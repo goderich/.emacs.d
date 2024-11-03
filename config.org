@@ -1,3 +1,16 @@
+* TODO Immediate priority
+
+If I want to make this more than an experiment, I need the following:
+- Proper org config
+  - Keybindings
+  - Contextual behaviour (dwim in a few places)
+  - Jumping around with narrowing
+- Ways to open links
+- Snippets
+- ???
+
+I can then start migrating my Doom config.
+
 * Basic settings
 #+begin_src emacs-lisp
   ;; -*- lexical-binding: t -*-
@@ -46,8 +59,11 @@ https://www.mattduck.com/2023-08-28-extending-use-package-bind
   (setq evil-normal-state-cursor '("gray" box))
   (setq evil-visual-state-cursor '("gray" box))
   (setq evil-insert-state-cursor '("gray" bar))
-  (setq evil-motion-state-cursor '("gray" hollow))
+  (setq evil-motion-state-cursor '("gray" box))
   (blink-cursor-mode -1)
+
+  ;; Sane undo
+  (evil-set-undo-system 'undo-redo)
 
   ;; Semicolon for M-x
   (evil-define-key '(normal visual) 'global
@@ -77,6 +93,9 @@ https://www.mattduck.com/2023-08-28-extending-use-package-bind
     ;; Line comments
     (kbd "gc") #'comment-line)
 
+  ;; Documentation on leader keys
+  (which-key-add-key-based-replacements "<leader>w" "windows")
+
   ;; Elisp mode
   (evil-set-leader 'normal (kbd ",") 'emacs-lisp-mode-map)
   (evil-define-key 'normal 'emacs-lisp-mode-map
@@ -93,19 +112,6 @@ or steal selectively. See the "[[https://github.com/Somelauw/evil-org-mode/blob/
 
 Better S motions:
 https://github.com/hlissner/evil-snipe
-
-* TODO Immediate priority
-
-If I want to make this more than an experiment, I need the following:
-- Proper org config
-  - Keybindings
-  - Contextual behaviour (dwim in a few places)
-  - Jumping around with narrowing
-- Ways to open links
-- Snippets
-- ???
-
-I can then start migrating my Doom config.
 
 * Resources
 
@@ -198,14 +204,46 @@ https://www.reddit.com/r/emacs/comments/re31i6/how_to_go_up_one_directory_when_u
 Company manual: https://company-mode.github.io/
 
 #+begin_src emacs-lisp
-;; COMPLETION
-;; see https://company-mode.github.io/
 (use-package company
   :ensure t
-  :init (company-mode))
+  :init (global-company-mode))
 #+end_src
 
 * Org-mode
+
+TODOs:
+- TODO state transient
+
+#+begin_src emacs-lisp
+(use-package org
+  :after evil
+  :config
+  (evil-define-key '(normal visual) 'org-mode-map
+    (kbd "<tab>") #'org-cycle
+    (kbd "<localleader>t") #'org-todo
+    (kbd "gh") #'outline-previous-visible-heading))
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package org
+  :config
+  (setq org-edit-src-content-indentation 0))
+#+end_src
+
+From evil-org, use evil bindings in source and table editing modes:
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'org-src
+  (define-key org-src-mode-map [remap evil-save-and-close]          'org-edit-src-exit)
+  (define-key org-src-mode-map [remap evil-save-modified-and-close] 'org-edit-src-exit)
+  (define-key org-src-mode-map [remap evil-quit]                    'org-edit-src-abort))
+
+(with-eval-after-load 'org-table
+  (define-key org-table-fedit-map [remap evil-save-and-close]          'org-table-fedit-finish)
+  (define-key org-table-fedit-map [remap evil-save-modified-and-close] 'org-table-fedit-finish)
+  (define-key org-table-fedit-map [remap evil-quit]                    'org-table-fedit-abort))
+#+end_src
+
 * TODO Link hinting
 
 Link hinting is not working at the moment.
@@ -224,6 +262,11 @@ Namely, Emacs fails to install the package.
 * Magit
 
 #+begin_src emacs-lisp
-  (use-package magit
-    :ensure t)
+(use-package magit
+  :ensure t
+  :config
+  (evil-define-key '(normal visual) 'global
+   (kbd "<leader>gg") #'magit))
 #+end_src
+
+* Snippets
