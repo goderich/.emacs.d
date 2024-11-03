@@ -1,0 +1,229 @@
+* Basic settings
+#+begin_src emacs-lisp
+  ;; -*- lexical-binding: t -*-
+  ;; Personal config file
+  (menu-bar-mode -1)
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1)
+  (display-line-numbers-mode -1)
+
+  (use-package solarized-theme
+    :ensure t
+    :config
+    (load-theme 'solarized-light t))
+
+  (set-frame-font "Source Code Pro-18")
+
+  ;; reduce the frequency of garbage collection by making it happen on
+  ;; each 50MB of allocated data (the default is on every 0.76MB)
+  (setq gc-cons-threshold 50000000)
+
+  ;; warn when opening files bigger than 100MB
+  (setq large-file-warning-threshold 100000000)
+
+  ;; Do not pollute this file with custom variables
+  (setq custom-file "~/.emacs.d/custom.el")
+  (load custom-file)
+#+end_src
+
+See also https://github.com/hrs/sensible-defaults.el
+
+* Evil
+
+Check out this great macro for evil keybindings with use-package:
+https://www.mattduck.com/2023-08-28-extending-use-package-bind
+
+#+begin_src emacs-lisp
+(use-package evil
+  :ensure t
+  :init (evil-mode 1)
+  :config
+  (setq evil-esc-delay 0)
+  ;; (global-evil-surround-mode 1)
+
+  ;; Configure cursor
+  (setq evil-emacs-state-cursor  '("red" box))
+  (setq evil-normal-state-cursor '("gray" box))
+  (setq evil-visual-state-cursor '("gray" box))
+  (setq evil-insert-state-cursor '("gray" bar))
+  (setq evil-motion-state-cursor '("gray" hollow))
+  (blink-cursor-mode -1)
+
+  ;; Semicolon for M-x
+  (evil-define-key '(normal visual) 'global
+   ";" #'execute-extended-command)
+
+  ;; ESC as C-g
+  (evil-global-set-key 'normal (kbd "ESC") #'keyboard-quit)
+  ;; (add-hook 'minibuffer-setup-hook (lambda ()
+  ;;   (keymap-set minibuffer-mode-map "ESC" #'abort-minibuffers)))
+
+  ;; KEYBINDINGS
+  ;; space as global leader
+  (evil-set-leader 'normal (kbd "SPC"))
+  ;; Global keybindings
+  (evil-define-key 'normal 'global
+    ;; Files
+    (kbd "<leader>.") #'find-file
+    (kbd "<leader>fr") #'recentf
+    (kbd "<leader>fs") #'save-buffer
+    ;; Buffers
+    (kbd "<leader>,") #'consult-buffer
+    (kbd "<leader>bq") #'kill-this-buffer
+    ;; Windows
+    (kbd "<leader>ww") #'other-window
+    (kbd "<leader>wq") #'delete-window
+    (kbd "<leader>wo") #'delete-other-windows
+    ;; Line comments
+    (kbd "gc") #'comment-line)
+
+  ;; Elisp mode
+  (evil-set-leader 'normal (kbd ",") 'emacs-lisp-mode-map)
+  (evil-define-key 'normal 'emacs-lisp-mode-map
+    (kbd "<localleader>ee") #'eval-last-sexp))
+
+#+end_src
+
+Maybe use https://github.com/emacs-evil/evil-collection ?
+There is a minibuffer mode, and modules can be loaded incrementally.
+
+For org-mode specifically, https://github.com/Somelauw/evil-org-mode
+has some great ideas, which I could take wholesale as a package,
+or steal selectively. See the "[[https://github.com/Somelauw/evil-org-mode/blob/master/doc/example_config.el][elaborate setup]]" example.
+
+Better S motions:
+https://github.com/hlissner/evil-snipe
+
+* TODO Immediate priority
+
+If I want to make this more than an experiment, I need the following:
+- Proper org config
+  - Keybindings
+  - Contextual behaviour (dwim in a few places)
+  - Jumping around with narrowing
+- Ways to open links
+- Snippets
+- ???
+
+I can then start migrating my Doom config.
+
+* Resources
+
+I can read other people's configs, not limited to literate ones.
+https://github.com/bbatsov/emacs.d/blob/master/init.el
+https://github.com/hrs/dotfiles/blob/main/emacs/.config/emacs/configuration.org
+
+For packages see here:
+https://github.com/emacs-tw/awesome-emacs
+
+* Narrowing and completion
+** Narrowing
+
+#+begin_src emacs-lisp
+(use-package consult
+  :ensure t)
+
+;; (use-package helpful
+;;   :ensure t
+;;   :config
+;;   (evil-global-set-key 'normal (kbd "<leader>hf") #'helpful-function)
+;;   (evil-define-key nil helpful-mode-map "q" #'kill-this-buffer))
+
+(use-package vertico
+  :ensure t
+  ;; :custom
+  ;; (vertico-scroll-margin 0) ;; Different scroll margin
+  ;; (vertico-count 20) ;; Show more candidates
+  ;; (vertico-resize t) ;; Grow and shrink the Vertico minibuffer
+  ;; (vertico-cycle t) ;; Enable cycling for `vertico-next/previous'
+  :init (vertico-mode))
+
+(defun up-directory (arg)
+  "Move up a directory (delete backwards to /)."
+  (interactive "p")
+  (if (string-match-p "/." (minibuffer-contents))
+      (zap-up-to-char (- arg) ?/)
+    (delete-minibuffer-contents)))
+
+(evil-define-key nil minibuffer-local-filename-completion-map [backspace] #'up-directory)
+
+;; Persist history over Emacs restarts.
+(use-package savehist
+  :ensure t
+  :init (savehist-mode))
+
+(use-package orderless
+  :ensure t
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-defaults nil)
+  (completion-category-overrides '((file (styles partial-completion)))))
+
+;; Documentation in M-x and minibuffers
+(use-package marginalia
+  :ensure t
+  ;; Bind `marginalia-cycle' locally in the minibuffer.  To make the binding
+  ;; available in the *Completions* buffer, add it to the
+  ;; `completion-list-mode-map'.
+  ;; :bind (:map minibuffer-local-map
+  ;;        ("M-A" . marginalia-cycle))
+
+  :init (marginalia-mode))
+
+;; Do not delay which-key (delay has to be above zero)
+(use-package which-key
+  :ensure t
+  :init (which-key-mode)
+  :config
+  (setq which-key-idle-delay 1)
+  (setq which-key-idle-secondary-delay 0.05))
+#+end_src
+
+There is also https://github.com/oantolin/embark/,
+but I haven't learned how to use it properly.
+
+*** TODO File path Backspace behaviour
+
+One thing I have not yet been able to do is
+replicate Doom's behaviour with file paths in the minibuffer:
+when on =~/aaa/bbb/ccc/=, I want to be able to
+delete the whole level (i.e. 'ccc', then 'bbb')
+when pressing Backspace.
+
+So far I have only found this, but I haven't succeeded in making it work:
+https://www.reddit.com/r/emacs/comments/re31i6/how_to_go_up_one_directory_when_using_findfile_cx/
+
+** Completion
+
+Company manual: https://company-mode.github.io/
+
+#+begin_src emacs-lisp
+;; COMPLETION
+;; see https://company-mode.github.io/
+(use-package company
+  :ensure t
+  :init (company-mode))
+#+end_src
+
+* Org-mode
+* TODO Link hinting
+
+Link hinting is not working at the moment.
+Namely, Emacs fails to install the package.
+
+#+begin_src emacs-lisp :tangle no
+(use-package link-hint
+  :ensure t
+  :bind
+  ("C-c l o" . link-hint-open-link)
+  ("C-c l c" . link-hint-copy-link))
+  (evil-define-key '(normal visual) 'global
+   ";" #'execute-extended-command)
+#+end_src
+
+* Magit
+
+#+begin_src emacs-lisp
+  (use-package magit
+    :ensure t)
+#+end_src
