@@ -199,6 +199,8 @@ when pressing Backspace.
 So far I have only found this, but I haven't succeeded in making it work:
 https://www.reddit.com/r/emacs/comments/re31i6/how_to_go_up_one_directory_when_using_findfile_cx/
 
+Check =vertico-directory-delete-char= fn
+
 ** Completion
 
 Company manual: https://company-mode.github.io/
