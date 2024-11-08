@@ -11,56 +11,108 @@ If I want to make this more than an experiment, I need the following:
 
 I can then start migrating my Doom config.
 
+* Resources
+
+I can read other people's configs, not limited to literate ones.
+https://github.com/bbatsov/emacs.d/blob/master/init.el
+Great evil-based config:
+https://github.com/hrs/dotfiles/blob/main/emacs/.config/emacs/configuration.org
+Another one:
+https://github.com/zzamboni/dot-emacs/blob/master/init.org#org-mode
+(the above has a way of splitting up use-package declarations into separate blocks:
+"If you look at the raw org file, you'll see that many of the src blocks are labeled
+with the :noweb-ref header to indicate the section under the main use-package org
+statement where they need to be placed.").
+
+For packages see here:
+https://github.com/emacs-tw/awesome-emacs
+
 * Basic settings
+** Early loading
+Maybe some of this should be in =early-init.el=?
+
 #+begin_src emacs-lisp
-  ;; -*- lexical-binding: t -*-
-  ;; Personal config file
-  (menu-bar-mode -1)
-  (tool-bar-mode -1)
-  (scroll-bar-mode -1)
-  (display-line-numbers-mode -1)
+;; -*- lexical-binding: t -*-
+;; reduce the frequency of garbage collection by making it happen on
+;; each 50MB of allocated data (the default is on every 0.76MB)
+(setq gc-cons-threshold 50000000)
 
-  (use-package solarized-theme
-    :ensure t
-    :config
-    (load-theme 'solarized-light t))
+;; warn when opening files bigger than 100MB
+(setq large-file-warning-threshold 100000000)
 
-  (set-frame-font "Source Code Pro-18")
+;; do not create backups
+(setq make-backup-files nil)
 
-  ;; reduce the frequency of garbage collection by making it happen on
-  ;; each 50MB of allocated data (the default is on every 0.76MB)
-  (setq gc-cons-threshold 50000000)
-
-  ;; warn when opening files bigger than 100MB
-  (setq large-file-warning-threshold 100000000)
-
-  ;; Do not pollute this file with custom variables
-  (setq custom-file "~/.emacs.d/custom.el")
-  (load custom-file)
+;; do not pollute this file with custom variables
+(setq custom-file "~/.emacs.d/custom.el")
+(load custom-file)
 #+end_src
 
 See also https://github.com/hrs/sensible-defaults.el
+
+** Package management
+Instead of putting =:ensure t= everywhere,
+I can just set it here once.
+
+#+begin_src elisp
+(require 'use-package-ensure)
+(setq use-package-always-ensure t)
+#+end_src
+
+See also =use-package-defaults= for other settings.
+
+#+begin_src elisp
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+#+end_src
+
+** Theming
+
+#+begin_src elisp
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+(display-line-numbers-mode -1)
+
+;; Soft wrap long lines
+(global-visual-line-mode 1)
+
+;; Maintain a small margin when scrolling
+(setq scroll-margin 2)
+
+(use-package solarized-theme
+  :config
+  (load-theme 'solarized-light t))
+
+(set-frame-font "Source Code Pro-18")
+#+end_src
+
+* TODO Utility functions
+
+#+begin_src emacs-lisp
+(defun +consult-goto-org-heading ()
+    "Find an org heading in the current buffer, and open it.
+`consult-org-heading' doesn't do this automatically for some reason."
+    (interactive)
+    (consult-org-heading)
+    (org-fold-show-context)
+    (org-fold-show-entry)
+    (org-fold-show-children))
+#+end_src
 
 * Evil
 
 Check out this great macro for evil keybindings with use-package:
 https://www.mattduck.com/2023-08-28-extending-use-package-bind
 
-#+begin_src emacs-lisp
+#+begin_src elisp :noweb yes
 (use-package evil
-  :ensure t
   :init (evil-mode 1)
   :config
   (setq evil-esc-delay 0)
   ;; (global-evil-surround-mode 1)
 
   ;; Configure cursor
-  (setq evil-emacs-state-cursor  '("red" box))
-  (setq evil-normal-state-cursor '("gray" box))
-  (setq evil-visual-state-cursor '("gray" box))
-  (setq evil-insert-state-cursor '("gray" bar))
-  (setq evil-motion-state-cursor '("gray" box))
-  (blink-cursor-mode -1)
+  <<evil-cursor>>
 
   ;; Sane undo
   (evil-set-undo-system 'undo-redo)
@@ -69,20 +121,38 @@ https://www.mattduck.com/2023-08-28-extending-use-package-bind
   (evil-define-key '(normal visual) 'global
    ";" #'execute-extended-command)
 
+  ;; Substitute with :s globally by default
+  (setq evil-ex-substitute-global t)
+
+  ;; Make evil commands operate on logical, not visual lines
+  (setq evil-respect-visual-line-mode nil)
+
   ;; ESC as C-g
   (evil-global-set-key 'normal (kbd "ESC") #'keyboard-quit)
   ;; (add-hook 'minibuffer-setup-hook (lambda ()
   ;;   (keymap-set minibuffer-mode-map "ESC" #'abort-minibuffers)))
 
+  (defun +open-config ()
+    (interactive)
+    (find-file "~/.emacs.d/config.org"))
+  
   ;; KEYBINDINGS
   ;; space as global leader
   (evil-set-leader 'normal (kbd "SPC"))
+  ;; comma as local leader
+  (evil-set-leader 'normal (kbd ",") 'localleader)
   ;; Global keybindings
+  (evil-define-key '(normal visual) 'global
+    "k"  #'evil-previous-visual-line
+    "j"  #'evil-next-visual-line
+    "gj" #'evil-next-line
+    "gk" #'evil-previous-line)
   (evil-define-key 'normal 'global
     ;; Files
     (kbd "<leader>.") #'find-file
     (kbd "<leader>fr") #'recentf
     (kbd "<leader>fs") #'save-buffer
+    (kbd "<leader>fc") #'+open-config
     ;; Buffers
     (kbd "<leader>,") #'consult-buffer
     (kbd "<leader>bq") #'kill-this-buffer
@@ -97,10 +167,8 @@ https://www.mattduck.com/2023-08-28-extending-use-package-bind
   (which-key-add-key-based-replacements "<leader>w" "windows")
 
   ;; Elisp mode
-  (evil-set-leader 'normal (kbd ",") 'emacs-lisp-mode-map)
-  (evil-define-key 'normal 'emacs-lisp-mode-map
+  (evil-define-key 'normal emacs-lisp-mode-map
     (kbd "<localleader>ee") #'eval-last-sexp))
-
 #+end_src
 
 Maybe use https://github.com/emacs-evil/evil-collection ?
@@ -113,30 +181,39 @@ or steal selectively. See the "[[https://github.com/Somelauw/evil-org-mode/blob/
 Better S motions:
 https://github.com/hlissner/evil-snipe
 
-* Resources
+#+name: evil-cursor
+#+begin_src emacs-lisp :tangle no
+(setq evil-emacs-state-cursor  '("red" box))
+(setq evil-normal-state-cursor '("gray" box))
+(setq evil-visual-state-cursor '("gray" box))
+(setq evil-insert-state-cursor '("gray" bar))
+(setq evil-motion-state-cursor '("gray" box))
+(blink-cursor-mode -1)
+#+end_src
 
-I can read other people's configs, not limited to literate ones.
-https://github.com/bbatsov/emacs.d/blob/master/init.el
-https://github.com/hrs/dotfiles/blob/main/emacs/.config/emacs/configuration.org
+** Window resizing transient
 
-For packages see here:
-https://github.com/emacs-tw/awesome-emacs
+#+begin_src emacs-lisp
+(transient-define-prefix +window-transient ()
+  ["Resizing windows"
+   [("b" "bigger" enlarge-window :transient t)
+    ("s" "down" shrink-window :transient t)
+    ("=" "down" balance-windows :transient t)]
+   [("q" "quit" transient-quit-all)]])
+#+end_src
 
 * Narrowing and completion
 ** Narrowing
 
 #+begin_src emacs-lisp
-(use-package consult
-  :ensure t)
+(use-package consult)
 
 ;; (use-package helpful
-;;   :ensure t
 ;;   :config
 ;;   (evil-global-set-key 'normal (kbd "<leader>hf") #'helpful-function)
 ;;   (evil-define-key nil helpful-mode-map "q" #'kill-this-buffer))
 
 (use-package vertico
-  :ensure t
   ;; :custom
   ;; (vertico-scroll-margin 0) ;; Different scroll margin
   ;; (vertico-count 20) ;; Show more candidates
@@ -155,11 +232,9 @@ https://github.com/emacs-tw/awesome-emacs
 
 ;; Persist history over Emacs restarts.
 (use-package savehist
-  :ensure t
   :init (savehist-mode))
 
 (use-package orderless
-  :ensure t
   :custom
   (completion-styles '(orderless basic))
   (completion-category-defaults nil)
@@ -167,7 +242,6 @@ https://github.com/emacs-tw/awesome-emacs
 
 ;; Documentation in M-x and minibuffers
 (use-package marginalia
-  :ensure t
   ;; Bind `marginalia-cycle' locally in the minibuffer.  To make the binding
   ;; available in the *Completions* buffer, add it to the
   ;; `completion-list-mode-map'.
@@ -178,7 +252,6 @@ https://github.com/emacs-tw/awesome-emacs
 
 ;; Do not delay which-key (delay has to be above zero)
 (use-package which-key
-  :ensure t
   :init (which-key-mode)
   :config
   (setq which-key-idle-delay 1)
@@ -199,30 +272,82 @@ when pressing Backspace.
 So far I have only found this, but I haven't succeeded in making it work:
 https://www.reddit.com/r/emacs/comments/re31i6/how_to_go_up_one_directory_when_using_findfile_cx/
 
-Check =vertico-directory-delete-char= fn
+** TODO Completion
 
-** Completion
+TODO: might also want to take a look at [[https://github.com/minad/corfu][Corfu]], which is supposed to be a smaller package.
 
 Company manual: https://company-mode.github.io/
 
+I do NOT normally want company mode on in org, because that's distracting.
+However, its completion of file paths is nice.
+If I can turn on only that, I'll use it.
+Of course, I could just as easily write my own function to insert a file path.
+
 #+begin_src emacs-lisp
 (use-package company
-  :ensure t
   :init (global-company-mode))
 #+end_src
 
 * Org-mode
 
 TODOs:
-- TODO state transient
+- Org-refile
+- C-RET behaviour on lists
+
+Check out https://github.com/minad/org-modern
 
 #+begin_src emacs-lisp
 (use-package org
   :after evil
   :config
-  (evil-define-key '(normal visual) 'org-mode-map
+  (setq org-tags-column 0)
+  ;; (setq org-tag-faces (:foreground "blue" :weight normal))
+  (setq org-use-fast-todo-selection t)
+
+  ;; Set org file associations
+  (setq org-file-apps
+	`((auto-mode . emacs)
+	  (,(rx ".pdf::" (group (one-or-more digit)) string-end) . "zathura %s -P %1")
+	  (,(rx ".pdf" string-end) . "zathura %s")
+	  (directory . emacs)))
+
+  ;; browser needs to be set with a separate function
+  (setq browse-url-browser-function 'browse-url-generic
+	browse-url-generic-program "qutebrowser")
+
+  ;; Don't use blank lines between text and the following heading
+  (setq org-blank-before-new-entry
+	'((heading . auto) (plain-list-item . auto)))
+
+  ;; Don't show empty lines between collapsed headings
+  (setq org-cycle-separator-lines 0)
+
+  ;; Org todo keywords and colours
+  (setq org-todo-keywords
+	'((sequence "TODO(t)" "|" "DONE(d)")
+	  (sequence "NEXT(n)" "WAITING(w)" "LATER(l)" "LOOP(p)" "|" "CANCELLED(c)")))
+
+  ;; Use LOOP keyword for repeating tasks
+  ;; (after marking them as done)
+  (setq org-todo-repeat-to-state "LOOP")
+
+  ;; Archive everything from org files in one directory
+  ;; into a single hidden file.
+  (setq org-archive-location ".archive.org::")
+
+  ;; My custom faces for todo items. I'm reusing most from:
+  ;; ~/.emacs.d/modules/lang/org/config.el
+  (with-no-warnings
+    (custom-declare-face '+org-todo-important '((t (:inherit (bold default)))) ""))
+
+  ;; Keybindings
+  (evil-define-key '(normal visual) org-mode-map
     (kbd "<tab>") #'org-cycle
+    (kbd "<localleader>,") #'org-ctrl-c-ctrl-c
+    (kbd "<localleader>s") #'org-edit-src-code
     (kbd "<localleader>t") #'org-todo
+    (kbd "<localleader>q") #'org-set-tags-command
+    (kbd "<localleader>.") #'+consult-goto-org-heading
     (kbd "gh") #'outline-previous-visible-heading))
 #+end_src
 
@@ -246,29 +371,87 @@ From evil-org, use evil bindings in source and table editing modes:
   (define-key org-table-fedit-map [remap evil-quit]                    'org-table-fedit-abort))
 #+end_src
 
-* TODO Link hinting
+** TODO Org-refile
+
+** Transient navigation
+Instead of pressing key combinations or chords repeatedly to navigate,
+we can define a transient state and use simple keys while in it.
+I got the idea from [[https://github.com/Somelauw/evil-org-mode/blob/master/doc/example_config.el][this evil-org example]] that used hydra,
+but I'm using transient because I'm more used to it,
+and because it's now built into Emacs (as of 28).
+
+#+begin_src emacs-lisp
+(transient-define-prefix +org-movement-transient ()
+  ["Moving around in org"
+   [("k" "up" outline-previous-visible-heading :transient t)
+    ("j" "down" outline-next-visible-heading :transient t)]
+   [("q" "quit" transient-quit-all)]])
+#+end_src
+
+* Link hinting
 
 Link hinting is not working at the moment.
 Namely, Emacs fails to install the package.
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src elisp
 (use-package link-hint
-  :ensure t
-  :bind
-  ("C-c l o" . link-hint-open-link)
-  ("C-c l c" . link-hint-copy-link))
-  (evil-define-key '(normal visual) 'global
-   ";" #'execute-extended-command)
+  :defer t
+  :config
+  (evil-define-key 'normal 'global
+    (kbd "<leader>u") #'link-hint-open-link))
 #+end_src
 
 * Magit
 
 #+begin_src emacs-lisp
 (use-package magit
-  :ensure t
   :config
   (evil-define-key '(normal visual) 'global
    (kbd "<leader>gg") #'magit))
 #+end_src
 
 * Snippets
+Trying https://github.com/minad/tempel.
+It advertises itself as a tiny and more lispy package.
+Could be a nice alternative to yasnippet.
+
+Currently I can't get TAB to work as =tempel-next= while expanding.
+
+#+begin_src elisp
+(use-package tempel
+  ;; Require trigger prefix before template name when completing.
+  ;; :custom
+  ;; (tempel-trigger-prefix "<")
+
+  :init
+  ;; Setup completion at point
+  (defun tempel-setup-capf ()
+    "Add the Tempel Capf to `completion-at-point-functions'.
+    `tempel-expand' only triggers on exact matches. Alternatively use
+    `tempel-complete' if you want to see all matches, but then you
+    should also configure `tempel-trigger-prefix', such that Tempel
+    does not trigger too often when you don't expect it. NOTE: We add
+    `tempel-expand' *before* the main programming mode Capf, such
+    that it will be tried first."
+    (setq-local completion-at-point-functions
+                (cons #'tempel-expand
+                      completion-at-point-functions)))
+
+  (add-hook 'conf-mode-hook 'tempel-setup-capf)
+  (add-hook 'prog-mode-hook 'tempel-setup-capf)
+  (add-hook 'text-mode-hook 'tempel-setup-capf)
+
+  :config
+  (evil-define-key 'insert org-mode-map
+    (kbd "<tab>") #'tempel-expand)
+
+  ;; Keybindings active during expansion:
+  (define-key tempel-map (kbd "<tab>") #'tempel-next)
+  (define-key tempel-map (kbd "<backtab>") #'tempel-next)
+
+  ;; Optionally make the Tempel templates available to Abbrev,
+  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
+  ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
+  ;; (global-tempel-abbrev-mode)
+)
+#+end_src

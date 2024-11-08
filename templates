@@ -1,0 +1,43 @@
+;; ~/.config/emacs/templates
+
+fundamental-mode ;; Available everywhere
+
+(today (format-time-string "%Y-%m-%d"))
+
+prog-mode
+
+(fixme (if (derived-mode-p 'emacs-lisp-mode) ";; " comment-start) "FIXME ")
+(todo (if (derived-mode-p 'emacs-lisp-mode) ";; " comment-start) "TODO ")
+(bug (if (derived-mode-p 'emacs-lisp-mode) ";; " comment-start) "BUG ")
+(hack (if (derived-mode-p 'emacs-lisp-mode) ";; " comment-start) "HACK ")
+
+emacs-lisp-mode
+
+(header ";;; " (file-name-nondirectory (or (buffer-file-name) (buffer-name)))
+        " -- " p " -*- lexical-binding: t -*-" n
+        ";;; Commentary:" n ";;; Code:" n n)
+
+org-mode
+
+(caption "#+caption: ")
+(name "#+name: ")
+(drawer ":" p ":" n r ":end:")
+(begin "#+begin_" (s name) n> r> n "#+end_" name)
+(quote "#+begin_quote" n> r> n "#+end_quote")
+(example "#+begin_example" n> r> n "#+end_example")
+(center "#+begin_center" n> r> n "#+end_center")
+(html "#+begin_export html" n> r> n "#+end_export")
+(latex "#+begin_export latex" n> r> n "#+end_export")
+(comment "#+begin_comment" n> r> n "#+end_comment")
+(src "#+begin_src " q n r n "#+end_src")
+;; (gnuplot "#+begin_src gnuplot :var data=" (p "table") " :file " (p "plot.png") n r n "#+end_src" :post (org-edit-src-code))
+(elisp "#+begin_src emacs-lisp" n r n "#+end_src" :post (org-edit-src-code))
+(elispnt
+ "#+name: " p n
+ "#+begin_src emacs-lisp :tangle no" n r n "#+end_src" :post (org-edit-src-code))
+(inlsrc "src_" p "{" q "}")
+
+;; Local Variables:
+;; mode: lisp-data
+;; outline-regexp: "[a-z]"
+;; End:
