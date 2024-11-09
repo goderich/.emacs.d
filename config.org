@@ -129,8 +129,6 @@ https://www.mattduck.com/2023-08-28-extending-use-package-bind
 
   ;; ESC as C-g
   (evil-global-set-key 'normal (kbd "ESC") #'keyboard-quit)
-  ;; (add-hook 'minibuffer-setup-hook (lambda ()
-  ;;   (keymap-set minibuffer-mode-map "ESC" #'abort-minibuffers)))
 
   (defun +open-config ()
     (interactive)
@@ -189,6 +187,15 @@ https://github.com/hlissner/evil-snipe
 (setq evil-insert-state-cursor '("gray" bar))
 (setq evil-motion-state-cursor '("gray" box))
 (blink-cursor-mode -1)
+#+end_src
+
+** Minibuffer keybindings
+
+#+begin_src emacs-lisp
+(defun +minibuffer-setup ()
+  (define-key minibuffer-mode-map (kbd "ESC") #'abort-minibuffers))
+
+(add-hook 'minibuffer-setup-hook #'+minibuffer-setup)
 #+end_src
 
 ** Window resizing transient
@@ -296,14 +303,11 @@ TODOs:
 
 Check out https://github.com/minad/org-modern
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :noweb yes
 (use-package org
   :after evil
   :config
-  (setq org-tags-column 0)
-  ;; (setq org-tag-faces (:foreground "blue" :weight normal))
-  (setq org-use-fast-todo-selection t)
-
+  <<org-settings>>
   ;; Set org file associations
   (setq org-file-apps
 	`((auto-mode . emacs)
@@ -317,7 +321,7 @@ Check out https://github.com/minad/org-modern
 
   ;; Don't use blank lines between text and the following heading
   (setq org-blank-before-new-entry
-	'((heading . auto) (plain-list-item . auto)))
+	'((heading . t) (plain-list-item . nil)))
 
   ;; Don't show empty lines between collapsed headings
   (setq org-cycle-separator-lines 0)
@@ -340,35 +344,51 @@ Check out https://github.com/minad/org-modern
   (with-no-warnings
     (custom-declare-face '+org-todo-important '((t (:inherit (bold default)))) ""))
 
-  ;; Keybindings
-  (evil-define-key '(normal visual) org-mode-map
-    (kbd "<tab>") #'org-cycle
-    (kbd "<localleader>,") #'org-ctrl-c-ctrl-c
-    (kbd "<localleader>s") #'org-edit-src-code
-    (kbd "<localleader>t") #'org-todo
-    (kbd "<localleader>q") #'org-set-tags-command
-    (kbd "<localleader>.") #'+consult-goto-org-heading
-    (kbd "gh") #'outline-previous-visible-heading))
+  <<org-src-settings>>
+  <<org-keybindings>>)
 #+end_src
 
-#+begin_src emacs-lisp
-(use-package org
-  :config
-  (setq org-edit-src-content-indentation 0))
+#+name: org-settings
+#+begin_src emacs-lisp :tangle no
+(setq org-tags-column 0)
+#+end_src
+
+One of the many things I liked about Doom was the TODO settings.
+Fast TODO selection was on by default, which I think is a great idea
+if you are using more keywords than just TODO and DONE.
+#+name: org-settings
+#+begin_src emacs-lisp :tangle no
+(setq org-use-fast-todo-selection t)
+#+end_src
+
+#+name: org-settings
+#+begin_src emacs-lisp :tangle no
+;; (setq org-tag-faces (:foreground "blue" :weight normal))
+#+end_src
+
+#+name: org-src-settings
+#+begin_src emacs-lisp :tangle no
+(setq org-edit-src-content-indentation 0)
+#+end_src
+
+#+name: org-keybindings
+#+begin_src emacs-lisp :tangle no
+(evil-define-key '(normal visual) org-mode-map
+  (kbd "<tab>") #'org-cycle
+  (kbd "<localleader>,") #'org-ctrl-c-ctrl-c
+  (kbd "<localleader>s") #'org-edit-src-code
+  (kbd "<localleader>t") #'org-todo
+  (kbd "<localleader>q") #'org-set-tags-command
+  (kbd "<localleader>.") #'+consult-goto-org-heading
+  (kbd "gh") #'outline-previous-visible-heading)
 #+end_src
 
 From evil-org, use evil bindings in source and table editing modes:
-
 #+begin_src emacs-lisp
 (with-eval-after-load 'org-src
   (define-key org-src-mode-map [remap evil-save-and-close]          'org-edit-src-exit)
   (define-key org-src-mode-map [remap evil-save-modified-and-close] 'org-edit-src-exit)
   (define-key org-src-mode-map [remap evil-quit]                    'org-edit-src-abort))
-
-(with-eval-after-load 'org-table
-  (define-key org-table-fedit-map [remap evil-save-and-close]          'org-table-fedit-finish)
-  (define-key org-table-fedit-map [remap evil-save-modified-and-close] 'org-table-fedit-finish)
-  (define-key org-table-fedit-map [remap evil-quit]                    'org-table-fedit-abort))
 #+end_src
 
 ** TODO Org-refile
@@ -389,9 +409,6 @@ and because it's now built into Emacs (as of 28).
 #+end_src
 
 * Link hinting
-
-Link hinting is not working at the moment.
-Namely, Emacs fails to install the package.
 
 #+begin_src elisp
 (use-package link-hint
@@ -417,41 +434,60 @@ Could be a nice alternative to yasnippet.
 
 Currently I can't get TAB to work as =tempel-next= while expanding.
 
-#+begin_src elisp
-(use-package tempel
-  ;; Require trigger prefix before template name when completing.
-  ;; :custom
-  ;; (tempel-trigger-prefix "<")
+#+begin_src elisp :noweb yes
+  (use-package tempel
+    ;; Require trigger prefix before template name when completing.
+    ;; :custom
+    ;; (tempel-trigger-prefix "<")
 
-  :init
-  ;; Setup completion at point
-  (defun tempel-setup-capf ()
-    "Add the Tempel Capf to `completion-at-point-functions'.
-    `tempel-expand' only triggers on exact matches. Alternatively use
-    `tempel-complete' if you want to see all matches, but then you
-    should also configure `tempel-trigger-prefix', such that Tempel
-    does not trigger too often when you don't expect it. NOTE: We add
-    `tempel-expand' *before* the main programming mode Capf, such
-    that it will be tried first."
-    (setq-local completion-at-point-functions
-                (cons #'tempel-expand
-                      completion-at-point-functions)))
+    :init
+    ;; Setup completion at point
+    (defun tempel-setup-capf ()
+      "Add the Tempel Capf to `completion-at-point-functions'.
+	`tempel-expand' only triggers on exact matches. Alternatively use
+	`tempel-complete' if you want to see all matches, but then you
+	should also configure `tempel-trigger-prefix', such that Tempel
+	does not trigger too often when you don't expect it. NOTE: We add
+	`tempel-expand' *before* the main programming mode Capf, such
+	that it will be tried first."
+      (setq-local completion-at-point-functions
+		  (cons #'tempel-expand
+			completion-at-point-functions)))
 
-  (add-hook 'conf-mode-hook 'tempel-setup-capf)
-  (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf)
+    (add-hook 'conf-mode-hook 'tempel-setup-capf)
+    (add-hook 'prog-mode-hook 'tempel-setup-capf)
+    (add-hook 'text-mode-hook 'tempel-setup-capf)
 
-  :config
-  (evil-define-key 'insert org-mode-map
-    (kbd "<tab>") #'tempel-expand)
+    :config
+    ;; Keybindings active during expansion:
+    <<tempel-keybindings>>
 
-  ;; Keybindings active during expansion:
-  (define-key tempel-map (kbd "<tab>") #'tempel-next)
-  (define-key tempel-map (kbd "<backtab>") #'tempel-next)
+    ;; Optionally make the Tempel templates available to Abbrev,
+    ;; either locally or globally. `expand-abbrev' is bound to C-x '.
+    ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
+    ;; (global-tempel-abbrev-mode)
+    )
+#+end_src
 
-  ;; Optionally make the Tempel templates available to Abbrev,
-  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
-  ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
-  ;; (global-tempel-abbrev-mode)
-)
+I am using TAB as the key to trigger snippet expansion:
+(so far just in org-mode, but later probably globally)
+#+name: tempel-keybindings
+#+begin_src emacs-lisp :tangle no
+(evil-define-key 'insert org-mode-map (kbd "<tab>") #'tempel-expand)
+#+end_src
+
+However, once I'm inside a snippet, chances are I no longer need to expand more snippets.
+Instead, I want to be able to use TAB to jump to next placeholder,
+or move the point after the snippet.
+
+For some reason, the following did not work:
+#+begin_src emacs-lisp :tangle no
+(define-key tempel-map (kbd "TAB") #'tempel-next)
+#+end_src
+Emacs still read the TAB key as =tempel-expand=.
+
+So I ended up remapping the =tempel-expand= function specifically:
+#+name: tempel-keybindings
+#+begin_src emacs-lisp :tangle no
+(define-key tempel-map [remap tempel-expand] #'tempel-next)
 #+end_src
