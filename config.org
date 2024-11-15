@@ -247,6 +247,32 @@ https://github.com/hlissner/evil-snipe
     ("<escape>" "quit" transient-quit-all)]])
 #+end_src
 
+* Help
+
+https://github.com/Wilfred/helpful
+
+#+begin_src emacs-lisp
+(use-package helpful
+  :config
+  (evil-global-set-key 'normal (kbd "<leader>h") #'+helpful-transient)
+  (evil-define-key 'normal helpful-mode-map "q" #'kill-buffer-and-window))
+#+end_src
+
+#+begin_src emacs-lisp
+(transient-define-prefix +helpful-transient ()
+  ["Emacs help"
+   ["Helpful mode"
+    ("f" "functions and macros" helpful-callable)
+    ("v" "variables" helpful-variable)
+    ("k" "key" helpful-key)
+    ("c" "interactive functions" helpful-command)
+    ("p" "thing at point" helpful-at-point)]
+   ["In-built help"
+    ("m" "describe mode" describe-mode)]
+   [("q" "quit" transient-quit-all)
+    ("<escape>" "quit" transient-quit-all)]])
+#+end_src
+
 * Narrowing and completion
 ** Narrowing
 
@@ -254,11 +280,6 @@ TODO: There is a lot of functionality here, I should explore it.
 https://github.com/minad/consult
 #+begin_src emacs-lisp
 (use-package consult)
-
-;; (use-package helpful
-;;   :config
-;;   (evil-global-set-key 'normal (kbd "<leader>hf") #'helpful-function)
-;;   (evil-define-key nil helpful-mode-map "q" #'kill-this-buffer))
 
 (use-package vertico
   ;; :custom
