@@ -137,16 +137,18 @@ https://www.mattduck.com/2023-08-28-extending-use-package-bind
 
 #+begin_src elisp :noweb yes
 (use-package evil
-  :init (evil-mode 1)
-  :config
+  :init 
+  (evil-mode 1)
   (setq evil-esc-delay 0)
-  ;; (global-evil-surround-mode 1)
-
-  ;; Configure cursor
-  <<evil-cursor>>
-
   ;; Sane undo
   (evil-set-undo-system 'undo-redo)
+
+  <<evil-escape>>
+
+  :config
+  ;; (global-evil-surround-mode 1)
+  ;; Configure cursor
+  <<evil-cursor>>
 
   ;; Semicolon for M-x
   (evil-define-key '(normal visual) 'global
@@ -164,7 +166,7 @@ https://www.mattduck.com/2023-08-28-extending-use-package-bind
   (defun +open-config ()
     (interactive)
     (find-file "~/.emacs.d/config.org"))
-  
+
   ;; KEYBINDINGS
   ;; space as global leader
   (evil-set-leader 'normal (kbd "SPC"))
@@ -207,6 +209,16 @@ For org-mode specifically, https://github.com/Somelauw/evil-org-mode
 has some great ideas, which I could take wholesale as a package,
 or steal selectively. See the "[[https://github.com/Somelauw/evil-org-mode/blob/master/doc/example_config.el][elaborate setup]]" example.
 
+Make ESC quit everything.
+I tried setting this up in the minibuffer to no avail,
+and with other keybinding methods and functions,
+but it turned out that a simple line with a =use-package= keyword
+was all that was needed.
+#+name: evil-escape
+#+begin_src emacs-lisp :tangle no
+:bind (("<escape>" . keyboard-escape-quit))
+#+end_src
+
 Better S motions:
 https://github.com/hlissner/evil-snipe
 
@@ -218,15 +230,6 @@ https://github.com/hlissner/evil-snipe
 (setq evil-insert-state-cursor '("gray" bar))
 (setq evil-motion-state-cursor '("gray" box))
 (blink-cursor-mode -1)
-#+end_src
-
-** Minibuffer keybindings
-
-#+begin_src emacs-lisp
-(defun +minibuffer-setup ()
-  (define-key minibuffer-mode-map (kbd "<escape>") #'abort-recursive-edit))
-
-(add-hook 'minibuffer-setup-hook #'+minibuffer-setup)
 #+end_src
 
 ** Window resizing transient
@@ -468,38 +471,38 @@ Could be a nice alternative to yasnippet.
 Currently I can't get TAB to work as =tempel-next= while expanding.
 
 #+begin_src elisp :noweb yes
-  (use-package tempel
-    ;; Require trigger prefix before template name when completing.
-    ;; :custom
-    ;; (tempel-trigger-prefix "<")
+(use-package tempel
+  ;; Require trigger prefix before template name when completing.
+  ;; :custom
+  ;; (tempel-trigger-prefix "<")
 
-    :init
-    ;; Setup completion at point
-    (defun tempel-setup-capf ()
-      "Add the Tempel Capf to `completion-at-point-functions'.
-	`tempel-expand' only triggers on exact matches. Alternatively use
-	`tempel-complete' if you want to see all matches, but then you
-	should also configure `tempel-trigger-prefix', such that Tempel
-	does not trigger too often when you don't expect it. NOTE: We add
-	`tempel-expand' *before* the main programming mode Capf, such
-	that it will be tried first."
-      (setq-local completion-at-point-functions
-		  (cons #'tempel-expand
-			completion-at-point-functions)))
+  :init
+  ;; Setup completion at point
+  (defun tempel-setup-capf ()
+    "Add the Tempel Capf to `completion-at-point-functions'.
+      `tempel-expand' only triggers on exact matches. Alternatively use
+      `tempel-complete' if you want to see all matches, but then you
+      should also configure `tempel-trigger-prefix', such that Tempel
+      does not trigger too often when you don't expect it. NOTE: We add
+      `tempel-expand' *before* the main programming mode Capf, such
+      that it will be tried first."
+    (setq-local completion-at-point-functions
+		(cons #'tempel-expand
+		      completion-at-point-functions)))
 
-    (add-hook 'conf-mode-hook 'tempel-setup-capf)
-    (add-hook 'prog-mode-hook 'tempel-setup-capf)
-    (add-hook 'text-mode-hook 'tempel-setup-capf)
+  (add-hook 'conf-mode-hook 'tempel-setup-capf)
+  (add-hook 'prog-mode-hook 'tempel-setup-capf)
+  (add-hook 'text-mode-hook 'tempel-setup-capf)
 
-    :config
-    ;; Keybindings active during expansion:
-    <<tempel-keybindings>>
+  :config
+  ;; Keybindings active during expansion:
+  <<tempel-keybindings>>
 
-    ;; Optionally make the Tempel templates available to Abbrev,
-    ;; either locally or globally. `expand-abbrev' is bound to C-x '.
-    ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
-    ;; (global-tempel-abbrev-mode)
-    )
+  ;; Optionally make the Tempel templates available to Abbrev,
+  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
+  ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
+  ;; (global-tempel-abbrev-mode)
+  )
 #+end_src
 
 I am using TAB as the key to trigger snippet expansion:
