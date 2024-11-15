@@ -476,42 +476,13 @@ Currently I can't get TAB to work as =tempel-next= while expanding.
 
 #+begin_src elisp :noweb yes
 (use-package tempel
-  ;; Require trigger prefix before template name when completing.
-  ;; :custom
-  ;; (tempel-trigger-prefix "<")
-
-  :init
-  ;; Setup completion at point
-  (defun tempel-setup-capf ()
-    "Add the Tempel Capf to `completion-at-point-functions'.
-      `tempel-expand' only triggers on exact matches. Alternatively use
-      `tempel-complete' if you want to see all matches, but then you
-      should also configure `tempel-trigger-prefix', such that Tempel
-      does not trigger too often when you don't expect it. NOTE: We add
-      `tempel-expand' *before* the main programming mode Capf, such
-      that it will be tried first."
-    (setq-local completion-at-point-functions
-		(cons #'tempel-expand
-		      completion-at-point-functions)))
-
-  (add-hook 'conf-mode-hook 'tempel-setup-capf)
-  (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf)
-
-  :config
-  ;; Keybindings active during expansion:
-  <<tempel-keybindings>>
-
-  ;; Optionally make the Tempel templates available to Abbrev,
-  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
-  ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
-  ;; (global-tempel-abbrev-mode)
-  )
+  :init <<tempel-trigger>>
+  :config <<tempel-keybindings>>)
 #+end_src
 
 I am using TAB as the key to trigger snippet expansion:
 (so far just in org-mode, but later probably globally)
-#+name: tempel-keybindings
+#+name: tempel-trigger
 #+begin_src emacs-lisp :tangle no
 (evil-define-key 'insert org-mode-map (kbd "<tab>") #'tempel-expand)
 #+end_src
@@ -531,3 +502,6 @@ So I ended up remapping the =tempel-expand= function specifically:
 #+begin_src emacs-lisp :tangle no
 (define-key tempel-map [remap tempel-expand] #'tempel-next)
 #+end_src
+Note that for this to work, =tempel-expand= has to be bound first.
+This is why I put =<<tempel-trigger>>= in =:init=,
+and =<<tempel-keybindings>>= in =:config=.
