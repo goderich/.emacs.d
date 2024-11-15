@@ -212,16 +212,14 @@ I tried setting this up in the minibuffer to no avail,
 and with other keybinding methods and functions,
 but it turned out that a simple line with a =use-package= keyword
 was all that was needed.
-#+name: evil-escape
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no :noweb-ref evil-escape
 :bind (("<escape>" . keyboard-escape-quit))
 #+end_src
 
 Better S motions:
 https://github.com/hlissner/evil-snipe
 
-#+name: evil-cursor
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no :noweb-ref evil-cursor
 (setq evil-emacs-state-cursor  '("red" box))
 (setq evil-normal-state-cursor '("gray" box))
 (setq evil-visual-state-cursor '("gray" box))
@@ -387,31 +385,26 @@ Check out https://github.com/minad/org-modern
 ** Org settings
 
 Enable indentation in org-mode.
-#+name: org-init
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no :noweb-ref org-init
 (setq org-startup-indented t)
 #+end_src
 
-#+name: org-settings
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
 (setq org-tags-column 0)
 #+end_src
 
 One of the many things I liked about Doom was the TODO settings.
 Fast TODO selection was on by default, which I think is a great idea
 if you are using more keywords than just TODO and DONE.
-#+name: org-settings
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
 (setq org-use-fast-todo-selection t)
 #+end_src
 
-#+name: org-settings
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
 ;; (setq org-tag-faces (:foreground "blue" :weight normal))
 #+end_src
 
-#+name: org-settings
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
 ;; Set org file associations
 (setq org-file-apps
       `((auto-mode . emacs)
@@ -448,16 +441,14 @@ if you are using more keywords than just TODO and DONE.
   (custom-declare-face '+org-todo-important '((t (:inherit (bold default)))) ""))
 #+end_src
 
-#+name: org-src-settings
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no :noweb-ref org-src-settings
 (setq org-edit-src-content-indentation 0)
 #+end_src
 
 
 ** Org keybindings
 
-#+name: org-keybindings
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
 (evil-define-key '(normal visual) org-mode-map
   (kbd "<tab>") #'org-cycle
   (kbd "<localleader>,") #'org-ctrl-c-ctrl-c
@@ -472,8 +463,7 @@ if you are using more keywords than just TODO and DONE.
 
 Some keybindings, namely ones using a modifier key,
 should be accessible in both normal and insert modes.
-#+name: org-keybindings
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
 (evil-define-key '(normal insert) org-mode-map
   (kbd "M-h") #'org-metaleft
   (kbd "M-j") #'org-metadown
@@ -487,7 +477,7 @@ should be accessible in both normal and insert modes.
 #+end_src
 
 From evil-org, use evil bindings in source and table editing modes:
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
 (with-eval-after-load 'org-src
   (define-key org-src-mode-map [remap evil-save-and-close]          'org-edit-src-exit)
   (define-key org-src-mode-map [remap evil-save-modified-and-close] 'org-edit-src-exit)
@@ -516,8 +506,7 @@ if an expansion fails, so that the hook can successfully fall through.
 (See [[Org functions][Org functions]].)
 Here I just add the function to the hook run before =org-cycle=.
 
-#+name: org-hooks
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no :noweb-ref org-hooks
 (org-cycle-tab-first . +tempel-expand-interactively)
 #+end_src
 
@@ -587,8 +576,7 @@ and those alone.
 
 Here we just load the file.
 The keybinding for the pandoc transient has been set elsewhere.
-#+name: org-modules
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no :noweb-ref org-modules
 (load-file (concat user-emacs-directory "pandoc.el"))
 #+end_src
 
@@ -625,7 +613,6 @@ Once I'm inside a snippet, chances are I no longer need to expand more snippets.
 Instead, I want to be able to use TAB to jump to next placeholder,
 or move the point after the snippet.
 
-#+name: tempel-keybindings
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no :noweb-ref tempel-keybindings
 (define-key tempel-map (kbd "TAB") #'tempel-next)
 #+end_src
