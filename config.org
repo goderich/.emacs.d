@@ -346,6 +346,8 @@ when pressing Backspace.
 So far I have only found this, but I haven't succeeded in making it work:
 https://www.reddit.com/r/emacs/comments/re31i6/how_to_go_up_one_directory_when_using_findfile_cx/
 
+Should look into Doom code directly.
+
 ** TODO Completion
 
 TODO: might also want to take a look at [[https://github.com/minad/corfu][Corfu]], which is supposed to be a smaller package.
@@ -365,54 +367,29 @@ Of course, I could just as easily write my own function to insert a file path.
 * Org-mode
 
 TODOs:
+- Think about completion in org (needed?)
 - Org-refile
-- C-RET behaviour on lists
 
 Check out https://github.com/minad/org-modern
 
 #+begin_src emacs-lisp :noweb yes
 (use-package org
   :after evil
+  :init <<org-init>>
+  :hook <<org-hooks>>
   :config
   <<org-settings>>
-  ;; Set org file associations
-  (setq org-file-apps
-	`((auto-mode . emacs)
-	  (,(rx ".pdf::" (group (one-or-more digit)) string-end) . "zathura %s -P %1")
-	  (,(rx ".pdf" string-end) . "zathura %s")
-	  (directory . emacs)))
-
-  ;; browser needs to be set with a separate function
-  (setq browse-url-browser-function 'browse-url-generic
-	browse-url-generic-program "qutebrowser")
-
-  ;; Don't use blank lines between text and the following heading
-  (setq org-blank-before-new-entry
-	'((heading . t) (plain-list-item . nil)))
-
-  ;; Don't show empty lines between collapsed headings
-  (setq org-cycle-separator-lines 0)
-
-  ;; Org todo keywords and colours
-  (setq org-todo-keywords
-	'((sequence "TODO(t)" "|" "DONE(d)")
-	  (sequence "NEXT(n)" "WAITING(w)" "LATER(l)" "LOOP(p)" "|" "CANCELLED(c)")))
-
-  ;; Use LOOP keyword for repeating tasks
-  ;; (after marking them as done)
-  (setq org-todo-repeat-to-state "LOOP")
-
-  ;; Archive everything from org files in one directory
-  ;; into a single hidden file.
-  (setq org-archive-location ".archive.org::")
-
-  ;; My custom faces for todo items. I'm reusing most from:
-  ;; ~/.emacs.d/modules/lang/org/config.el
-  (with-no-warnings
-    (custom-declare-face '+org-todo-important '((t (:inherit (bold default)))) ""))
-
   <<org-src-settings>>
-  <<org-keybindings>>)
+  <<org-keybindings>>
+  <<org-modules>>)
+#+end_src
+
+** Org settings
+
+Enable indentation in org-mode.
+#+name: org-init
+#+begin_src emacs-lisp :tangle no
+(setq org-startup-indented t)
 #+end_src
 
 #+name: org-settings
@@ -433,10 +410,51 @@ if you are using more keywords than just TODO and DONE.
 ;; (setq org-tag-faces (:foreground "blue" :weight normal))
 #+end_src
 
+#+name: org-settings
+#+begin_src emacs-lisp :tangle no
+;; Set org file associations
+(setq org-file-apps
+      `((auto-mode . emacs)
+	(,(rx ".pdf::" (group (one-or-more digit)) string-end) . "zathura %s -P %1")
+	(,(rx ".pdf" string-end) . "zathura %s")
+	(directory . emacs)))
+
+;; browser needs to be set with a separate function
+(setq browse-url-browser-function 'browse-url-generic
+      browse-url-generic-program "qutebrowser")
+
+;; Don't use blank lines between text and the following heading
+(setq org-blank-before-new-entry
+      '((heading . t) (plain-list-item . nil)))
+
+;; Don't show empty lines between collapsed headings
+(setq org-cycle-separator-lines 0)
+
+;; Org todo keywords and colours
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "|" "DONE(d)")
+	(sequence "NEXT(n)" "WAITING(w)" "LATER(l)" "LOOP(p)" "|" "CANCELLED(c)")))
+
+;; Use LOOP keyword for repeating tasks
+;; (after marking them as done)
+(setq org-todo-repeat-to-state "LOOP")
+
+;; Archive everything from org files in one directory
+;; into a single hidden file.
+(setq org-archive-location ".archive.org::")
+
+;; My custom faces for todo items. I'm reusing most from Doom.
+(with-no-warnings
+  (custom-declare-face '+org-todo-important '((t (:inherit (bold default)))) ""))
+#+end_src
+
 #+name: org-src-settings
 #+begin_src emacs-lisp :tangle no
 (setq org-edit-src-content-indentation 0)
 #+end_src
+
+
+** Org keybindings
 
 #+name: org-keybindings
 #+begin_src emacs-lisp :tangle no
@@ -444,10 +462,28 @@ if you are using more keywords than just TODO and DONE.
   (kbd "<tab>") #'org-cycle
   (kbd "<localleader>,") #'org-ctrl-c-ctrl-c
   (kbd "<localleader>s") #'org-edit-src-code
+  (kbd "<localleader>p") #'pandoc-transient
   (kbd "<localleader>t") #'org-todo
   (kbd "<localleader>q") #'org-set-tags-command
+  (kbd "<localleader>Q") #'+org-remove-tags
   (kbd "<localleader>.") #'+consult-goto-org-heading
   (kbd "gh") #'outline-previous-visible-heading)
+#+end_src
+
+Some keybindings, namely ones using a modifier key,
+should be accessible in both normal and insert modes.
+#+name: org-keybindings
+#+begin_src emacs-lisp
+(evil-define-key '(normal insert) org-mode-map
+  (kbd "M-h") #'org-metaleft
+  (kbd "M-j") #'org-metadown
+  (kbd "M-k") #'org-metaup
+  (kbd "M-l") #'org-metaright
+  (kbd "M-H") #'org-shiftmetaleft
+  (kbd "M-J") #'org-shiftmetadown
+  (kbd "M-K") #'org-shiftmetaup
+  (kbd "M-L") #'org-shiftmetaright
+  (kbd "C-<return>") #'+org-insert-item)
 #+end_src
 
 From evil-org, use evil bindings in source and table editing modes:
@@ -458,8 +494,68 @@ From evil-org, use evil bindings in source and table editing modes:
   (define-key org-src-mode-map [remap evil-quit]                    'org-edit-src-abort))
 #+end_src
 
-** TODO Org-refile
+Binding to =org-cycle= (usually TAB)
+or =org-ctrl-c-ctrl-c= (mine is =,,= instead)
+does not follow the usual procedure.
+Because these keys are context-dependent to begin with,
+it's generally not a good idea to rebind them completely,
+since you might screw up additional contexts
+you didn't even realize were there before rebinding.
+Instead, additional functionality is added via hooks,
+which are run before the main body of the function.
+If any of the functions returns a non-nil value,
+the main body is run instead.
+It's the next best thing to a =cond= in the function itself.
 
+Trying to bind tempel's expansion to TAB was a tad involved.
+The expansion function returns a non-nil value even when it fails,
+and the =tempel-expand= function by itself does not expand
+when run programmatically.
+I ended up writing a small wrapper function that returns nil
+if an expansion fails, so that the hook can successfully fall through.
+(See [[Org functions][Org functions]].)
+Here I just add the function to the hook run before =org-cycle=.
+
+#+name: org-hooks
+#+begin_src emacs-lisp :tangle no
+(org-cycle-tab-first . +tempel-expand-interactively)
+#+end_src
+
+** Org functions
+
+#+begin_src emacs-lisp
+(defun +org-remove-tags ()
+  "Remove all tags."
+  (interactive)
+  (org-set-tags nil))
+
+(defun +org-insert-item ()
+  "Insert an item determined from context."
+  (interactive)
+  (cond
+   ;; list with checkboxes
+   ((org-at-item-checkbox-p)
+    (progn
+      (org-end-of-item)
+      (org-insert-item 'checkbox)))
+   ;; list without checkboxes
+   ((org-at-item-p)
+    (progn
+      (org-end-of-item)
+      (org-insert-item)))
+   ;; heading
+   ((org-at-heading-p) (org-insert-heading-respect-content))))
+
+(defun +tempel-expand-interactively ()
+  "Try to expand a snippet with tempel.
+If expansion fails, return nil.
+This function is specifically for use with org-cycle."
+  (ignore-errors
+      (tempel--interactive #'tempel-expand)))
+#+end_src
+
+** TODO Org-refile
+  
 ** Transient navigation
 Instead of pressing key combinations or chords repeatedly to navigate,
 we can define a transient state and use simple keys while in it.
@@ -470,16 +566,36 @@ and because it's now built into Emacs (as of 28).
 #+begin_src emacs-lisp
 (transient-define-prefix +org-movement-transient ()
   ["Moving around in org"
-   [("k" "up" outline-previous-visible-heading :transient t)
-    ("j" "down" outline-next-visible-heading :transient t)]
+   [("k" "up" org-previous-visible-heading :transient t)
+    ("j" "down" org-next-visible-heading :transient t)]
    [("q" "quit" transient-quit-all)]])
+#+end_src
+
+** Pandoc integration
+
+My personal interface to pandoc from Emacs
+is written in a [[~/.emacs.d/pandoc.el][separate file]] as a module.
+There is a single entry point: a transient function
+(aptly named =pandoc-transient=),
+which allows the user to interactively
+construct a pandoc call, and then executes it.
+
+I might make it into its own package later,
+but there is currently no shortage of pandoc APIs for Emacs,
+and my version is very much tailored to my personal needs
+and those alone.
+
+Here we just load the file.
+The keybinding for the pandoc transient has been set elsewhere.
+#+name: org-modules
+#+begin_src emacs-lisp :tangle no
+(load-file (concat user-emacs-directory "pandoc.el"))
 #+end_src
 
 * Link hinting
 
 #+begin_src elisp
 (use-package link-hint
-  :defer t
   :config
   (evil-define-key 'normal 'global
     (kbd "<leader>u") #'link-hint-open-link))
@@ -490,6 +606,7 @@ and because it's now built into Emacs (as of 28).
 #+begin_src emacs-lisp
 (use-package magit
   :config
+  (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
   (evil-define-key '(normal visual) 'global
    (kbd "<leader>gg") #'magit))
 #+end_src
@@ -499,36 +616,16 @@ Trying https://github.com/minad/tempel.
 It advertises itself as a tiny and more lispy package.
 Could be a nice alternative to yasnippet.
 
-Currently I can't get TAB to work as =tempel-next= while expanding.
-
 #+begin_src elisp :noweb yes
 (use-package tempel
-  :init <<tempel-trigger>>
   :config <<tempel-keybindings>>)
 #+end_src
 
-I am using TAB as the key to trigger snippet expansion:
-(so far just in org-mode, but later probably globally)
-#+name: tempel-trigger
-#+begin_src emacs-lisp :tangle no
-(evil-define-key 'insert org-mode-map (kbd "<tab>") #'tempel-expand)
-#+end_src
-
-However, once I'm inside a snippet, chances are I no longer need to expand more snippets.
+Once I'm inside a snippet, chances are I no longer need to expand more snippets.
 Instead, I want to be able to use TAB to jump to next placeholder,
 or move the point after the snippet.
 
-For some reason, the following did not work:
+#+name: tempel-keybindings
 #+begin_src emacs-lisp :tangle no
 (define-key tempel-map (kbd "TAB") #'tempel-next)
 #+end_src
-Emacs still read the TAB key as =tempel-expand=.
-
-So I ended up remapping the =tempel-expand= function specifically:
-#+name: tempel-keybindings
-#+begin_src emacs-lisp :tangle no
-(define-key tempel-map [remap tempel-expand] #'tempel-next)
-#+end_src
-Note that for this to work, =tempel-expand= has to be bound first.
-This is why I put =<<tempel-trigger>>= in =:init=,
-and =<<tempel-keybindings>>= in =:config=.
