@@ -188,9 +188,7 @@ https://www.mattduck.com/2023-08-28-extending-use-package-bind
     (kbd "<leader>,") #'consult-buffer
     (kbd "<leader>bq") #'kill-this-buffer
     ;; Windows
-    (kbd "<leader>ww") #'other-window
-    (kbd "<leader>wq") #'delete-window
-    (kbd "<leader>wo") #'delete-other-windows
+    (kbd "<leader>w") #'+window-transient
     ;; Line comments
     (kbd "gc") #'comment-line)
 
@@ -237,10 +235,16 @@ https://github.com/hlissner/evil-snipe
 #+begin_src emacs-lisp
 (transient-define-prefix +window-transient ()
   ["Resizing windows"
-   [("b" "bigger" enlarge-window :transient t)
-    ("s" "down" shrink-window :transient t)
-    ("=" "down" balance-windows :transient t)]
-   [("q" "quit" transient-quit-all)]])
+   ["Transient"
+    ("b" "bigger" enlarge-window :transient t)
+    ("s" "smaller" shrink-window :transient t)
+    ("=" "balance" balance-windows :transient t)]
+   ["Non-transient"
+    ("d" "delete" delete-window)
+    ("w" "other" other-window)
+    ("m" "maximize" delete-other-windows)]
+   [("q" "quit" transient-quit-all)
+    ("<escape>" "quit" transient-quit-all)]])
 #+end_src
 
 * Narrowing and completion
