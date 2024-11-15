@@ -230,6 +230,12 @@ https://github.com/hlissner/evil-snipe
 (blink-cursor-mode -1)
 #+end_src
 
+#+begin_src emacs-lisp
+(use-package evil-surround
+  :ensure t
+  :config (global-evil-surround-mode 1))
+#+end_src
+
 ** Window resizing transient
 
 #+begin_src emacs-lisp
