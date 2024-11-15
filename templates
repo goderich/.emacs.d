@@ -32,15 +32,24 @@ org-mode
 (comment "#+begin_comment" n> r> n "#+end_comment")
 (src "#+begin_src " q n r n "#+end_src")
 ;; (gnuplot "#+begin_src gnuplot :var data=" (p "table") " :file " (p "plot.png") n r n "#+end_src" :post (org-edit-src-code))
-(elisp "#+begin_src emacs-lisp" n r n "#+end_src" :post (org-edit-src-code))
+(elisp
+ "#+begin_src emacs-lisp" n r n "#+end_src"
+ :post (progn
+	 (evil-normal-state)
+	 (org-edit-src-code)
+	 (evil-insert-state)))
 (elispnt
  "#+name: " p n
- "#+begin_src emacs-lisp :tangle no" n r n "#+end_src" :post (org-edit-src-code))
+ "#+begin_src emacs-lisp :tangle no" n r n "#+end_src"
+ :post (progn
+	 (evil-normal-state)
+	 (org-edit-src-code)
+	 (evil-insert-state)))
 (inlsrc "src_" p "{" q "}")
 
 ;; academic snippets
-(/ "\\text{" p "}" q)
-(// "\\textit{" p "}" q)
+(/ "\\text{/" p "/}" q)
+(// "\\textit{/" p "/}" q)
 
 ;; Local Variables:
 ;; mode: lisp-data
