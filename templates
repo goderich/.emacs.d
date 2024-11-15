@@ -19,6 +19,7 @@ emacs-lisp-mode
 
 org-mode
 
+;; org blocks
 (caption "#+caption: ")
 (name "#+name: ")
 (drawer ":" p ":" n r ":end:")
@@ -36,6 +37,10 @@ org-mode
  "#+name: " p n
  "#+begin_src emacs-lisp :tangle no" n r n "#+end_src" :post (org-edit-src-code))
 (inlsrc "src_" p "{" q "}")
+
+;; academic snippets
+(/ "\\text{" p "}" q)
+(// "\\textit{" p "}" q)
 
 ;; Local Variables:
 ;; mode: lisp-data
