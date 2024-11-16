@@ -4,10 +4,7 @@ This is actually going quite nicely, but I still need the following:
 - Proper org config (nearing completion)
   - Contextual behaviour (dwim for RET)
 - Fonts (variable width for org, CJK font config)
-- Lisp editing (smartparens or the like)
 - Modeline
-- Git gutter
-- Whitespace cleanup
 
 Academic:
 - Add ebib, copy config
@@ -26,7 +23,6 @@ These are some of the packages I should consider:
   - https://github.com/Malabarba/smart-mode-line
 - https://github.com/hlissner/emacs-solaire-mode
 - https://github.com/lewang/ws-butler
-- https://github.com/emacs-evil/evil-surround
 - https://github.com/edkolev/evil-lion <- not necessary all the time, but nice when needed
 - https://codeberg.org/ideasman42/emacs-undo-fu <- in-built undo is terrible
   - https://codeberg.org/ideasman42/emacs-undo-fu-session
@@ -35,6 +31,7 @@ These are some of the packages I should consider:
 - https://github.com/kuanyui/tldr.el
 - https://github.com/manateelazycat/lsp-bridge <- eglot alternative, advertised as blazingly fast
 - https://github.com/flycheck/flycheck
+- https://github.com/bbatsov/crux <- lots of useful utility functions
 - Think about giving Dired another go
 - Org-mode:
   - https://github.com/minad/org-modern <- will it slow?
