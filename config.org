@@ -265,7 +265,9 @@ https://github.com/hlissner/evil-snipe
   :config (global-evil-surround-mode 1))
 #+end_src
 
-** Undo
+** TODO Undo
+See also Hints and undo-fu-session [[https://codeberg.org/ideasman42/emacs-undo-fu][here]].
+
 #+begin_src emacs-lisp
 (use-package undo-fu)
 #+end_src
@@ -694,4 +696,47 @@ or move the point after the snippet.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref tempel-keybindings
 (define-key tempel-map (kbd "TAB") #'tempel-next)
+#+end_src
+
+* Programming
+
+** Lisp
+Smartparens is THE package for lisp code editing.
+#+begin_src emacs-lisp :noweb yes
+(use-package smartparens
+  :hook (prog-mode)
+  :config
+  ;; load default config
+  (require 'smartparens-config)
+  <<smartparens-keybindings>>)
+#+end_src
+
+Examples can be found in the [[https://github.com/Fuco1/smartparens/wiki][wiki]] and in [[https://ebzzry.com/en/emacs-pairs/][this article]].
+
+#+begin_src emacs-lisp :tangle no :noweb-ref smartparens-keybindings
+(evil-define-key '(normal visual) emacs-lisp-mode-map
+  "(" #'sp-backward-up-sexp
+  ")" #'sp-up-sexp)
+
+(evil-define-key 'normal emacs-lisp-mode-map
+  (kbd "<localleader>(") #'sp-backward-slurp-sexp
+  (kbd "<localleader>)") #'sp-forward-slurp-sexp
+  (kbd "<localleader><") #'sp-backward-barf-sexp
+  (kbd "<localleader>>") #'sp-forward-barf-sexp
+  (kbd "<localleader>w") #'sp-wrap-round)
+
+(evil-define-key 'visual emacs-lisp-mode-map
+  "(" #'sp-wrap-round
+  ")" #'sp-wrap-round
+  "[" #'sp-wrap-square
+  "]" #'sp-wrap-square)
+#+end_src
+
+* Utils
+** Whitespace cleanup
+One more package I learned of from Doom's config.
+
+#+begin_src emacs-lisp
+(use-package ws-butler
+  :init (ws-butler-global-mode 1))
 #+end_src
