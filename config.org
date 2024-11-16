@@ -5,6 +5,7 @@ This is actually going quite nicely, but I still need the following:
   - Contextual behaviour (dwim for RET)
 - Fonts (variable width for org, CJK font config)
 - Modeline
+- Crux?
 
 Academic:
 - Add ebib, copy config
@@ -13,6 +14,16 @@ Academic:
 Other TODOs:
 - Org-refile
 - org-books (maybe migrate to codeberg and rename?)
+
+Programming langs and other modes:
+- Elisp
+- Clojure
+- Zig
+- Odin
+- YAML
+- JSON
+- HTML
+- ???
 
 ** Packages
 These are some of the packages I should consider:
