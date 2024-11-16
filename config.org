@@ -377,27 +377,24 @@ https://www.reddit.com/r/emacs/comments/re31i6/how_to_go_up_one_directory_when_u
 
 Should look into Doom code directly.
 
-** TODO Completion
+** Completion
 
-TODO: might also want to take a look at [[https://github.com/minad/corfu][Corfu]], which is supposed to be a smaller package.
+[[https://github.com/minad/corfu][Corfu]]
 
-Company manual: https://company-mode.github.io/
-
-I do NOT normally want company mode on in org, because that's distracting.
+I do NOT normally want completion on in org, because that's distracting.
 However, its completion of file paths is nice.
 If I can turn on only that, I'll use it.
 Of course, I could just as easily write my own function to insert a file path.
 
 #+begin_src emacs-lisp
-(use-package company
-  :init (global-company-mode))
+(use-package corfu
+  :hook ((prog-mode . corfu-mode))
+  :custom
+  (corfu-auto t)
+  (corfu-quit-no-match t))
 #+end_src
 
 * Org-mode
-
-TODOs:
-- Think about completion in org (needed?)
-- Org-refile
 
 Check out https://github.com/minad/org-modern
 
