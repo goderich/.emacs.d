@@ -172,7 +172,7 @@ https://www.mattduck.com/2023-08-28-extending-use-package-bind
   (evil-mode 1)
   (setq evil-esc-delay 0)
   ;; Sane undo
-  (evil-set-undo-system 'undo-redo)
+  (evil-set-undo-system 'undo-fu)
 
   <<evil-escape>>
 
@@ -265,6 +265,10 @@ https://github.com/hlissner/evil-snipe
   :config (global-evil-surround-mode 1))
 #+end_src
 
+** Undo
+#+begin_src emacs-lisp
+(use-package undo-fu)
+#+end_src
 ** Window resizing transient
 
 #+begin_src emacs-lisp
