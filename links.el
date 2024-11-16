@@ -51,35 +51,6 @@ Creates the ID if one isn't already present."
   (interactive)
   (apply #'+insert-link (+org--get-id-heading)))
 
-(defun +org-set-custom-id ()
-  "Create a new custom ID property at the current org heading.
-Prompts for user input, converts it to lisp-case, and
-sets that as the new CUSTOM_ID. If the input is left
-blank, uses the heading text itself.
-
-Returns the new CUSTOM_ID value as a string."
-  (let ((custom-id
-         (->> (org-get-heading)
-              (read-string "Create new custom ID: " "" nil)
-              (s-dashed-words)
-              (concat "sec:"))))
-    (org-set-property "CUSTOM_ID" custom-id)
-    custom-id))
-
-(defun +org-get-custom-id ()
-  "Retrieve the custom_id of a heading.
-If one does not exist, create it.
-
-The function prompts the user for a new custom ID. By default,
-the heading name is used. The user input or heading is then
-transformed into a lisp-case string."
-  (save-excursion
-    (consult-org-heading)
-    (let* ((props (org-entry-properties))
-           (custom-id (or (map-elt props "CUSTOM_ID")
-                          (+org-set-custom-id))))
-      custom-id)))
-
 (defun +org-insert-last-stored-link ()
   "Assumes that `org-stored-links' is non-nil."
   (let ((link (pop org-stored-links)))
