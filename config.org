@@ -410,9 +410,7 @@ Should look into Doom code directly.
 [[https://github.com/minad/corfu][Corfu]]
 
 I do NOT normally want completion on in org, because that's distracting.
-However, its completion of file paths is nice.
-If I can turn on only that, I'll use it.
-Of course, I could just as easily write my own function to insert a file path.
+I do want completion when programming, and I want it to open up automatically.
 
 #+begin_src emacs-lisp
 (use-package corfu
@@ -696,10 +694,19 @@ The only keybinding required is for the transient entry point.
 
 #+begin_src emacs-lisp
 (use-package magit
+  :custom
+  (magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
   :config
-  (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
   (evil-define-key '(normal visual) 'global
    (kbd "<leader>gg") #'magit))
+#+end_src
+
+** TODO Git diff highlighting
+
+Installed the mode, but it is barely noticeable in its default form in my theme.
+#+begin_src emacs-lisp
+(use-package diff-hl
+  :init (global-diff-hl-mode))
 #+end_src
 
 * Snippets
