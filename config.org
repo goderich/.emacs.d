@@ -1,12 +1,22 @@
-* TODO Immediate priority
+* NEXT Outgoing TODOs
 
-If I want to make this more than an experiment, I need the following:
-- Proper org config
-  - Contextual behaviour (dwim in a few places)
-- Fonts (variable width for org)
+This is actually going quite nicely, but I still need the following:
+- Proper org config (nearing completion)
+  - Contextual behaviour (dwim for RET)
+- Fonts (variable width for org, CJK font config)
 - Lisp editing (smartparens or the like)
+- Modeline
+- Git gutter
+- Whitespace cleanup
 
-I can then start migrating my Doom config.
+Academic:
+- Add ebib, copy config
+- Copy refs.el from Doom config
+
+Other TODOs:
+- Org-refile
+- org-books (maybe migrate to codeberg and rename?)
+
 ** Packages
 These are some of the packages I should consider:
 - https://github.com/emacs-dashboard/emacs-dashboard
@@ -21,7 +31,6 @@ These are some of the packages I should consider:
 - https://codeberg.org/ideasman42/emacs-undo-fu <- in-built undo is terrible
   - https://codeberg.org/ideasman42/emacs-undo-fu-session
 - Maybe https://github.com/redguardtoo/evil-nerd-commenter if what I'm using now is insufficient
-- https://github.com/minad/corfu
 - https://github.com/jacktasia/dumb-jump for jumping to definition
 - https://github.com/kuanyui/tldr.el
 - https://github.com/manateelazycat/lsp-bridge <- eglot alternative, advertised as blazingly fast
@@ -61,6 +70,7 @@ https://github.com/emacs-tw/awesome-emacs
 * Basic settings
 ** Early loading
 Maybe some of this should be in =early-init.el=?
+See also https://github.com/hrs/sensible-defaults.el
 
 #+begin_src emacs-lisp
 ;; -*- lexical-binding: t -*-
@@ -79,11 +89,9 @@ Maybe some of this should be in =early-init.el=?
 (load custom-file)
 #+end_src
 
-See also https://github.com/hrs/sensible-defaults.el
-
 ** Package management
-Instead of putting =:ensure t= everywhere,
-I can just set it here once.
+Instead of putting =:ensure t= everywhere, I can just set it here once.
+(This is not recommended by some.)
 
 #+begin_src elisp
 (require 'use-package-ensure)
@@ -113,9 +121,19 @@ See also =use-package-defaults= for other settings.
 (use-package solarized-theme
   :config
   (load-theme 'solarized-light t))
+#+end_src
+
+** Fonts
+Some ideas for font configuration in [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/][this blog post]]
+and [[https://stackoverflow.com/questions/28428382/how-to-manage-fonts-in-emacs][this SO answer]].
+#+begin_src emacs-lisp
+(use-package mixed-pitch
+  :hook (text-mode . mixed-pitch-mode))
 
 (set-frame-font "Source Code Pro-18")
 #+end_src
+For CJK fonts specifically, check [[https://www.shimmy1996.com/en/posts/2018-06-24-fun-with-fonts-in-emacs/][this]], or [[https://www.reddit.com/r/emacs/comments/8tz1r0/how_to_set_font_according_to_languages_that_i/e1bjce6/][this snippet]].
+Also [[https://coldnew.github.io/d5011be2/][this article]] deals with CJK alignment in org tables.
 
 * TODO Utility functions
 
@@ -130,6 +148,19 @@ See also =use-package-defaults= for other settings.
     (org-fold-show-children))
 #+end_src
 
+From
+https://superuser.com/questions/131538/can-i-create-directories-that-dont-exist-while-creating-a-new-file-in-emacs
+#+begin_src emacs-lisp
+(defun +find-file ()
+  "Create parent directory if not exists while visiting file."
+  (interactive)
+  (unless (file-exists-p filename)
+    (let ((dir (file-name-directory filename)))
+      (unless (file-exists-p dir)
+        (make-directory dir t)))))
+
+;; (find-file-read-args "Find file: " (confirm-nonexistent-file-or-buffer))
+#+end_src
 * Evil
 
 Check out this great macro for evil keybindings with use-package:
@@ -448,12 +479,14 @@ if you are using more keywords than just TODO and DONE.
 
 ** Org keybindings
 
+Note that some keybindings are set in their respective modes.
+They still appear together in the final tangled file.
+
 #+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
 (evil-define-key '(normal visual) org-mode-map
   (kbd "<tab>") #'org-cycle
   (kbd "<localleader>,") #'org-ctrl-c-ctrl-c
   (kbd "<localleader>s") #'org-edit-src-code
-  (kbd "<localleader>p") #'pandoc-transient
   (kbd "<localleader>t") #'org-todo
   (kbd "<localleader>q") #'org-set-tags-command
   (kbd "<localleader>Q") #'+org-remove-tags
@@ -491,7 +524,7 @@ Because these keys are context-dependent to begin with,
 it's generally not a good idea to rebind them completely,
 since you might screw up additional contexts
 you didn't even realize were there before rebinding.
-Instead, additional functionality is added via hooks,
+Instead, additional functionality is added via hooks
 which are run before the main body of the function.
 If any of the functions returns a non-nil value,
 the main body is run instead.
@@ -514,7 +547,7 @@ Here I just add the function to the hook run before =org-cycle=.
 
 #+begin_src emacs-lisp
 (defun +org-remove-tags ()
-  "Remove all tags."
+  "Remove all tags from current heading."
   (interactive)
   (org-set-tags nil))
 
@@ -526,12 +559,14 @@ Here I just add the function to the hook run before =org-cycle=.
    ((org-at-item-checkbox-p)
     (progn
       (org-end-of-item)
-      (org-insert-item 'checkbox)))
+      (org-insert-item 'checkbox)
+      (evil-insert-state)))
    ;; list without checkboxes
    ((org-at-item-p)
     (progn
       (org-end-of-item)
-      (org-insert-item)))
+      (org-insert-item)
+      (evil-insert-state)))
    ;; heading
    ((org-at-heading-p) (org-insert-heading-respect-content))))
 
@@ -545,7 +580,17 @@ This function is specifically for use with org-cycle."
 
 ** TODO Org-refile
   
+#+begin_src emacs-lisp :tangle no :noweb-ref org-refile
+(defun +org-refile-to-current-file ()
+  "Refile current heading to elsewhere in the current buffer."
+  (interactive)
+  (let ((org-refile-targets '((nil :maxlevel . 10)))
+        (org-refile-use-outline-path t))
+    (call-interactively #'org-refile)))
+#+end_src
+
 ** Transient navigation
+
 Instead of pressing key combinations or chords repeatedly to navigate,
 we can define a transient state and use simple keys while in it.
 I got the idea from [[https://github.com/Somelauw/evil-org-mode/blob/master/doc/example_config.el][this evil-org example]] that used hydra,
@@ -557,6 +602,8 @@ and because it's now built into Emacs (as of 28).
   ["Moving around in org"
    [("k" "up" org-previous-visible-heading :transient t)
     ("j" "down" org-next-visible-heading :transient t)]
+   [("<tab>" "cycle" org-cycle :transient t)
+    ("<backtab>" "cycle all" org-shifttab :transient t)]
    [("q" "quit" transient-quit-all)]])
 #+end_src
 
@@ -574,10 +621,41 @@ but there is currently no shortage of pandoc APIs for Emacs,
 and my version is very much tailored to my personal needs
 and those alone.
 
-Here we just load the file.
-The keybinding for the pandoc transient has been set elsewhere.
+Here we load the file.
 #+begin_src emacs-lisp :tangle no :noweb-ref org-modules
 (load-file (concat user-emacs-directory "pandoc.el"))
+#+end_src
+
+The only keybinding required is for the transient entry point.
+#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
+(evil-define-key 'normal org-mode-map
+  (kbd "<localleader>p") #'pandoc-transient)
+#+end_src
+
+** Links
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-modules
+(load-file (concat user-emacs-directory "links.el"))
+#+end_src
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
+(evil-define-key '(normal insert) org-mode-map
+  (kbd "C-l") #'+org-link-dwim)
+#+end_src
+
+
+#+begin_src emacs-lisp
+(transient-define-prefix +link-transient ()
+  ["Org links"
+   ["insert link..."
+    ("l" "do-what-i-mean" +org-link-dwim)
+    ("c" "from clipboard" +org-insert-link-from-clipboard)
+    ("f" "to file" +org-insert-file-path)]
+   ["link to org heading..."
+    ("h" "with heading text" +org-insert-link)
+    ("u" "with a unique ID" +org-insert-link-with-id)]
+   [("q" "quit" transient-quit-all)
+    ("<escape>" "quit" transient-quit-all)]])
 #+end_src
 
 * Link hinting
