@@ -268,6 +268,40 @@ See also Hints and undo-fu-session [[https://codeberg.org/ideasman42/emacs-undo-
 #+begin_src emacs-lisp
 (use-package undo-fu)
 #+end_src
+
+** Minibuffer keybindings
+
+Keybindings in the minibuffer have to be set differently.
+I am not using evil in the minibuffer, and the bindings
+have to be set up using a hook each time.
+
+I went through this trouble to replicate Doom's behaviour
+when pressing backspace in the minibuffer.
+It works as normal when typing the name of a file,
+but if you keep deleting, the parent directories will be deleted
+with a single press of backspace.
+This is pretty convenient when jumping upwards many levels.
+
+Right now my implementation is very naive,
+as it doesn't know if I'm in a file path or some other completion.
+If =vertico-directory-up= cannot delete a directory
+it will get stuck, making me quit the prompt.
+I don't think this would happen often,
+but it might be a good idea to build in a few failsafes.
+
+#+begin_src emacs-lisp
+(defun +delete-char-or-directory ()
+  (interactive)
+  (if (eq (char-before) ?/)
+      (vertico-directory-up)
+    (delete-backward-char 1)))
+
+(defun +minibuffer-setup ()
+  (define-key minibuffer-local-map (kbd "<backspace>") #'+delete-char-or-directory))
+
+(add-hook 'minibuffer-setup-hook #'+minibuffer-setup)
+#+end_src
+
 ** Window resizing transient
 
 #+begin_src emacs-lisp
@@ -326,15 +360,6 @@ https://github.com/minad/consult
   ;; (vertico-resize t) ;; Grow and shrink the Vertico minibuffer
   ;; (vertico-cycle t) ;; Enable cycling for `vertico-next/previous'
   :init (vertico-mode))
-
-(defun up-directory (arg)
-  "Move up a directory (delete backwards to /)."
-  (interactive "p")
-  (if (string-match-p "/." (minibuffer-contents))
-      (zap-up-to-char (- arg) ?/)
-    (delete-minibuffer-contents)))
-
-(evil-define-key nil minibuffer-local-filename-completion-map [backspace] #'up-directory)
 
 ;; Persist history over Emacs restarts.
 (use-package savehist
