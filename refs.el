@@ -1,7 +1,9 @@
 ;;; ~/.emacs.d/refs.el -*- lexical-binding: t; -*-
 
 ;; Inserting pandoc references in org-mode with narrowing.
-;; Thinking of a package name. Maybe prior: Pandoc References In Org Rendition
+;; Thinking of a package name.
+;; Maybe prior: Pandoc References In Org Rendition
+;; Another idea: pox (pandoc/org X-ref)
 
 (defun +ref--insert-reference (str &optional capitalize?)
   (let ((str (if capitalize? (s-capitalize str) str)))
@@ -33,7 +35,7 @@ transformed into a lisp-case string."
     (consult-org-heading)
     (let* ((props (org-entry-properties))
            (custom-id (or (map-elt props "CUSTOM_ID")
-                          (+org-set-custom-id))))
+                          (+ref--org-set-custom-id))))
       custom-id)))
 
 (defun +ref-insert-ref-heading (&optional capitalize?)

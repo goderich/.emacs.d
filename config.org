@@ -670,6 +670,10 @@ The only keybinding required is for the transient entry point.
   (kbd "C-l") #'+org-link-dwim)
 #+end_src
 
+#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
+(evil-define-key 'normal org-mode-map
+  (kbd "<localleader>l") #'+link-transient)
+#+end_src
 
 #+begin_src emacs-lisp
 (transient-define-prefix +link-transient ()
@@ -681,6 +685,35 @@ The only keybinding required is for the transient entry point.
    ["link to org heading..."
     ("h" "with heading text" +org-insert-link)
     ("u" "with a unique ID" +org-insert-link-with-id)]
+   [("q" "quit" transient-quit-all)
+    ("<escape>" "quit" transient-quit-all)]])
+#+end_src
+
+** Cross-referencing
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-modules
+(load-file (concat user-emacs-directory "refs.el"))
+#+end_src
+
+I should think about an insert mode keybinding, too.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
+(evil-define-key 'normal org-mode-map
+  (kbd "<localleader>r") #'+ref-transient)
+#+end_src
+
+Again, a transient.
+Since I'm using transients instead of regular evil keybindings,
+I could make capitalization an infix instead of having separate bindings.
+Although it's not like I'm running out of keys. Something to ponder.
+
+#+begin_src emacs-lisp
+(transient-define-prefix +ref-transient ()
+  ["Pandoc cross-references in Org"
+   ["insert reference..."
+    ("h" "to heading" +ref-insert-ref-heading)
+    ("t" "to table" +ref-insert-ref-table)
+    ("f" "to figure" +ref-insert-ref-figure)]
    [("q" "quit" transient-quit-all)
     ("<escape>" "quit" transient-quit-all)]])
 #+end_src
