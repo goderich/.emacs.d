@@ -294,16 +294,14 @@ This is pretty convenient when jumping upwards many levels.
 
 Right now my implementation is very naive,
 as it doesn't know if I'm in a file path or some other completion.
-If =vertico-directory-up= cannot delete a directory
-it will get stuck, making me quit the prompt.
-I don't think this would happen often,
-but it might be a good idea to build in a few failsafes.
+In other places, it will delete the whole line if you press backspace on a slash,
+although I do not foresee many such situations in my Emacs usage.
 
 #+begin_src emacs-lisp
 (defun +delete-char-or-directory ()
   (interactive)
   (if (eq (char-before) ?/)
-      (vertico-directory-up)
+      (backward-kill-sexp)
     (delete-backward-char 1)))
 
 (defun +minibuffer-setup ()
@@ -401,19 +399,6 @@ https://github.com/minad/consult
 
 There is also https://github.com/oantolin/embark/,
 but I haven't learned how to use it properly.
-
-*** TODO File path Backspace behaviour
-
-One thing I have not yet been able to do is
-replicate Doom's behaviour with file paths in the minibuffer:
-when on =~/aaa/bbb/ccc/=, I want to be able to
-delete the whole level (i.e. 'ccc', then 'bbb')
-when pressing Backspace.
-
-So far I have only found this, but I haven't succeeded in making it work:
-https://www.reddit.com/r/emacs/comments/re31i6/how_to_go_up_one_directory_when_using_findfile_cx/
-
-Should look into Doom code directly.
 
 ** Completion
 
