@@ -598,8 +598,14 @@ Here I just add the function to the hook run before =org-cycle=.
       (org-end-of-item)
       (org-insert-item)
       (evil-insert-state)))
-   ;; heading
-   ((org-at-heading-p) (org-insert-heading-respect-content))))
+   ;; if in a table, break the table at that row
+   ;; (since RET jumps to next row, adding one if needed)
+   ((org-at-table-p)
+    (progn
+      (end-of-line)
+      (newline)))
+   ;; fall back to heading insertion
+   (t (org-insert-heading-respect-content))))
 
 (defun +tempel-expand-interactively ()
   "Try to expand a snippet with tempel.
