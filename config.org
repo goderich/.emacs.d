@@ -750,18 +750,22 @@ Although it's not like I'm running out of keys. Something to ponder.
    (kbd "<leader>gg") #'magit))
 #+end_src
 
-** TODO Git diff highlighting
+** Git diff highlighting
 
-Installed the mode, but it is barely noticeable in its default form in my theme.
+Changed the settings using [[https://www.reddit.com/r/emacs/comments/582yms/question_changing_the_colour_of_diffhl_indicators/][this discussion]] as a reference.
 #+begin_src emacs-lisp
 (use-package diff-hl
-  :init (global-diff-hl-mode))
+  :init
+  (custom-set-faces
+   '(diff-hl-change ((t (:background "orange2" :foreground "orange2"))))
+   '(diff-hl-insert ((t (:background "green4" :foreground "green4"))))
+   '(diff-hl-delete ((t (:background "red2" :foreground "red2")))))
+  (diff-hl-flydiff-mode)
+  (global-diff-hl-mode))
 #+end_src
 
 * Snippets
 Trying https://github.com/minad/tempel.
-It advertises itself as a tiny and more lispy package.
-Could be a nice alternative to yasnippet.
 
 #+begin_src elisp :noweb yes
 (use-package tempel
