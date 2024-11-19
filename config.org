@@ -178,63 +178,22 @@ https://www.mattduck.com/2023-08-28-extending-use-package-bind
 
 #+begin_src elisp :noweb yes
 (use-package evil
-  :init 
+  :init
   (evil-mode 1)
-  (setq evil-esc-delay 0)
   ;; Sane undo
   (evil-set-undo-system 'undo-fu)
 
-  <<evil-escape>>
+  :bind <<evil-escape>>
+  :custom
+  (evil-esc-delay 0)
+  ;; Substitute with :s globally by default
+  (evil-ex-substitute-global t)
+  ;; Make evil commands operate on logical, not visual lines
+  (evil-respect-visual-line-mode nil)
 
   :config
-  ;; (global-evil-surround-mode 1)
-  ;; Configure cursor
   <<evil-cursor>>
-
-  ;; Semicolon for M-x
-  (evil-define-key '(normal visual) 'global
-   ";" #'execute-extended-command)
-
-  ;; Substitute with :s globally by default
-  (setq evil-ex-substitute-global t)
-
-  ;; Make evil commands operate on logical, not visual lines
-  (setq evil-respect-visual-line-mode nil)
-
-  ;; ESC as C-g
-  (evil-global-set-key 'normal (kbd "ESC") #'keyboard-quit)
-
-  (defun +open-config ()
-    (interactive)
-    (find-file "~/.emacs.d/config.org"))
-
-  ;; KEYBINDINGS
-  ;; space as global leader
-  (evil-set-leader 'normal (kbd "SPC"))
-  ;; comma as local leader
-  (evil-set-leader 'normal (kbd ",") 'localleader)
-  ;; Global keybindings
-  (evil-define-key '(normal visual) 'global
-    "k"  #'evil-previous-visual-line
-    "j"  #'evil-next-visual-line
-    "gj" #'evil-next-line
-    "gk" #'evil-previous-line)
-  (evil-define-key 'normal 'global
-    ;; Files
-    (kbd "<leader>.") #'find-file
-    (kbd "<leader>fr") #'recentf
-    (kbd "<leader>fs") #'save-buffer
-    (kbd "<leader>fc") #'+open-config
-    ;; Buffers
-    (kbd "<leader>,") #'consult-buffer
-    (kbd "<leader>bq") #'kill-this-buffer
-    ;; Windows
-    (kbd "<leader>w") #'+window-transient
-    ;; Line comments
-    (kbd "gc") #'comment-line)
-
-  ;; Documentation on leader keys
-  (which-key-add-key-based-replacements "<leader>w" "windows")
+  <<evil-keybindings>>
 
   ;; Elisp mode
   (evil-define-key 'normal emacs-lisp-mode-map
@@ -242,20 +201,11 @@ https://www.mattduck.com/2023-08-28-extending-use-package-bind
 #+end_src
 
 Maybe use https://github.com/emacs-evil/evil-collection ?
-There is a minibuffer mode, and modules can be loaded incrementally.
+Modules can be loaded incrementally.
 
 For org-mode specifically, https://github.com/Somelauw/evil-org-mode
 has some great ideas, which I could take wholesale as a package,
 or steal selectively. See the "[[https://github.com/Somelauw/evil-org-mode/blob/master/doc/example_config.el][elaborate setup]]" example.
-
-Make ESC quit everything.
-I tried setting this up in the minibuffer to no avail,
-and with other keybinding methods and functions,
-but it turned out that a simple line with a =use-package= keyword
-was all that was needed.
-#+begin_src emacs-lisp :tangle no :noweb-ref evil-escape
-:bind (("<escape>" . keyboard-escape-quit))
-#+end_src
 
 Better S motions:
 https://github.com/hlissner/evil-snipe
@@ -273,6 +223,89 @@ https://github.com/hlissner/evil-snipe
 (use-package evil-surround
   :ensure t
   :config (global-evil-surround-mode 1))
+#+end_src
+
+** Keybindings
+
+Make ESC quit everything.
+I tried setting this up in the minibuffer to no avail,
+and with other keybinding methods and functions,
+but it turned out that a simple line with a =use-package= keyword
+was all that was needed.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref evil-escape
+("<escape>" . keyboard-escape-quit)
+#+end_src
+
+Not only that, but when I'm in insert mode and a [[id:2ca8bb84-790f-4e68-8d3d-4893ef154e43][completion]] overlay is active,
+or if I'm currently in the middle of inserting a [[id:0118536f-8f2f-4e6d-ab30-66bd3101401d][snippet]],
+I want ESC to quit completion or templating *while keeping me in insert mode*.
+There does not appear to be a simple way of doing with with settings or hooks,
+and evil is greedily capturing keypresses,
+so remapping ESC in =corfu-mode= and =tempel-mode= did not work.
+During times like these, my solution is a simple wrapper function
+that I then bind ESC to globally in insert mode.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref evil-keybindings
+(defun +evil-normal-state-maybe ()
+  (interactive)
+  (cond
+   ((and corfu-mode completion-in-region-mode) (corfu-quit))
+   (tempel--active (tempel-done))
+   (t (evil-normal-state))))
+
+(evil-define-key 'insert 'global (kbd "<escape>") #'+evil-normal-state-maybe)
+#+end_src
+
+I first encountered the idea of using SPC as the global leader in Spacemacs, and I think it's great.
+I use the comma for localleader binds, because in Dvorak it's very conveniently positioned,
+and not a great loss in normal mode.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref evil-keybindings
+(evil-set-leader 'normal (kbd "SPC"))
+(evil-set-leader 'normal (kbd ",") 'localleader)
+#+end_src
+
+I run commands by name quite a lot, and so to me it makes sense
+to bind the command menu to an easily reachable key,
+preferably with no modifiers.
+Doom has it on =SPC := if I recall correctly.
+I think vim's =;= command is not worth an unmodified key,
+especially since it is made redundant with [[https://github.com/hlissner/evil-snipe][evil-snipe]].
+
+#+begin_src emacs-lisp :tangle no :noweb-ref evil-keybindings
+(evil-define-key '(normal visual) 'global ";" #'execute-extended-command)
+#+end_src
+
+I write a lot of prose, and so encounter wrapped lines quite often.
+For me, =j= and =k= moving by visual line just makes sense.
+=gj= and =gk= bindings are there mostly for macros,
+as I don't use them interactively.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref evil-keybindings
+(evil-define-key '(normal visual) 'global
+  "k"  #'evil-previous-visual-line
+  "j"  #'evil-next-visual-line
+  "gj" #'evil-next-line
+  "gk" #'evil-previous-line)
+#+end_src
+
+Spacemacs also introduced me to mnemonic keybindings.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref evil-keybindings
+(evil-define-key 'normal 'global
+  ;; Files
+  (kbd "<leader>.") #'find-file
+  (kbd "<leader>fr") #'recentf
+  (kbd "<leader>fs") #'save-buffer
+  (kbd "<leader>fc") #'+open-config
+  ;; Buffers
+  (kbd "<leader>,") #'consult-buffer
+  (kbd "<leader>bq") #'kill-this-buffer
+  ;; Windows
+  (kbd "<leader>w") #'+window-transient
+  ;; Line comments
+  (kbd "gc") #'comment-line)
 #+end_src
 
 ** TODO Undo
@@ -308,7 +341,8 @@ although I do not foresee many such situations in my Emacs usage.
     (delete-backward-char 1)))
 
 (defun +minibuffer-setup ()
-  (define-key minibuffer-local-map (kbd "<backspace>") #'+delete-char-or-directory))
+  (define-key minibuffer-local-map (kbd "<backspace>") #'+delete-char-or-directory)
+  (define-key minibuffer-local-map (kbd "C-w") #'backward-kill-word))
 
 (add-hook 'minibuffer-setup-hook #'+minibuffer-setup)
 #+end_src
@@ -404,6 +438,9 @@ There is also https://github.com/oantolin/embark/,
 but I haven't learned how to use it properly.
 
 ** Completion
+:PROPERTIES:
+:ID:       2ca8bb84-790f-4e68-8d3d-4893ef154e43
+:END:
 
 [[https://github.com/minad/corfu][Corfu]]
 
@@ -420,8 +457,8 @@ TODO:
   :custom
   (corfu-auto t)
   (corfu-quit-no-match t)
-  :bind (:map corfu-map ("<escape>" . corfu-quit)) ; <- does not work!
   )
+  ;; :bind (:map corfu-map ("<escape>" . corfu-quit)) ; <- does not work!
 #+end_src
 
 * Org-mode
@@ -764,6 +801,9 @@ Changed the settings using [[https://www.reddit.com/r/emacs/comments/582yms/ques
 #+end_src
 
 * Snippets
+:PROPERTIES:
+:ID:       0118536f-8f2f-4e6d-ab30-66bd3101401d
+:END:
 Trying https://github.com/minad/tempel.
 
 #+begin_src elisp :noweb yes
