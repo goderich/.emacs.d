@@ -169,6 +169,10 @@ Should move these under appropriate headings.
 (defun +open-config ()
   (interactive)
   (find-file "~/.emacs.d/config.org"))
+
+(defun +open-org-dir ()
+  (interactive)
+  (ido-find-file-in-dir "~/org/"))
 #+end_src
 
 * Evil
@@ -297,6 +301,7 @@ Spacemacs also introduced me to mnemonic keybindings.
   ;; Files
   (kbd "<leader>.") #'find-file
   (kbd "<leader>fr") #'recentf
+  (kbd "<leader>fo") #'+open-org-dir
   (kbd "<leader>fs") #'save-buffer
   (kbd "<leader>fc") #'+open-config
   ;; Buffers
