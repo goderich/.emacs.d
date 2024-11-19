@@ -579,22 +579,24 @@ Here I just add the function to the hook run before =org-cycle=.
   (interactive)
   (org-set-tags nil))
 
+(defun *org-list-insert-and-indent (&optional checkbox?)
+  "Insert a new row in a list.
+Respects current indentation and checkbox."
+  (let ((indentation (current-indentation)))
+    (org-end-of-item)
+    (org-insert-item checkbox?)
+    (indent-line-to indentation)
+    (end-of-line)
+    (evil-insert-state)))
+
 (defun +org-insert-item ()
   "Insert an item determined from context."
   (interactive)
   (cond
    ;; list with checkboxes
-   ((org-at-item-checkbox-p)
-    (progn
-      (org-end-of-item)
-      (org-insert-item 'checkbox)
-      (evil-insert-state)))
+   ((org-at-item-checkbox-p) (*org-list-insert-and-indent 'checkbox))
    ;; list without checkboxes
-   ((org-at-item-p)
-    (progn
-      (org-end-of-item)
-      (org-insert-item)
-      (evil-insert-state)))
+   ((org-at-item-p) (*org-list-insert-and-indent))
    ;; if in a table, break the table at that row
    ;; (since RET jumps to next row, adding one if needed)
    ((org-at-table-p)
