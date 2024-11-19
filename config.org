@@ -3,6 +3,7 @@
 This is actually going quite nicely, but I still need the following:
 - Proper org config (nearing completion)
   - Contextual behaviour (dwim for RET)
+  - org agenda settings
 - Fonts (+variable width for org+, CJK font config)
 - Crux (for various utility functions)
 - Modeline (how important is this actually?)
@@ -40,6 +41,7 @@ These are some of the packages I should consider:
 - Maybe https://github.com/redguardtoo/evil-nerd-commenter if what I'm using now is insufficient
 - https://github.com/xiongtx/eros <- overlays for showing evaluated results
 - https://github.com/jacktasia/dumb-jump for jumping to definition
+- What's the Doom package that shows usage examples in the help menu?
 - https://github.com/kuanyui/tldr.el
 - https://github.com/manateelazycat/lsp-bridge <- eglot alternative, advertised as blazingly fast
 - https://github.com/flycheck/flycheck
@@ -86,19 +88,24 @@ See also https://github.com/hrs/sensible-defaults.el
 
 #+begin_src emacs-lisp
 ;; -*- lexical-binding: t -*-
-;; reduce the frequency of garbage collection by making it happen on
-;; each 50MB of allocated data (the default is on every 0.76MB)
-(setq gc-cons-threshold 50000000)
-
-;; warn when opening files bigger than 100MB
-(setq large-file-warning-threshold 100000000)
-
-;; do not create backups
-(setq make-backup-files nil)
-
-;; do not pollute this file with custom variables
-(setq custom-file "~/.emacs.d/custom.el")
-(load custom-file)
+(use-package emacs
+  :custom
+  ;; reduce the frequency of garbage collection by making it happen on
+  ;; each 20MB of allocated data (the default is on every 0.76MB)
+  (gc-cons-threshold 20000000)
+  ;; warn when opening files bigger than 100MB
+  (large-file-warning-threshold 100000000)
+  ;; do not create backups
+  (make-backup-files nil)
+  ;; use regular spacing with sentences.
+  ;; this is important because it directly impacts sentence motions in evil.
+  (sentence-end-double-space nil)
+  ;; do not pollute this file with custom variables
+  (custom-file "~/.emacs.d/custom.el")
+  :config
+  (load custom-file)
+  ;; do not use tabs for indentation
+  (indent-tabs-mode -1))
 #+end_src
 
 ** Package management
@@ -136,13 +143,12 @@ See also =use-package-defaults= for other settings.
 #+end_src
 
 ** Fonts
-Some ideas for font configuration in [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/][this blog post]]
-and [[https://stackoverflow.com/questions/28428382/how-to-manage-fonts-in-emacs][this SO answer]].
+Some ideas for font configuration in [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/][this blog post]] and [[https://stackoverflow.com/questions/28428382/how-to-manage-fonts-in-emacs][this SO answer]].
 #+begin_src emacs-lisp
 (use-package mixed-pitch
   :hook (text-mode . mixed-pitch-mode))
 
-(set-frame-font "Source Code Pro-18")
+(set-frame-font "Source Code Pro-20")
 #+end_src
 For CJK fonts specifically, check [[https://www.shimmy1996.com/en/posts/2018-06-24-fun-with-fonts-in-emacs/][this]], or [[https://www.reddit.com/r/emacs/comments/8tz1r0/how_to_set_font_according_to_languages_that_i/e1bjce6/][this snippet]].
 Also [[https://coldnew.github.io/d5011be2/][this article]] deals with CJK alignment in org tables.
@@ -159,21 +165,12 @@ Should move these under appropriate headings.
     (org-fold-show-context)
     (org-fold-show-entry)
     (org-fold-show-children))
-#+end_src
 
-From
-https://superuser.com/questions/131538/can-i-create-directories-that-dont-exist-while-creating-a-new-file-in-emacs
-#+begin_src emacs-lisp
-(defun +find-file ()
-  "Create parent directory if not exists while visiting file."
+(defun +open-config ()
   (interactive)
-  (unless (file-exists-p filename)
-    (let ((dir (file-name-directory filename)))
-      (unless (file-exists-p dir)
-        (make-directory dir t)))))
-
-;; (find-file-read-args "Find file: " (confirm-nonexistent-file-or-buffer))
+  (find-file "~/.emacs.d/config.org"))
 #+end_src
+
 * Evil
 
 Check out this great macro for evil keybindings with use-package:
