@@ -447,14 +447,15 @@ but I haven't learned how to use it properly.
 :ID:       2ca8bb84-790f-4e68-8d3d-4893ef154e43
 :END:
 
-[[https://github.com/minad/corfu][Corfu]]
+Using [[https://github.com/minad/corfu][Corfu]].
 
 I do NOT normally want completion on in org, because that's distracting.
 I do want completion when programming, and I want it to open up automatically.
 
-TODO:
-- Bind ESC to corfu-quit
-- Make TAB complete shared prefix, instead of first candidate
+Trying out SPC as separator:
+pressing space does not exit completion, but instead begins a second chunk.
+This makes corfu work a lot like consult et al,
+where a search string can be entered using space-separated pieces.
 
 #+begin_src emacs-lisp
 (use-package corfu
@@ -462,8 +463,9 @@ TODO:
   :custom
   (corfu-auto t)
   (corfu-quit-no-match t)
-  )
-  ;; :bind (:map corfu-map ("<escape>" . corfu-quit)) ; <- does not work!
+  :bind (:map corfu-map
+	      ("TAB" . corfu-expand)
+	      ("SPC" . corfu-insert-separator)))
 #+end_src
 
 * Org-mode
