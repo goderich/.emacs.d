@@ -18,13 +18,14 @@ Other TODOs:
 
 Programming langs and other modes (check my doom/init.el):
 - Elisp
+  - macroexpand
 - Clojure
 - Zig
 - Odin
+- LSP/treesitter
 - YAML
 - JSON
 - HTML
-- ???
 
 ** Packages
 These are some of the packages I should consider:
@@ -682,10 +683,43 @@ but I'm using transient because I'm more used to it,
 and because it's now built into Emacs (as of 28).
 
 #+begin_src emacs-lisp
+(defmacro with-org-fold (fun)
+  `(progn
+     ,fun
+     (evil-scroll-line-to-top nil)
+     (org-fold-show-subtree)))
+
+(defun +org-up-level-and-show ()
+  (interactive)
+  (with-org-fold
+    (org-up-heading-safe)))
+
+(defun +org-up-and-show ()
+  (interactive)
+  (with-org-fold
+    (org-previous-visible-heading 1)))
+
+(defun +org-down-and-show ()
+  (interactive)
+  (with-org-fold
+    (org-next-visible-heading 1)))
+
+(defun +org-up-same-level ()
+  (interactive)
+  (with-org-fold
+    (org-backward-heading-same-level 1 t)))
+
+(defun +org-down-same-level ()
+  (interactive)
+  (with-org-fold
+    (org-forward-heading-same-level 1 t)))
+
 (transient-define-prefix +org-movement-transient ()
   ["Moving around in org"
-   [("k" "up" org-previous-visible-heading :transient t)
-    ("j" "down" org-next-visible-heading :transient t)]
+   [("h" "up level" +org-up-level-and-show :transient t)
+    ("k" "up (same level)" +org-up-same-level :transient t)
+    ("j" "down (same level)" +org-down-same-level :transient t)
+    ("l" "down level" +org-down-and-show :transient t)]
    [("<tab>" "cycle" org-cycle :transient t)
     ("<backtab>" "cycle all" org-shifttab :transient t)]
    [("q" "quit" transient-quit-all)]])
