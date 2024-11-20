@@ -58,7 +58,6 @@ These are some of the packages I should consider:
   - https://github.com/oneKelvinSmith/monokai-emacs
   - https://github.com/kunalb/poet
   - https://github.com/rougier/nano-theme
-- https://github.com/emacsorphanage/git-gutter
 - https://github.com/Wilfred/deadgrep
 - https://github.com/vedang/pdf-tools
 - Mail? Consider.
@@ -559,6 +558,9 @@ They still appear together in the final tangled file.
   (kbd "<localleader>,") #'org-ctrl-c-ctrl-c
   (kbd "<localleader>s") #'org-edit-src-code
   (kbd "<localleader>t") #'org-todo
+  (kbd "<localleader>dd") #'org-deadline
+  (kbd "<localleader>ds") #'org-schedule
+  (kbd "<localleader>dt") #'org-time-stamp
   (kbd "<localleader>S") #'org-sparse-tree
   (kbd "<localleader>q") #'org-set-tags-command
   (kbd "<localleader>Q") #'+org-remove-tags
