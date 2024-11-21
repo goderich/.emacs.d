@@ -211,9 +211,6 @@ For org-mode specifically, https://github.com/Somelauw/evil-org-mode
 has some great ideas, which I could take wholesale as a package,
 or steal selectively. See the "[[https://github.com/Somelauw/evil-org-mode/blob/master/doc/example_config.el][elaborate setup]]" example.
 
-Better S motions:
-https://github.com/hlissner/evil-snipe
-
 #+begin_src emacs-lisp :tangle no :noweb-ref evil-cursor
 (setq evil-emacs-state-cursor  '("red" box))
 (setq evil-normal-state-cursor '("gray" box))
@@ -229,7 +226,7 @@ https://github.com/hlissner/evil-snipe
   :config (global-evil-surround-mode 1))
 #+end_src
 
-** Keybindings
+** Global keybindings
 
 Make ESC quit everything.
 I tried setting this up in the minibuffer to no avail,
@@ -318,6 +315,33 @@ See also Hints and undo-fu-session [[https://codeberg.org/ideasman42/emacs-undo-
 
 #+begin_src emacs-lisp
 (use-package undo-fu)
+#+end_src
+
+** Evil-snipe
+
+Sniping is an incredibly efficient way to move around nearby text.
+
+#+begin_src emacs-lisp :noweb yes
+(use-package evil-snipe
+  :init
+  (evil-snipe-mode 1)
+  (evil-snipe-override-mode 1)
+  :bind <<evil-snipe-keybindings>>)
+#+end_src
+
+I like to have evil-snipe capture f/F/t/T for its own use,
+so I turn on =evil-snipe-override-mode=.
+This way, I can use these keys to jump to the next occurrence
+of the searched character.
+However, I do *not* want evil-snipe to steal my =,= and =;= keys,
+even in a transient mode after a snipe.
+They are my =localleader= and execute command keys, respectively,
+and I want them to be available at all times.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref evil-snipe-keybindings
+(:map evil-snipe-parent-transient-map
+      ("," . nil)
+      (";" . nil))
 #+end_src
 
 ** Minibuffer keybindings
