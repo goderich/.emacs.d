@@ -1185,3 +1185,15 @@ One more package I learned of from Doom's config.
     (kbd "<localleader>)") #'sp-forward-slurp-sexp
     (kbd "<localleader>rq") #'cider-quit))
 #+end_src
+** Anzu
+
+[[https://github.com/emacsorphanage/anzu][Anzu]] is a small but pretty important package
+that shows the number of search matches in the modeline.
+It stays completely out of the way
+until you search for occurrences of something,
+and then it's indispensable.
+
+#+begin_src emacs-lisp
+(use-package anzu
+  :init (global-anzu-mode 1))
+#+end_src
