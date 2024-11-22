@@ -922,6 +922,148 @@ This function is specifically for use with org-cycle."
       (tempel--interactive #'tempel-expand)))
 #+end_src
 
+* Bibliography and citations
+
+** Ebib
+
+TODOs:
+- disable notes for now, figure out later
+- keybindings not working (check evil-collection)
+- citation keybindings in org
+
+#+begin_src emacs-lisp :noweb yes
+(use-package ebib
+  :config
+  <<ebib-functions>>
+  <<ebib-settings>>
+  <<ebib-keybindings>>)
+#+end_src
+
+*** Settings
+
+#+begin_src emacs-lisp :tangle no :noweb-ref ebib-settings
+(setq ebib-preload-bib-files (list my/default-bibliography))
+;; (setq ebib-notes-directory my/ebib-notes)
+(setq ebib-file-search-dirs (list my/ebib-file-search-dir))
+(setq ebib-import-directory my/ebib-import-directory)
+(setq ebib-file-associations '(("pdf" . "zathura") ("ps" . "gv")))
+(setq ebib-bibtex-dialect 'biblatex)
+(setq ebib-citation-insert-multiple t)
+(setq ebib-index-columns '(("Author/Editor" 20 t)
+			   ("Year" 6 t)
+			   ("Title" 40 t)))
+(map-put! ebib-reference-templates
+	  "Article"
+	  "{Author}. {Date|Year}. {\"Title\".} {Journaltitle|Journal} {Volume}{(Issue)}{:Pages}.{ Doi.}")
+(map-put! ebib-reference-templates
+	  "Book"
+	  "{Author|Editor}. {Date|Year}. {\"Title\".} {Address: }{Publisher.}")
+(setq ebib-notes-name-transform-function #'identity)
+(setq ebib-name-transform-function #'+ebib-generate-filename)
+;; Set auto-generated citation key options
+(setq bibtex-autokey-year-length 4
+      bibtex-autokey-titleword-length 0
+      bibtex-autokey-name-separator "-"
+      bibtex-autokey-year-title-separator ""
+      bibtex-autokey-edit-before-use t)
+(map-put! ebib-citation-commands
+	  'org-mode
+	  '((("text" "[cite/t: %(@%K%< %A%>%; )]")
+	     ("paren" "[cite: %(@%K%< %A%>%; )]")
+	     ("bare" "@%K")
+	     ("no-name" "[cite/na: %(@%K%< %A%>%; )]"))))
+(map-put! ebib-citation-commands
+	  'markdown-mode
+	  '((("text" "@%K%< [%A]%>")
+	     ("paren" "[%(@%K%<, %A%>%; )]")
+	     ("year" "[-@%K%< %A%>]"))))
+#+end_src
+
+*** Functions
+
+#+begin_src emacs-lisp :tangle no :noweb-ref ebib-functions
+(defun *ebib-get-author-names (key)
+  (let ((names
+	 (->>
+	  (ebib-get-field-value "author" key ebib--cur-db "default" 'unbraced)
+	  (s-split " and ")
+	  (--map (car (s-split "," it))))))
+    (if (< 2 (length names))
+	(concat (car names) " et al")
+      (s-join " and " names))))
+
+(defun *ebib-get-year (key)
+  (let ((date
+	 (or
+	  (ebib-get-field-value "date" key ebib--cur-db 'noerror 'unbraced)
+	  (ebib-get-field-value "year" key ebib--cur-db 'noerror 'unbraced))))
+    (->> date
+	 (s-split "-")
+	 (-first-item))))
+
+(defun *ebib-get-title (key)
+  (let ((title
+	 (->> (ebib-get-field-value "title" key ebib--cur-db "default" 'unbraced)
+              (s-split ":")
+              (car)
+              (replace-regexp-in-string "[{}]" "")
+              (s-trim))))
+    (s-truncate 100 title "")))
+
+(defun +ebib-generate-filename (key)
+  (let ((names (*ebib-get-author-names key))
+	(year (*ebib-get-year key))
+	(title (*ebib-get-title key)))
+    (->> (list names year title)
+	 (-non-nil)
+	 (s-join " ")
+	 (replace-regexp-in-string "/" "")
+	 (replace-regexp-in-string "," "")
+	 (replace-regexp-in-string " " "_"))))
+
+(defun +ebib-edit-as-string ()
+  "Edit the current field as a string.
+This is a function for `ebib-entry-mode'. Since `ebib-edit-field'
+has to take a numeric prefix /= 1 in order to begin string
+editing, it seems easier to abstract this into a function and
+give it its own name and keybinding."
+  (interactive)
+  (ebib-edit-field 2))
+
+(defun +ebib-import-file-from-index ()
+  "Import a file and add to the entry at point.
+Used from the ebib index."
+  (interactive)
+  (ebib-edit-entry)
+  (ebib-import-file nil)
+  (ebib-quit-entry-buffer))
+#+end_src
+
+*** Keybindings
+
+#+begin_src emacs-lisp :tangle no :noweb-ref ebib-keybindings
+(evil-define-key 'normal 'global
+  (kbd "<leader>e") #'ebib)
+
+(evil-define-key 'normal ebib-index-mode-map
+  "q"   #'ebib-quit
+  "s"   #'ebib-save-current-database
+  "S"   #'ebib-save-all-databases
+  "J"   #'ebib-jump-to-entry
+  (kbd "<tab>") #'ebib-edit-entry
+  (kbd "<localleader>f") #'+ebib-import-file-from-index)
+
+(evil-define-key 'normal ebib-entry-mode-map
+  "q"   #'ebib-quit
+  "z"   #'ebib-leave-ebib-windows
+  "E"   #'+ebib-edit-as-string
+  "s"   #'ebib-save-current-database
+  "S"   #'ebib-save-all-databases
+  "D"   #'ebib-delete-current-field-contents
+  (kbd "<tab>") #'ebib-quit-entry-buffer
+  (kbd "<localleader>f") #'ebib-import-file)
+#+end_src
+
 * Link hinting
 
 #+begin_src elisp
