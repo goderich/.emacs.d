@@ -1117,9 +1117,9 @@ or move the point after the snippet.
 (define-key tempel-map (kbd "TAB") #'tempel-next)
 #+end_src
 
-* Programming
+* Programming languages
 
-** Lisp
+** Lisps
 Smartparens is THE package for lisp code editing.
 #+begin_src emacs-lisp :noweb yes
 (use-package smartparens
@@ -1151,18 +1151,13 @@ Examples can be found in the [[https://github.com/Fuco1/smartparens/wiki][wiki]]
   "]" #'sp-wrap-square)
 #+end_src
 
-* Utils
-** Whitespace cleanup
-One more package I learned of from Doom's config.
-
-#+begin_src emacs-lisp
-(use-package ws-butler
-  :init (ws-butler-global-mode 1))
-#+end_src
-
-* Programming
-
 ** Clojure
+
+See also the following:
+- [[https://github.com/clojure-emacs/clojure-mode/][clojure-mode]]
+- [[https://github.com/clojure-emacs/cider][cider]]
+- [[https://github.com/clojure-emacs/clj-refactor.el][clj-refactor]]
+- [[https://docs.doomemacs.org/latest/modules/lang/clojure/][clojure doom module]]
 
 #+begin_src emacs-lisp
 (use-package clojure-mode
@@ -1185,6 +1180,15 @@ One more package I learned of from Doom's config.
     (kbd "<localleader>)") #'sp-forward-slurp-sexp
     (kbd "<localleader>rq") #'cider-quit))
 #+end_src
+* Utils
+** Whitespace cleanup
+One more package I learned of from Doom's config.
+
+#+begin_src emacs-lisp
+(use-package ws-butler
+  :init (ws-butler-global-mode 1))
+#+end_src
+
 ** Anzu
 
 [[https://github.com/emacsorphanage/anzu][Anzu]] is a small but pretty important package
