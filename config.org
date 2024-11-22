@@ -11,12 +11,16 @@ This is actually going quite nicely, but I still need the following:
 Academic:
 - Add ebib, copy config
 - Probably need to copy vars.el as well
+- [[https://github.com/rnkn/olivetti][olivetti]]?
 
 Other TODOs:
 - org-refile (configure refiling to current file)
 - org-books (maybe migrate to codeberg and rename?)
+- [[https://blog.d46.us/advanced-emacs-startup/][how to speed up Emacs startup time]]
+  (gc tricks and deferring are useful)
 
 Programming langs and other modes (check my doom/init.el):
+- unify smartparens keybindings for lisps
 - Elisp
   - macroexpand
 - Clojure
@@ -35,9 +39,11 @@ These are some of the packages I should consider:
 | [[kbd:][]t]]      | go to next TODO item             |
 | [[kbd:][[t]]      | go to previous TODO item         |
 | [[kbd:][SPC p t]] | show all TODO items in a project |
-- https://github.com/emacsorphanage/anzu <- show number of search items in modeline
-- https://github.com/emacs-dashboard/emacs-dashboard
-- https://github.com/hlissner/emacs-solaire-mode
+- Startup screen
+  - https://github.com/emacs-dashboard/emacs-dashboard
+  - https://github.com/ichernyshovvv/enlight
+  - I could also go straight into org-agenda on startup
+- https://github.com/hlissner/emacs-solaire-mode (necessary? I don't use splits that much)
 - https://github.com/edkolev/evil-lion <- not necessary all the time, but nice when needed
 - Maybe https://github.com/redguardtoo/evil-nerd-commenter if what I'm using now is insufficient
 - https://github.com/xiongtx/eros <- overlays for showing evaluated results
