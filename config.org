@@ -215,6 +215,8 @@ https://www.mattduck.com/2023-08-28-extending-use-package-bind
 #+begin_src elisp :noweb yes
 (use-package evil
   :init
+  ;; for use with evil-collection
+  (setq evil-want-keybinding nil)
   (evil-mode 1)
   ;; Sane undo
   (evil-set-undo-system 'undo-fu)
@@ -340,6 +342,20 @@ Spacemacs also introduced me to mnemonic keybindings.
   (kbd "<leader>w") #'+window-transient
   ;; Line comments
   (kbd "gc") #'comment-line)
+#+end_src
+
+** Evil collection
+
+I'm on the fence about pulling all of [[https://github.com/emacs-evil/evil-collection][evil-collection]] for just a few modes,
+so I'm trying it out for now. Can always copy/rewrite myself later.
+Consider also modes: [[https://github.com/emacs-evil/evil-collection/blob/master/modes/macrostep/evil-collection-macrostep.el][macrostep]], [[https://github.com/emacs-evil/evil-collection/tree/master/modes/smerge-mode][smerge]], calendar (?), calc
+Note that evil-collection does not include bindings for org-agenda
+
+#+begin_src emacs-lisp
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init '(ebib magit info)))
 #+end_src
 
 ** TODO Undo
