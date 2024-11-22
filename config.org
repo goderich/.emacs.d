@@ -331,6 +331,7 @@ Spacemacs also introduced me to mnemonic keybindings.
 (evil-define-key 'normal 'global
   ;; Files
   (kbd "<leader>.") #'find-file
+  (kbd "<leader>a") #'org-agenda-list
   (kbd "<leader>fr") #'recentf
   (kbd "<leader>fo") #'+open-org-dir
   (kbd "<leader>fs") #'save-buffer
@@ -632,6 +633,10 @@ if you are using more keywords than just TODO and DONE.
 ;; My custom faces for todo items. I'm reusing most from Doom.
 (with-no-warnings
   (custom-declare-face '+org-todo-important '((t (:inherit (bold default)))) ""))
+
+;; In the datetime prompt, if entering a time that has already
+;; passed today, interpret it as a time for tomorrow.
+(setq org-read-date-prefer-future 'time)
 #+end_src
 
 #+begin_src emacs-lisp :tangle no :noweb-ref org-src-settings
@@ -709,47 +714,21 @@ Here I just add the function to the hook run before =org-cycle=.
 (org-cycle-tab-first . +tempel-expand-interactively)
 #+end_src
 
-** Org functions
+** Org agenda
 
-#+begin_src emacs-lisp
-(defun +org-remove-tags ()
-  "Remove all tags from current heading."
-  (interactive)
-  (org-set-tags nil))
+#+begin_src emacs-lisp :tangle no :noweb-ref org-agenda
+(setq org-agenda-files (list org-directory))
 
-(defun *org-list-insert-and-indent (&optional checkbox?)
-  "Insert a new row in a list.
-Respects current indentation and checkbox."
-  (let ((indentation (current-indentation)))
-    (org-end-of-item)
-    (org-insert-item checkbox?)
-    (indent-line-to indentation)
-    (end-of-line)
-    (evil-insert-state)))
+;; org-agenda settings
+;; Display one week, always starting from Monday.
+(setq org-agenda-span 'week
+      org-agenda-start-on-weekday 1
+      org-agenda-start-day ".")
 
-(defun +org-insert-item ()
-  "Insert an item determined from context."
-  (interactive)
-  (cond
-   ;; list with checkboxes
-   ((org-at-item-checkbox-p) (*org-list-insert-and-indent 'checkbox))
-   ;; list without checkboxes
-   ((org-at-item-p) (*org-list-insert-and-indent))
-   ;; if in a table, break the table at that row
-   ;; (since RET jumps to next row, adding one if needed)
-   ((org-at-table-p)
-    (progn
-      (end-of-line)
-      (newline)))
-   ;; fall back to heading insertion
-   (t (org-insert-heading-respect-content))))
-
-(defun +tempel-expand-interactively ()
-  "Try to expand a snippet with tempel.
-If expansion fails, return nil.
-This function is specifically for use with org-cycle."
-  (ignore-errors
-      (tempel--interactive #'tempel-expand)))
+;; Show full context after switching to an item from agenda
+(map-put! org-fold-show-context-detail 'agenda 'tree)
+;; shold this be in agenda settings?
+(map-put! org-fold-show-context-detail 'default 'tree)
 #+end_src
 
 ** TODO Org-refile
@@ -898,6 +877,49 @@ Although it's not like I'm running out of keys. Something to ponder.
     ("f" "to figure" +ref-insert-ref-figure)]
    [("q" "quit" transient-quit-all)
     ("<escape>" "quit" transient-quit-all)]])
+#+end_src
+
+** Org functions
+
+#+begin_src emacs-lisp
+(defun +org-remove-tags ()
+  "Remove all tags from current heading."
+  (interactive)
+  (org-set-tags nil))
+
+(defun *org-list-insert-and-indent (&optional checkbox?)
+  "Insert a new row in a list.
+Respects current indentation and checkbox."
+  (let ((indentation (current-indentation)))
+    (org-end-of-item)
+    (org-insert-item checkbox?)
+    (indent-line-to indentation)
+    (end-of-line)
+    (evil-insert-state)))
+
+(defun +org-insert-item ()
+  "Insert an item determined from context."
+  (interactive)
+  (cond
+   ;; list with checkboxes
+   ((org-at-item-checkbox-p) (*org-list-insert-and-indent 'checkbox))
+   ;; list without checkboxes
+   ((org-at-item-p) (*org-list-insert-and-indent))
+   ;; if in a table, break the table at that row
+   ;; (since RET jumps to next row, adding one if needed)
+   ((org-at-table-p)
+    (progn
+      (end-of-line)
+      (newline)))
+   ;; fall back to heading insertion
+   (t (org-insert-heading-respect-content))))
+
+(defun +tempel-expand-interactively ()
+  "Try to expand a snippet with tempel.
+If expansion fails, return nil.
+This function is specifically for use with org-cycle."
+  (ignore-errors
+      (tempel--interactive #'tempel-expand)))
 #+end_src
 
 * Link hinting
