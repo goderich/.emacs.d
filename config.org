@@ -159,6 +159,32 @@ Some ideas for font configuration in [[https://zzamboni.org/post/beautifying-org
 For CJK fonts specifically, check [[https://www.shimmy1996.com/en/posts/2018-06-24-fun-with-fonts-in-emacs/][this]], or [[https://www.reddit.com/r/emacs/comments/8tz1r0/how_to_set_font_according_to_languages_that_i/e1bjce6/][this snippet]].
 Also [[https://coldnew.github.io/d5011be2/][this article]] deals with CJK alignment in org tables.
 
+** Vars
+
+#+begin_src emacs-lisp
+(pcase (system-name)
+  ;; Laptop
+  ("iwaka-thinkpad"
+   (setq my/org-directory "~/org"
+         my/default-bibliography "~/files/academic/bib/bibliography.bib"
+         my/ebib-file-search-dir "~/files/syncthing/papers/ebib"
+         my/ebib-import-directory "~/files/syncthing/papers/papers/articles "))
+
+  ;; Office PC
+  ("goderich-ncue"
+   (setq my/org-directory "~/org"
+         my/default-bibliography "~/files/academic/bib/bibliography.bib"
+         my/ebib-file-search-dir "~/files/papers/ebib"
+         my/ebib-import-directory "~/files/papers/papers/articles"))
+
+  ;; Tablet
+  ("goderich-surface"
+   (setq my/org-directory "~/org"
+         my/default-bibliography "~/academic/bib/bibliography.bib"
+	 my/ebib-file-search-dir "~/papers/ebib"
+	 my/ebib-import-directory "~/papers/papers/articles")))
+#+end_src
+
 * TODO Utility functions
 Should move these under appropriate headings.
 
