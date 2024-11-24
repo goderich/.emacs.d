@@ -605,6 +605,7 @@ and I feel the convenience outweighs it.
   <<org-src-settings>>
   <<org-functions>>
   <<org-keybindings>>
+  <<org-navigation-transient>>
   <<org-modules>>)
 #+end_src
 
@@ -696,7 +697,7 @@ They still appear together in the final tangled file.
   (kbd "<localleader>q") #'org-set-tags-command
   (kbd "<localleader>Q") #'+org-remove-tags
   (kbd "<localleader>.") #'+consult-goto-org-heading
-  (kbd "gh") #'org-previous-visible-heading
+  (kbd "gh") #'+org-up-heading
   (kbd "gj") #'+org-down-same-level
   (kbd "gk") #'+org-up-same-level
   (kbd "gl") #'+org-down-and-show)
@@ -783,36 +784,49 @@ Here I just add the function to the hook run before =org-cycle=.
 
 Instead of pressing key combinations or chords repeatedly to navigate,
 we can define a transient state and use simple keys while in it.
-I got the idea from [[https://github.com/Somelauw/evil-org-mode/blob/master/doc/example_config.el][this evil-org example]] that used hydra,
+I got the idea from [[https://github.com/Somelauw/evil-org-mode/blob/master/doc/example_config.el][this evil-org example]] that uses hydra,
 but I'm using transient because I'm more used to it,
 and because it's now built into Emacs (as of 28).
 
-#+begin_src emacs-lisp
-(defmacro with-org-fold (fun)
+#+begin_src emacs-lisp :tangle no :noweb-ref org-navigation-transient
+(defmacro with-org-show (&rest body)
   `(progn
-     ,fun
+     ,@body
      (evil-scroll-line-to-top nil)
-     (org-fold-show-subtree)))
+     (org-fold-show-entry)
+     (org-fold-show-children)))
+
+(defun +org-up-heading ()
+  "Go up to the nearest heading, or to a higher level heading.
+If not on a heading, finds the next heading backwards.
+If already on a heading, goes higher up in the tree. This
+makes sense to me to combine into a single keybinding."
+  (interactive)
+  (if (org-at-heading-p)
+      (org-up-element)
+    (org-back-to-heading)))
 
 (defun +org-up-level-and-show ()
   (interactive)
-  (with-org-fold
-    (org-up-heading-safe)))
+  (with-org-show
+   (org-up-heading-safe)))
 
 (defun +org-down-and-show ()
   (interactive)
-  (with-org-fold
-    (org-next-visible-heading 1)))
+  (with-org-show
+   (org-next-visible-heading 1)))
 
 (defun +org-up-same-level ()
   (interactive)
-  (with-org-fold
-    (org-backward-heading-same-level 1 t)))
+  (with-org-show
+   (org-fold-hide-subtree)
+   (org-backward-heading-same-level 1 t)))
 
 (defun +org-down-same-level ()
   (interactive)
-  (with-org-fold
-    (org-forward-heading-same-level 1 t)))
+  (with-org-show
+   (org-fold-hide-subtree)
+   (org-forward-heading-same-level 1 t)))
 
 (transient-define-prefix +org-movement-transient ()
   ["Moving around in org"
@@ -1144,7 +1158,8 @@ Used from the ebib index."
 
 #+begin_src elisp
 (use-package link-hint
-  :config
+  :commands (link-hint-open-link link-hint-open-link-at-point)
+  :init
   (evil-define-key 'normal 'global
     (kbd "<leader>u") #'link-hint-open-link))
 #+end_src
