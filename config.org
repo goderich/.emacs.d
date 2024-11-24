@@ -73,7 +73,7 @@ These are some of the packages I should consider:
   - https://github.com/seagle0128/doom-modeline
   - https://github.com/Malabarba/smart-mode-line
 
-* Resources
+** Resources
 
 I can read other people's configs, not limited to literate ones.
 - [[https://github.com/bbatsov/emacs.d/blob/master/init.el][bbatsov's minimalist config]]
@@ -185,7 +185,7 @@ Also [[https://coldnew.github.io/d5011be2/][this article]] deals with CJK alignm
 	 my/ebib-import-directory "~/papers/papers/articles")))
 #+end_src
 
-* TODO Utility functions
+** TODO Utility functions
 Should move these under appropriate headings.
 
 #+begin_src emacs-lisp
@@ -960,12 +960,15 @@ TODOs:
 	  "{Author|Editor}. {Date|Year}. {\"Title\".} {Address: }{Publisher.}")
 (setq ebib-notes-name-transform-function #'identity)
 (setq ebib-name-transform-function #'+ebib-generate-filename)
+
 ;; Set auto-generated citation key options
 (setq bibtex-autokey-year-length 4
       bibtex-autokey-titleword-length 0
       bibtex-autokey-name-separator "-"
       bibtex-autokey-year-title-separator ""
       bibtex-autokey-edit-before-use t)
+(setq ebib-uniquify-keys t)
+
 (map-put! ebib-citation-commands
 	  'org-mode
 	  '((("text" "[cite/t: %(@%K%< %A%>%; )]")
@@ -1046,20 +1049,23 @@ Used from the ebib index."
   (kbd "<leader>e") #'ebib)
 
 (evil-define-key 'normal ebib-index-mode-map
-  "q"   #'ebib-quit
-  "s"   #'ebib-save-current-database
-  "S"   #'ebib-save-all-databases
-  "J"   #'ebib-jump-to-entry
+  "q" #'ebib-quit
+  "s" #'ebib-save-current-database
+  "S" #'ebib-save-all-databases
+  "/" #'ebib-jump-to-entry
   (kbd "<tab>") #'ebib-edit-entry
   (kbd "<localleader>f") #'+ebib-import-file-from-index)
 
+;; Unset N while I'm figuring out what to do with notes.
+(keymap-unset ebib-index-mode-map "N")
+
 (evil-define-key 'normal ebib-entry-mode-map
-  "q"   #'ebib-quit
-  "z"   #'ebib-leave-ebib-windows
-  "E"   #'+ebib-edit-as-string
-  "s"   #'ebib-save-current-database
-  "S"   #'ebib-save-all-databases
-  "D"   #'ebib-delete-current-field-contents
+  "q" #'ebib-quit
+  "z" #'ebib-leave-ebib-windows
+  "E" #'+ebib-edit-as-string
+  "s" #'ebib-save-current-database
+  "S" #'ebib-save-all-databases
+  "D" #'ebib-delete-current-field-contents
   (kbd "<tab>") #'ebib-quit-entry-buffer
   (kbd "<localleader>f") #'ebib-import-file)
 #+end_src
@@ -1084,7 +1090,10 @@ Used from the ebib index."
    (kbd "<leader>gg") #'magit))
 #+end_src
 
-** Git diff highlighting
+** TODO Git diff highlighting
+
+TODO:
+- add hindings to next-hunk prev-hunk fns
 
 Changed the settings using [[https://www.reddit.com/r/emacs/comments/582yms/question_changing_the_colour_of_diffhl_indicators/][this discussion]] as a reference.
 #+begin_src emacs-lisp
