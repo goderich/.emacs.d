@@ -975,6 +975,16 @@ This function is specifically for use with org-cycle."
       (tempel--interactive #'tempel-expand)))
 #+end_src
 
+I believe org-mode first started the fashion of
+contextually dependent actions in Emacs (aka "dwim").
+Then Doom took it and expanded it further.
+The idea is great, and here I put my own spin on it.
+If on a...
+- source block: edit it (run block with =,,=).
+- list item with checkbox: toggle checkbox.
+- link: open it.
+- table: move to next row, possibly creating one (jump out of table with =C-RET=).
+
 #+begin_src emacs-lisp :tangle no :noweb-ref org-functions
 (defun +org-return ()
   "Perform an action dependent on context."
@@ -982,6 +992,7 @@ This function is specifically for use with org-cycle."
   (cond
    ((org-in-src-block-p) (org-edit-src-code))
    ((org-at-item-checkbox-p) (org-toggle-checkbox))
+   ((org-in-regexp org-link-bracket-re 1) (link-hint-open-link-at-point))
    ((org-at-table-p) (org-table-next-row))
    (t (evil-ret))))
 #+end_src
@@ -994,12 +1005,14 @@ Do I want to move to the new position? Depends.
 #+begin_src emacs-lisp :tangle no
 (defun +org-refile-to-this-file ()
   (interactive)
-  (let ((loc (save-excursion
-	       (consult-org-heading)
-	       (cons (org-get-heading) (point)))))
+  (let* ((loc-pair (save-excursion
+		     (consult-org-heading)
+		     (cons (org-get-heading) (point))))
+	 (heading (car loc-pair))
+	 (location (cdr loc-pair)))
     (org-refile nil
 		(current-buffer)
-		(list (car loc) (buffer-file-name) nil (cdr loc)))))
+		(list heading (buffer-file-name) nil location))))
 #+end_src
 
 * Bibliography and citations
