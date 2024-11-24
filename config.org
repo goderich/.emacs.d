@@ -34,11 +34,6 @@ Programming langs and other modes (check my doom/init.el):
 ** Packages
 These are some of the packages I should consider:
 - https://github.com/bbatsov/crux <- lots of useful utility functions
-- https://github.com/tarsius/hl-todo
-  Keybindings from Doom:
-| [[kbd:][]t]]      | go to next TODO item             |
-| [[kbd:][[t]]      | go to previous TODO item         |
-| [[kbd:][SPC p t]] | show all TODO items in a project |
 - Startup screen
   - https://github.com/emacs-dashboard/emacs-dashboard
   - https://github.com/ichernyshovvv/enlight
@@ -341,6 +336,10 @@ Spacemacs also introduced me to mnemonic keybindings.
   (kbd "<leader>bq") #'kill-this-buffer
   ;; Windows
   (kbd "<leader>w") #'+window-transient
+  ;; todo items
+  (kbd "]t") #'hl-todo-next
+  (kbd "[t") #'hl-todo-previous
+  ;; there is also the hl-todo-occur command
   ;; Line comments
   (kbd "gc") #'comment-line)
 #+end_src
@@ -1107,6 +1106,11 @@ Changed the settings using [[https://www.reddit.com/r/emacs/comments/582yms/ques
   (global-diff-hl-mode))
 #+end_src
 
+* TODO hl-todo
+#+begin_src emacs-lisp
+(use-package hl-todo
+  :init (global-hl-todo-mode 1))
+#+end_src
 * Snippets
 :PROPERTIES:
 :ID:       0118536f-8f2f-4e6d-ab30-66bd3101401d
