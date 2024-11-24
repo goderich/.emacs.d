@@ -394,8 +394,8 @@ They are my =localleader= and execute command keys, respectively,
 and I want them to be available at all times.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref evil-snipe-settings
-(define-key evil-snipe-parent-transient-map "," nil)
-(define-key evil-snipe-parent-transient-map ";" nil)
+(keymap-set evil-snipe-parent-transient-map "," nil)
+(keymap-set evil-snipe-parent-transient-map ";" nil)
 #+end_src
 
 By default, snipe searches only on the current line.
@@ -443,8 +443,8 @@ although I do not foresee many such situations in my Emacs usage.
     (delete-backward-char 1)))
 
 (defun +minibuffer-setup ()
-  (define-key minibuffer-local-map (kbd "<backspace>") #'+delete-char-or-directory)
-  (define-key minibuffer-local-map (kbd "C-w") #'backward-kill-word))
+  (keymap-set minibuffer-local-map "<backspace>" #'+delete-char-or-directory)
+  (keymap-set minibuffer-local-map "C-w" #'backward-kill-word))
 
 (add-hook 'minibuffer-setup-hook #'+minibuffer-setup)
 #+end_src
@@ -568,6 +568,7 @@ where a search string can be entered using space-separated pieces.
 * Org-mode
 
 Check out https://github.com/minad/org-modern
+Sacha Chua also has an [[https://sachachua.com/blog/2024/01/using-consult-and-org-ql-to-search-my-org-mode-agenda-files-and-sort-the-results-to-prioritize-heading-matches/][interesting use]] of org-ql.
 
 #+begin_src emacs-lisp :noweb yes
 (use-package org
@@ -577,6 +578,7 @@ Check out https://github.com/minad/org-modern
   :config
   <<org-settings>>
   <<org-src-settings>>
+  <<org-functions>>
   <<org-keybindings>>
   <<org-modules>>)
 #+end_src
@@ -646,6 +648,7 @@ if you are using more keywords than just TODO and DONE.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref org-src-settings
 (setq org-edit-src-content-indentation 0)
+(setq org-confirm-babel-evaluate nil)
 #+end_src
 
 
@@ -657,6 +660,7 @@ They still appear together in the final tangled file.
 #+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
 (evil-define-key '(normal visual) org-mode-map
   (kbd "<tab>") #'org-cycle
+  (kbd "<return>") #'+org-return
   (kbd "<localleader>,") #'org-ctrl-c-ctrl-c
   (kbd "<localleader>s") #'org-edit-src-code
   (kbd "<localleader>t") #'org-todo
@@ -667,7 +671,21 @@ They still appear together in the final tangled file.
   (kbd "<localleader>q") #'org-set-tags-command
   (kbd "<localleader>Q") #'+org-remove-tags
   (kbd "<localleader>.") #'+consult-goto-org-heading
-  (kbd "gh") #'outline-previous-visible-heading)
+  (kbd "gh") #'org-previous-visible-heading
+  (kbd "gj") #'+org-down-same-level
+  (kbd "gk") #'+org-up-same-level
+  (kbd "gl") #'+org-down-and-show)
+#+end_src
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
+(evil-define-key '(normal insert) org-mode-map
+  (kbd "C-l") #'+org-link-dwim
+  (kbd "C-c") #'ebib-insert-citation)
+#+end_src
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
+(evil-define-key 'normal org-mode-map
+  (kbd "<localleader>l") #'+link-transient)
 #+end_src
 
 Some keybindings, namely ones using a modifier key,
@@ -736,19 +754,6 @@ Here I just add the function to the hook run before =org-cycle=.
 (map-put! org-fold-show-context-detail 'default 'tree)
 #+end_src
 
-** TODO Org-refile
-
-Found this bit, but it's not working quite the way I'd like it to
-(namely, it does not seem to go through consult; maybe that's in consult settings?)
-#+begin_src emacs-lisp :tangle no :noweb-ref org-refile
-(defun +org-refile-to-current-file ()
-  "Refile current heading to elsewhere in the current buffer."
-  (interactive)
-  (let ((org-refile-targets '((nil :maxlevel . 10)))
-        (org-refile-use-outline-path t))
-    (call-interactively #'org-refile)))
-#+end_src
-
 ** Transient navigation
 
 Instead of pressing key combinations or chords repeatedly to navigate,
@@ -768,11 +773,6 @@ and because it's now built into Emacs (as of 28).
   (interactive)
   (with-org-fold
     (org-up-heading-safe)))
-
-(defun +org-up-and-show ()
-  (interactive)
-  (with-org-fold
-    (org-previous-visible-heading 1)))
 
 (defun +org-down-and-show ()
   (interactive)
@@ -831,16 +831,6 @@ The only keybinding required is for the transient entry point.
 (load-file (concat user-emacs-directory "links.el"))
 #+end_src
 
-#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
-(evil-define-key '(normal insert) org-mode-map
-  (kbd "C-l") #'+org-link-dwim)
-#+end_src
-
-#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
-(evil-define-key 'normal org-mode-map
-  (kbd "<localleader>l") #'+link-transient)
-#+end_src
-
 #+begin_src emacs-lisp
 (transient-define-prefix +link-transient ()
   ["Org links"
@@ -884,9 +874,28 @@ Although it's not like I'm running out of keys. Something to ponder.
     ("<escape>" "quit" transient-quit-all)]])
 #+end_src
 
+** Org cite
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-cite
+(defun +ebib-open-on-citation (citation _)
+  (let ((key (map-elt (cadr citation) :key)))
+    (ebib)
+    (ebib-db-set-current-entry-key key ebib--cur-db)
+    (ebib--update-buffers 'no-refresh)))
+
+(org-cite-register-processor '+org-cite-follow-processor
+  ;; Note that the citation is passed as an object, not a string.
+  ;; The follow function must take two arguments.
+  ;; See `org-cite-register-processor' documentation for details.
+  :follow #'+ebib-open-on-citation)
+
+(setq org-cite-global-bibliography (list my/default-bibliography))
+(setq org-cite-follow-processor '+org-cite-follow-processor)
+#+end_src
+
 ** Org functions
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no :noweb-ref org-functions
 (defun +org-remove-tags ()
   "Remove all tags from current heading."
   (interactive)
@@ -925,6 +934,33 @@ If expansion fails, return nil.
 This function is specifically for use with org-cycle."
   (ignore-errors
       (tempel--interactive #'tempel-expand)))
+#+end_src
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-functions
+(defun +org-return ()
+  "Perform an action dependent on context."
+  (interactive)
+  (cond
+   ((org-in-src-block-p) (org-edit-src-code))
+   ((org-at-item-checkbox-p) (org-toggle-checkbox))
+   ((org-at-table-p) (org-table-next-row))
+   (t (evil-ret))))
+#+end_src
+
+** TODO Org-refile
+
+This bit of code works. I should test it more.
+Right now it does not move the pointer after refiling.
+Do I want to move to the new position? Depends.
+#+begin_src emacs-lisp :tangle no
+(defun +org-refile-to-this-file ()
+  (interactive)
+  (let ((loc (save-excursion
+	       (consult-org-heading)
+	       (cons (org-get-heading) (point)))))
+    (org-refile nil
+		(current-buffer)
+		(list (car loc) (buffer-file-name) nil (cdr loc)))))
 #+end_src
 
 * Bibliography and citations
