@@ -587,12 +587,17 @@ where a search string can be entered using space-separated pieces.
 
 * Org-mode
 
-Check out https://github.com/minad/org-modern
-Sacha Chua also has an [[https://sachachua.com/blog/2024/01/using-consult-and-org-ql-to-search-my-org-mode-agenda-files-and-sort-the-results-to-prioritize-heading-matches/][interesting use]] of org-ql.
+- Check out https://github.com/minad/org-modern
+- Sacha Chua also has an [[https://sachachua.com/blog/2024/01/using-consult-and-org-ql-to-search-my-org-mode-agenda-files-and-sort-the-results-to-prioritize-heading-matches/][interesting use]] of org-ql.
+
+Note that since I am using a literate config
+and loading it with org-babel from my =init.el=,
+I cannot defer loading org-mode at startup.
+It's not a huge penalty though,
+and I feel the convenience outweighs it.
 
 #+begin_src emacs-lisp :noweb yes
 (use-package org
-  :after evil
   :init <<org-init>>
   :hook <<org-hooks>>
   :config
