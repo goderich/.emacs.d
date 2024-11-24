@@ -36,8 +36,8 @@ These are some of the packages I should consider:
 - https://github.com/hlissner/emacs-solaire-mode (necessary? I don't use splits that much)
 - https://github.com/edkolev/evil-lion <- not necessary all the time, but nice when needed
 - Maybe https://github.com/redguardtoo/evil-nerd-commenter if what I'm using now is insufficient
-- https://github.com/xiongtx/eros <- overlays for showing evaluated results
 - https://github.com/jacktasia/dumb-jump for jumping to definition
+- https://github.com/jamescherti/inhibit-mouse.el <- completely disable the mouse
 - What's the Doom package that shows usage examples in the help menu?
 - https://github.com/kuanyui/tldr.el
 - https://github.com/manateelazycat/lsp-bridge <- eglot alternative, advertised as blazingly fast
@@ -1246,6 +1246,13 @@ Smartparens is THE package for lisp code editing.
   ;; load default config
   (require 'smartparens-config)
   <<smartparens-keybindings>>)
+#+end_src
+
+
+
+#+begin_src emacs-lisp
+(use-package eros
+  :hook emacs-lisp-mode)
 #+end_src
 
 Examples can be found in the [[https://github.com/Fuco1/smartparens/wiki][wiki]] and in [[https://ebzzry.com/en/emacs-pairs/][this article]].
