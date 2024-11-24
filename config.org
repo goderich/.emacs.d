@@ -200,6 +200,12 @@ Should move these under appropriate headings.
 (defun +open-org-dir ()
   (interactive)
   (ido-find-file-in-dir "~/org/"))
+
+(defun turn-off-visual-line-mode ()
+  (visual-line-mode -1))
+
+(defun turn-on-truncate-lines ()
+  (toggle-truncate-lines 1))
 #+end_src
 
 * Evil
@@ -926,12 +932,11 @@ This function is specifically for use with org-cycle."
 ** Ebib
 
 TODOs:
-- disable notes for now, figure out later
-- keybindings not working (check evil-collection)
-- citation keybindings in org
+- disabled notes for now, figure out later
 
 #+begin_src emacs-lisp :noweb yes
 (use-package ebib
+  :commands (ebib ebib-insert-citation)
   :config
   <<ebib-functions>>
   <<ebib-settings>>
@@ -979,6 +984,11 @@ TODOs:
 	  '((("text" "@%K%< [%A]%>")
 	     ("paren" "[%(@%K%<, %A%>%; )]")
 	     ("year" "[-@%K%< %A%>]"))))
+#+end_src
+
+#+begin_src emacs-lisp :tangle no :noweb-ref ebib-settings
+(add-hook 'ebib-index-mode-hook #'turn-on-truncate-lines)
+(add-hook 'ebib-index-mode-hook #'turn-off-visual-line-mode)
 #+end_src
 
 *** Functions
