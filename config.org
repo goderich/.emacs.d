@@ -2,24 +2,17 @@
 
 This is actually going quite nicely, but I still need the following:
 - Proper org config (nearing completion)
-  - Contextual behaviour (dwim for RET)
   - org agenda settings
 - Fonts (+variable width for org+, CJK font config)
 - Crux (for various utility functions)
 - Modeline (how important is this actually?)
 
 Academic:
-- Add ebib, copy config
-- Probably need to copy vars.el as well
 - [[https://github.com/rnkn/olivetti][olivetti]]?
 
 Other TODOs:
-- org-refile (configure refiling to current file)
 - org-books (maybe migrate to codeberg and rename?)
-- [[https://blog.d46.us/advanced-emacs-startup/][how to speed up Emacs startup time]]
-  (gc tricks and deferring are useful)
-  (note that use-package defers [[https://www.gnu.org/software/emacs/manual/html_node/use-package/Best-practices.html][quite aggressively]],
-  e.g. with :commands, :hook, :bind, :mode, :interpreter, or just :defer)
+- [[https://blog.d46.us/advanced-emacs-startup/][how to speed up Emacs startup time]] (already began)
 
 Programming langs and other modes (check my doom/init.el):
 - unify smartparens keybindings for lisps
