@@ -357,7 +357,9 @@ Spacemacs also introduced me to mnemonic keybindings.
   (kbd "[t") #'hl-todo-previous
   ;; there is also the hl-todo-occur command
   ;; Line comments
-  (kbd "gc") #'comment-line)
+  (kbd "gc") #'comment-line
+  ;; ebib
+  (kbd "<leader>e") #'ebib)
 #+end_src
 
 I hit =C-a= on my keyboard when typing "ea"
@@ -1145,9 +1147,6 @@ Used from the ebib index."
 *** Keybindings
 
 #+begin_src emacs-lisp :tangle no :noweb-ref ebib-keybindings
-(evil-define-key 'normal 'global
-  (kbd "<leader>e") #'ebib)
-
 (evil-define-key 'normal ebib-index-mode-map
   "q" #'ebib-quit
   "s" #'ebib-save-current-database
