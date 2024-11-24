@@ -18,6 +18,8 @@ Other TODOs:
 - org-books (maybe migrate to codeberg and rename?)
 - [[https://blog.d46.us/advanced-emacs-startup/][how to speed up Emacs startup time]]
   (gc tricks and deferring are useful)
+  (note that use-package defers [[https://www.gnu.org/software/emacs/manual/html_node/use-package/Best-practices.html][quite aggressively]],
+  e.g. with :commands, :hook, :bind, :mode, :interpreter, or just :defer)
 
 Programming langs and other modes (check my doom/init.el):
 - unify smartparens keybindings for lisps
@@ -92,10 +94,10 @@ See also https://github.com/hrs/sensible-defaults.el
 (use-package emacs
   :custom
   ;; reduce the frequency of garbage collection by making it happen on
-  ;; each 20MB of allocated data (the default is on every 0.76MB)
-  (gc-cons-threshold 20000000)
-  ;; warn when opening files bigger than 100MB
-  (large-file-warning-threshold 100000000)
+  ;; each 50MB of allocated data (the default is on every 0.76MB)
+  (gc-cons-threshold (* 50 1000 1000))
+  ;; warn when opening files bigger than 50MB
+  (large-file-warning-threshold (* 50 1000 1000))
   ;; do not create backups
   (make-backup-files nil)
   ;; use regular spacing with sentences.
@@ -116,6 +118,15 @@ Instead of putting =:ensure t= everywhere, I can just set it here once.
 #+begin_src elisp
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
+#+end_src
+
+I also turn on the profiler, so that I can see which packages
+take the longest amount of time to load
+(with the =use-package-report= command)
+and see if their loading can be deferred.
+
+#+begin_src emacs-lisp
+(setq use-package-compute-statistics t)
 #+end_src
 
 See also =use-package-defaults= for other settings.
@@ -377,6 +388,7 @@ Sniping is an incredibly efficient way to move around nearby text.
 
 #+begin_src emacs-lisp :noweb yes
 (use-package evil-snipe
+  :after evil
   :init
   (evil-snipe-mode 1)
   (evil-snipe-override-mode 1)
@@ -472,8 +484,10 @@ https://github.com/Wilfred/helpful
 
 #+begin_src emacs-lisp
 (use-package helpful
-  :config
+  :commands (+helpful-transient)
+  :init
   (evil-global-set-key 'normal (kbd "<leader>h") #'+helpful-transient)
+  :config
   (evil-define-key 'normal helpful-mode-map "q" #'kill-buffer-and-window))
 #+end_src
 
@@ -1128,11 +1142,12 @@ Used from the ebib index."
 
 #+begin_src emacs-lisp
 (use-package magit
-  :custom
-  (magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
-  :config
+  :commands (magit)
+  :init
   (evil-define-key '(normal visual) 'global
-   (kbd "<leader>gg") #'magit))
+    (kbd "<leader>gg") #'magit)
+  :config
+  (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1))
 #+end_src
 
 ** TODO Git diff highlighting
@@ -1143,7 +1158,8 @@ TODO:
 Changed the settings using [[https://www.reddit.com/r/emacs/comments/582yms/question_changing_the_colour_of_diffhl_indicators/][this discussion]] as a reference.
 #+begin_src emacs-lisp
 (use-package diff-hl
-  :init
+  :defer 2
+  :config
   (custom-set-faces
    '(diff-hl-change ((t (:background "orange2" :foreground "orange2"))))
    '(diff-hl-insert ((t (:background "green4" :foreground "green4"))))
@@ -1220,6 +1236,7 @@ See also the following:
 
 #+begin_src emacs-lisp
 (use-package clojure-mode
+  :defer t
   :config
   (evil-define-key 'normal clojure-mode-map
     (kbd "<localleader>'") #'cider-jack-in))
@@ -1227,6 +1244,7 @@ See also the following:
 
 #+begin_src emacs-lisp
 (use-package cider
+  :commands (cider-jack-in cider-jack-in-clj cider-jack-in-cljs)
   :config
   (setq cider-allow-jack-in-without-project t
 	cider-jack-in-default 'babashka
