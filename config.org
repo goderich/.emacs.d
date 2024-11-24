@@ -70,6 +70,11 @@ These are some of the packages I should consider:
   - https://github.com/seagle0128/doom-modeline
   - https://github.com/Malabarba/smart-mode-line
 
+A few useful packages are mentioned [[https://blog.d46.us/advanced-emacs-startup/][here]] as well.
+
+For more packages see here:
+https://github.com/emacs-tw/awesome-emacs
+
 ** Resources
 
 I can read other people's configs, not limited to literate ones.
@@ -77,12 +82,13 @@ I can read other people's configs, not limited to literate ones.
 - [[https://github.com/hrs/dotfiles/blob/main/emacs/.config/emacs/configuration.org][Great evil-based config]]
 - [[https://github.com/zzamboni/dot-emacs/blob/master/init.org][Zzamboni's evil-based config]] prior to his migration to Doom. Lots of org gems there.
 - [[https://github.com/rougier/dotemacs/blob/master/dotemacs.org][Nicholas Rougier's literate config]]
+- See [[https://github.com/jschaf/dotfiles/blob/master/emacs/core/abn-core-emacs-settings.el][this config]] (including other files) for some obscure settings and startup hacks.
+
+See [[https://www.reddit.com/r/emacs/comments/9zad13/managing_personal_packages_with_usepackage/][here]] for instructions on how to load local files with =use-package=
+(so that they can be deferred, of course)
 
 Might be some interesting stuff here:
 https://github.com/daviwil/emacs-from-scratch
-
-For packages see here:
-https://github.com/emacs-tw/awesome-emacs
 
 * Basic settings
 ** Early loading
@@ -1139,6 +1145,8 @@ Used from the ebib index."
 #+end_src
 
 * Magit
+
+Consider also [[https://github.com/alphapapa/magit-todos][magit-todos]].
 
 #+begin_src emacs-lisp
 (use-package magit
