@@ -367,6 +367,17 @@ Spacemacs also introduced me to mnemonic keybindings.
   (kbd "gc") #'comment-line)
 #+end_src
 
+I hit =C-a= on my keyboard when typing "ea"
+(because of Dvorak + [[https://precondition.github.io/home-row-mods][home row modifiers]]).
+In evil insert mode, it pastes the last insertion my default.
+In regular Emacs keybindings, it goes to the beginning of the line.
+Neither is worth keeping if it leads to borking up my typing.
+The two need to be disabled separately.
+#+begin_src emacs-lisp :tangle no :noweb-ref evil-keybindings
+(evil-define-key 'insert 'global (kbd "C-a") nil)
+(keymap-global-unset "C-a")
+#+end_src
+
 ** Evil collection
 
 I'm on the fence about pulling all of [[https://github.com/emacs-evil/evil-collection][evil-collection]] for just a few modes,
