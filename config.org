@@ -1328,3 +1328,16 @@ and then it's indispensable.
 (use-package anzu
   :init (global-anzu-mode 1))
 #+end_src
+
+* Finalize
+
+Trick from [[https://blog.d46.us/advanced-emacs-startup/][here]]:
+I increase the garbage collection threshold
+during startup to speed up Emacs' load time,
+but then decrease it once my config loads
+so that GC pauses aren't so noticeable
+when I'm actually using Emacs.
+
+#+begin_src emacs-lisp
+(setq gc-cons-threshold (* 2 1000 1000))
+#+end_src
