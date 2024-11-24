@@ -997,7 +997,7 @@ If on a...
   (cond
    ((org-in-src-block-p) (org-edit-src-code))
    ((org-at-item-checkbox-p) (org-toggle-checkbox))
-   ((org-in-regexp org-link-bracket-re 1) (link-hint-open-link-at-point))
+   ((org-in-regexp link-hint-url-regexp 1) (link-hint-open-link-at-point))
    ((org-at-table-p) (org-table-next-row))
    (t (evil-ret))))
 #+end_src
