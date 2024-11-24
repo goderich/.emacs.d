@@ -709,9 +709,8 @@ They still appear together in the final tangled file.
   (kbd "<localleader>Q") #'+org-remove-tags
   (kbd "<localleader>.") #'+consult-goto-org-heading
   (kbd "gh") #'+org-up-heading
-  (kbd "gj") #'+org-down-same-level
-  (kbd "gk") #'+org-up-same-level
-  (kbd "gl") #'+org-down-and-show)
+  (kbd "gj") #'org-next-visible-heading
+  (kbd "gk") #'+org-down-and-show)
 #+end_src
 
 #+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
