@@ -960,7 +960,7 @@ Although it's not like I'm running out of keys. Something to ponder.
   "Insert a new row in a list.
 Respects current indentation and checkbox."
   (let ((indentation (current-indentation)))
-    (org-end-of-item)
+    (end-of-line)
     (org-insert-item checkbox?)
     (indent-line-to indentation)
     (end-of-line)
