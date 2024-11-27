@@ -996,21 +996,33 @@ contextually dependent actions in Emacs (aka "dwim").
 Then Doom took it and expanded it further.
 The idea is great, and here I put my own spin on it.
 If on a...
-- source block: edit it (run block with =,,=).
 - list item with checkbox: toggle checkbox.
-- link: open it.
 - table: move to next row, possibly creating one (jump out of table with =C-RET=).
+- image or image link: toggle displaying the image.
+- URL: open it.
+- org link: follow it.
+- source block: edit it (run block with =,,=).
 
 #+begin_src emacs-lisp :tangle no :noweb-ref org-functions
 (defun +org-return ()
   "Perform an action dependent on context."
   (interactive)
   (cond
-   ((org-in-src-block-p) (org-edit-src-code))
    ((org-at-item-checkbox-p) (org-toggle-checkbox))
-   ((org-in-regexp link-hint-url-regexp 1) (link-hint-open-link-at-point))
    ((org-at-table-p) (org-table-next-row))
+   ((org-in-regexp +org-image-regexp 1) (+org-toggle-image-at-point))
+   ((org-in-regexp link-hint-url-regexp 1) (link-hint-open-link-at-point))
+   ((org-in-regexp org-link-bracket-re 1) (link-hint-open-link-at-point))
+   ((org-in-src-block-p) (org-edit-src-code))
    (t (evil-ret))))
+
+(defvar +org-image-regexp
+  (rx (seq "[[./" (+? anything) "." (or "png" "jpg" "jpeg") "]]")))
+
+(defun +org-toggle-image-at-point ()
+  (interactive)
+  (let ((bounds (org-in-regexp +org-image-regexp 1)))
+      (org-toggle-inline-images nil (car bounds) (cdr bounds))))
 #+end_src
 
 ** TODO Org-refile
