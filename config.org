@@ -344,6 +344,7 @@ Spacemacs also introduced me to mnemonic keybindings.
 (evil-define-key 'normal 'global
   ;; Files
   (kbd "<leader>.") #'find-file
+  (kbd "<leader>/") #'consult-line
   (kbd "<leader>a") #'org-agenda-list
   (kbd "<leader>fr") #'recentf
   (kbd "<leader>fo") #'+open-org-dir
@@ -849,7 +850,8 @@ makes sense to me to combine into a single keybinding."
     ("j" "down (same level)" +org-down-same-level :transient t)
     ("l" "down level" +org-down-and-show :transient t)]
    [("<tab>" "cycle" org-cycle :transient t)
-    ("<backtab>" "cycle all" org-shifttab :transient t)]
+    ("<backtab>" "cycle all" org-shifttab :transient t)
+    ("<SPC>" "scroll down" evil-scroll-down :transient t)]
    [("q" "quit" transient-quit-all)]])
 #+end_src
 
