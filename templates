@@ -49,6 +49,11 @@ org-mode
 ;; academic snippets
 (/ "\\text{/" p "/}" q)
 (// "\\textit{/" p "/}" q)
+(video
+"#+begin_html
+<video controls src=\"./media/" p "\"></video>
+#+end_html
+" q)
 
 ;; Local Variables:
 ;; mode: lisp-data
