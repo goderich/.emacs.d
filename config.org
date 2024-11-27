@@ -613,6 +613,7 @@ and I feel the convenience outweighs it.
   <<org-src-settings>>
   <<org-functions>>
   <<org-keybindings>>
+  <<org-agenda>>
   <<org-navigation-transient>>
   <<org-modules>>)
 #+end_src
@@ -777,7 +778,8 @@ No bindings for agenda in evil-collection, but see [[https://github.com/Somelauw
 #+begin_src emacs-lisp :tangle no :noweb-ref org-agenda
 (setq org-agenda-files (list org-directory))
 
-;; org-agenda settings
+(setq org-agenda-window-setup 'only-window)
+
 ;; Display one week, always starting from Monday.
 (setq org-agenda-span 'week
       org-agenda-start-on-weekday 1
