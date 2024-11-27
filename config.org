@@ -80,7 +80,9 @@ I can read other people's configs, not limited to literate ones.
 See [[https://www.reddit.com/r/emacs/comments/9zad13/managing_personal_packages_with_usepackage/][here]] for instructions on how to load local files with =use-package=
 (so that they can be deferred, of course)
 
-Might be some interesting stuff here:
+[[https://github.com/positron-solutions/transient-showcase][transient showcase]]
+
+Some interesting stuff here:
 https://github.com/daviwil/emacs-from-scratch
 
 * Basic settings
@@ -770,6 +772,8 @@ Here I just add the function to the hook run before =org-cycle=.
 
 ** Org agenda
 
+No bindings for agenda in evil-collection, but see [[https://github.com/Somelauw/evil-org-mode/blob/master/evil-org-agenda.el][here]].
+
 #+begin_src emacs-lisp :tangle no :noweb-ref org-agenda
 (setq org-agenda-files (list org-directory))
 
@@ -801,6 +805,7 @@ and because it's now built into Emacs (as of 28).
      (org-fold-show-entry)
      (org-fold-show-children)))
 
+;; This is not in the transient, move out
 (defun +org-up-heading ()
   "Go up to the nearest heading, or to a higher level heading.
 If not on a heading, finds the next heading backwards.
@@ -833,6 +838,8 @@ makes sense to me to combine into a single keybinding."
    (org-fold-hide-subtree)
    (org-forward-heading-same-level 1 t)))
 
+;; added SPC scrolling, but need to add `org-back-to-heading' to h/k
+;; add link-hint on u?
 (transient-define-prefix +org-movement-transient ()
   ["Moving around in org"
    [("h" "up level" +org-up-level-and-show :transient t)
@@ -847,7 +854,7 @@ makes sense to me to combine into a single keybinding."
 ** Pandoc integration
 
 My personal interface to pandoc from Emacs
-is written in a [[~/.emacs.d/pandoc.el][separate file]] as a module.
+is written in a [[./pandoc.el][separate file]] as a module.
 There is a single entry point: a transient function
 (aptly named =pandoc-transient=),
 which allows the user to interactively
@@ -1007,7 +1014,8 @@ If on a...
 This bit of code works. I should test it more.
 Right now it does not move the pointer after refiling.
 Do I want to move to the new position? Depends.
-#+begin_src emacs-lisp :tangle no
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-functions
 (defun +org-refile-to-this-file ()
   (interactive)
   (let* ((loc-pair (save-excursion
@@ -1169,16 +1177,6 @@ Used from the ebib index."
   (kbd "<localleader>f") #'ebib-import-file)
 #+end_src
 
-* Link hinting
-
-#+begin_src elisp
-(use-package link-hint
-  :commands (link-hint-open-link link-hint-open-link-at-point)
-  :init
-  (evil-define-key 'normal 'global
-    (kbd "<leader>u") #'link-hint-open-link))
-#+end_src
-
 * Magit
 
 Consider also [[https://github.com/alphapapa/magit-todos][magit-todos]].
@@ -1195,11 +1193,8 @@ Consider also [[https://github.com/alphapapa/magit-todos][magit-todos]].
 
 ** TODO Git diff highlighting
 
-TODO:
-- add hindings to next-hunk prev-hunk fns
-
 Changed the settings using [[https://www.reddit.com/r/emacs/comments/582yms/question_changing_the_colour_of_diffhl_indicators/][this discussion]] as a reference.
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :noweb yes
 (use-package diff-hl
   :defer 2
   :config
@@ -1208,31 +1203,14 @@ Changed the settings using [[https://www.reddit.com/r/emacs/comments/582yms/ques
    '(diff-hl-insert ((t (:background "green4" :foreground "green4"))))
    '(diff-hl-delete ((t (:background "red2" :foreground "red2")))))
   (diff-hl-flydiff-mode)
-  (global-diff-hl-mode))
+  (global-diff-hl-mode)
+  <<diff-hl-keybindings>>)
 #+end_src
 
-* TODO hl-todo
-#+begin_src emacs-lisp
-(use-package hl-todo
-  :init (global-hl-todo-mode 1))
-#+end_src
-* Snippets
-:PROPERTIES:
-:ID:       0118536f-8f2f-4e6d-ab30-66bd3101401d
-:END:
-Trying https://github.com/minad/tempel.
-
-#+begin_src elisp :noweb yes
-(use-package tempel
-  :config <<tempel-keybindings>>)
-#+end_src
-
-Once I'm inside a snippet, chances are I no longer need to expand more snippets.
-Instead, I want to be able to use TAB to jump to next placeholder,
-or move the point after the snippet.
-
-#+begin_src emacs-lisp :tangle no :noweb-ref tempel-keybindings
-(define-key tempel-map (kbd "TAB") #'tempel-next)
+#+begin_src emacs-lisp :tangle no :noweb-ref diff-hl-keybindings
+(evil-define-key 'normal 'global
+  (kbd "]h") #'diff-hl-next-hunk
+  (kbd "[h") #'diff-hl-previous-hunk)
 #+end_src
 
 * Programming languages
@@ -1308,12 +1286,34 @@ See also the following:
     (kbd "<localleader>rq") #'cider-quit))
 #+end_src
 * Utils
-** Whitespace cleanup
-One more package I learned of from Doom's config.
+** Snippets
+:PROPERTIES:
+:ID:       0118536f-8f2f-4e6d-ab30-66bd3101401d
+:END:
+Trying https://github.com/minad/tempel.
 
-#+begin_src emacs-lisp
-(use-package ws-butler
-  :init (ws-butler-global-mode 1))
+#+begin_src elisp :noweb yes
+(use-package tempel
+  :config <<tempel-keybindings>>)
+#+end_src
+
+Once I'm inside a snippet, chances are I no longer need to expand more snippets.
+Instead, I want to be able to use TAB to jump to next placeholder,
+or move the point after the snippet.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref tempel-keybindings
+(define-key tempel-map (kbd "TAB") #'tempel-next)
+#+end_src
+
+** Link hinting
+
+#+begin_src elisp
+(use-package link-hint
+  :commands (link-hint-open-link link-hint-open-link-at-point)
+  :defer 2
+  :init
+  (evil-define-key 'normal 'global
+    (kbd "<leader>u") #'link-hint-open-link))
 #+end_src
 
 ** Anzu
@@ -1327,6 +1327,22 @@ and then it's indispensable.
 #+begin_src emacs-lisp
 (use-package anzu
   :init (global-anzu-mode 1))
+#+end_src
+
+** TODO hl-todo
+
+#+begin_src emacs-lisp
+(use-package hl-todo
+  :defer 2
+  :config (global-hl-todo-mode 1))
+#+end_src
+
+** ws-butler
+One more package I learned of from Doom's config.
+
+#+begin_src emacs-lisp
+(use-package ws-butler
+  :init (ws-butler-global-mode 1))
 #+end_src
 
 * Finalize
