@@ -74,6 +74,7 @@ I can read other people's configs, not limited to literate ones.
 - [[https://github.com/bbatsov/emacs.d/blob/master/init.el][bbatsov's minimalist config]]
 - [[https://github.com/hrs/dotfiles/blob/main/emacs/.config/emacs/configuration.org][Great evil-based config]]
 - [[https://github.com/zzamboni/dot-emacs/blob/master/init.org][Zzamboni's evil-based config]] prior to his migration to Doom. Lots of org gems there.
+- [[https://zzamboni.org/post/my-doom-emacs-configuration-with-commentary/][Zzamboni's Doom config]]
 - [[https://github.com/rougier/dotemacs/blob/master/dotemacs.org][Nicholas Rougier's literate config]]
 - See [[https://github.com/jschaf/dotfiles/blob/master/emacs/core/abn-core-emacs-settings.el][this config]] (including other files) for some obscure settings and startup hacks.
 
