@@ -1,6 +1,7 @@
 ;;; ~/.emacs.d/pandoc.el -*- lexical-binding: t; -*-
 
 ;; Elisp functions to call Pandoc from Emacs
+(require 'f)
 
 (defun pandoc--defaults-option (extension)
   (pcase extension
