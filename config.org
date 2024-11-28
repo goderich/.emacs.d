@@ -5,7 +5,7 @@ This is actually going quite nicely, but I still need the following:
   - org agenda settings
 - Fonts (+variable width for org+, CJK font config)
 - Crux (for various utility functions)
-- Modeline (how important is this actually?)
+- Modeline
 
 Academic:
 - [[https://github.com/rnkn/olivetti][olivetti]]?
@@ -1207,20 +1207,26 @@ Consider also [[https://github.com/alphapapa/magit-todos][magit-todos]].
   (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1))
 #+end_src
 
-** TODO Git diff highlighting
+** Git diff highlighting
 
 Changed the settings using [[https://www.reddit.com/r/emacs/comments/582yms/question_changing_the_colour_of_diffhl_indicators/][this discussion]] as a reference.
 #+begin_src emacs-lisp :noweb yes
 (use-package diff-hl
   :defer 2
   :config
-  (custom-set-faces
-   '(diff-hl-change ((t (:background "orange2" :foreground "orange2"))))
-   '(diff-hl-insert ((t (:background "green4" :foreground "green4"))))
-   '(diff-hl-delete ((t (:background "red2" :foreground "red2")))))
+  <<diff-hl-colors>>
   (diff-hl-flydiff-mode)
   (global-diff-hl-mode)
   <<diff-hl-keybindings>>)
+#+end_src
+
+I stole the insert and delete shades from Doom, because they look really good.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref diff-hl-colors
+(custom-set-faces
+ '(diff-hl-change ((t (:background "orange2" :foreground "orange2")))) ; #cb4b16
+ '(diff-hl-insert ((t (:background "#859900" :foreground "#859900"))))
+ '(diff-hl-delete ((t (:background "#dc322f" :foreground "#dc322f")))))
 #+end_src
 
 #+begin_src emacs-lisp :tangle no :noweb-ref diff-hl-keybindings
