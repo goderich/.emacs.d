@@ -323,7 +323,7 @@ I think vim's =;= command is not worth an unmodified key,
 especially since it is made redundant with [[https://github.com/hlissner/evil-snipe][evil-snipe]].
 
 #+begin_src emacs-lisp :tangle no :noweb-ref evil-keybindings
-(evil-define-key '(normal visual) 'global ";" #'execute-extended-command)
+(evil-define-key '(normal visual motion) 'global ";" #'execute-extended-command)
 #+end_src
 
 I write a lot of prose, and so encounter wrapped lines quite often.
