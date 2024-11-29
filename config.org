@@ -1,8 +1,6 @@
 * NEXT Outgoing TODOs
 
 This is actually going quite nicely, but I still need the following:
-- Proper org config (nearing completion)
-  - org agenda settings
 - Fonts (+variable width for org+, CJK font config)
 - Crux (for various utility functions)
 - Modeline
@@ -775,8 +773,6 @@ Here I just add the function to the hook run before =org-cycle=.
 
 ** Org agenda
 
-No bindings for agenda in evil-collection, but see [[https://github.com/Somelauw/evil-org-mode/blob/master/evil-org-agenda.el][here]].
-
 #+begin_src emacs-lisp :tangle no :noweb-ref org-agenda
 (setq org-agenda-files (list org-directory))
 
@@ -791,6 +787,26 @@ No bindings for agenda in evil-collection, but see [[https://github.com/Somelauw
 (map-put! org-fold-show-context-detail 'agenda 'tree)
 ;; shold this be in agenda settings?
 (map-put! org-fold-show-context-detail 'default 'tree)
+#+end_src
+
+There are no bindings for agenda in evil-collection,
+so I had a choice between pulling another package and rolling my own.
+I went with the DIY option, but took some inspiration from [[https://github.com/Somelauw/evil-org-mode/blob/master/evil-org-agenda.el][evil-org]] in setting up mine.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-agenda
+(evil-set-initial-state 'org-agenda-mode 'motion)
+
+(evil-define-key 'motion org-agenda-mode-map
+  "b" #'org-agenda-earlier
+  "f" #'org-agenda-later
+  "(" #'org-agenda-earlier
+  ")" #'org-agenda-later
+  "u" #'link-hint-open-link
+  ;; :prefix ("v" . "switch view...")
+  "vw" #'org-agenda-week-view
+  "vm" #'org-agenda-month-view
+  ;; bit different behaviour from link-hint
+  (kbd "<return>") #'org-agenda-goto)
 #+end_src
 
 ** Transient navigation
