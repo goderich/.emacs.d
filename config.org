@@ -567,7 +567,6 @@ where a search string can be entered using space-separated pieces.
 
 * Org-mode
 
-- Check out https://github.com/minad/org-modern
 - Sacha Chua also has an [[https://sachachua.com/blog/2024/01/using-consult-and-org-ql-to-search-my-org-mode-agenda-files-and-sort-the-results-to-prioritize-heading-matches/][interesting use]] of org-ql.
 
 Note that since I am using a literate config
@@ -626,7 +625,7 @@ if you are using more keywords than just TODO and DONE.
 
 ;; Don't use blank lines between text and the following heading
 (setq org-blank-before-new-entry
-      '((heading . t) (plain-list-item . nil)))
+      '((heading . nil) (plain-list-item . nil)))
 
 ;; Don't show empty lines between collapsed headings
 (setq org-cycle-separator-lines 0)
@@ -779,6 +778,21 @@ I went with the DIY option, but took some inspiration from [[https://github.com/
   "vm" #'org-agenda-month-view
   ;; bit different behaviour from link-hint
   (kbd "<return>") #'org-agenda-goto)
+#+end_src
+
+** TODO Org-modern bling
+
+Just tried this out on the Surface go, and it isn't slow at all.
+I think I'll keep using this package,
+but I'll need to research the settings some more.
+https://github.com/minad/org-modern
+
+#+begin_src emacs-lisp
+(use-package org-modern
+  :hook org-mode
+  :config
+  (setq org-modern-todo nil
+        org-modern-table nil))
 #+end_src
 
 ** Transient navigation
@@ -1296,6 +1310,7 @@ See also the following:
     (kbd "<localleader>)") #'sp-forward-slurp-sexp
     (kbd "<localleader>rq") #'cider-quit))
 #+end_src
+
 * Utils
 ** Snippets
 :PROPERTIES:
@@ -1346,6 +1361,13 @@ and then it's indispensable.
 (use-package hl-todo
   :defer 2
   :config (global-hl-todo-mode 1))
+#+end_src
+
+** TODO Olivetti
+
+#+begin_src emacs-lisp
+(use-package olivetti
+  :commands (olivetti-mode))
 #+end_src
 
 ** ws-butler
