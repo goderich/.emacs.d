@@ -241,6 +241,7 @@ https://www.mattduck.com/2023-08-28-extending-use-package-bind
   :config
   <<evil-cursor>>
   <<evil-keybindings>>
+  <<evil-transients>>
 
   ;; Elisp mode
   (evil-define-key 'normal emacs-lisp-mode-map
@@ -335,6 +336,18 @@ as I don't use them interactively.
   "gk" #'evil-previous-line)
 #+end_src
 
+Swapping =H= and =^= is an old vimmer trick.
+Since moving to the beginning of the line is arguably a more common action,
+it makes sense to place it on the more reachable =H=.
+I also augment it with a crux function that jumps to the first non-whitespace char,
+and to the first column if pressed again.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref evil-keybindings
+(evil-define-key '(normal visual) 'global
+  "H"  #'crux-move-beginning-of-line
+  "^"  #'evil-window-top)
+#+end_src
+
 Spacemacs also introduced me to mnemonic keybindings.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref evil-keybindings
@@ -342,16 +355,14 @@ Spacemacs also introduced me to mnemonic keybindings.
   ;; Files
   (kbd "<leader>.") #'find-file
   (kbd "<leader>/") #'consult-line
-  (kbd "<leader>a") #'org-agenda-list
-  (kbd "<leader>fr") #'recentf
-  (kbd "<leader>fo") #'+open-org-dir
-  (kbd "<leader>fs") #'save-buffer
-  (kbd "<leader>fc") #'+open-config
+  (kbd "<leader>f") #'+file-transient
   ;; Buffers
   (kbd "<leader>,") #'consult-buffer
   (kbd "<leader>bq") #'kill-this-buffer
   ;; Windows
   (kbd "<leader>w") #'+window-transient
+  ;; org
+  (kbd "<leader>a") #'org-agenda-list
   ;; todo items
   (kbd "]t") #'hl-todo-next
   (kbd "[t") #'hl-todo-previous
@@ -473,9 +484,10 @@ although I do not foresee many such situations in my Emacs usage.
 (add-hook 'minibuffer-setup-hook #'+minibuffer-setup)
 #+end_src
 
-** Window resizing transient
+** Transient commands
+*** Window resizing transient
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no :noweb-ref evil-transients
 (transient-define-prefix +window-transient ()
   ["Resizing windows"
    ["Transient"
@@ -490,7 +502,19 @@ although I do not foresee many such situations in my Emacs usage.
     ("<escape>" "quit" transient-quit-all)]])
 #+end_src
 
+*** File transient
 
+#+begin_src emacs-lisp :tangle no :noweb-ref evil-transients
+(transient-define-prefix +file-transient ()
+  ["File commands"
+   ["With this file..."
+    ("s" "save" save-buffer)
+    ("D" "delete" crux-delete-file-and-buffer)
+    ("u" "sudo edit" crux-sudo-edit)]
+   ["Open..."
+    ("r" "recent file" recentf)
+    ("o" "org directory" +open-org-dir)
+    ("c" "config.org" +open-config)]
    [("q" "quit" transient-quit-all)
     ("<escape>" "quit" transient-quit-all)]])
 #+end_src
@@ -1247,14 +1271,12 @@ I stole the insert and delete shades from Doom, because they look really good.
 Smartparens is THE package for lisp code editing.
 #+begin_src emacs-lisp :noweb yes
 (use-package smartparens
-  :hook (prog-mode)
+  :hook (prog-mode) ;; should probably narrow it down to lisps
   :config
   ;; load default config
   (require 'smartparens-config)
   <<smartparens-keybindings>>)
 #+end_src
-
-
 
 #+begin_src emacs-lisp
 (use-package eros
@@ -1273,13 +1295,22 @@ Examples can be found in the [[https://github.com/Fuco1/smartparens/wiki][wiki]]
   (kbd "<localleader>)") #'sp-forward-slurp-sexp
   (kbd "<localleader><") #'sp-backward-barf-sexp
   (kbd "<localleader>>") #'sp-forward-barf-sexp
-  (kbd "<localleader>w") #'sp-wrap-round)
+  (kbd "<localleader>w") #'sp-wrap-round
+  (kbd "<localleader>e") #'+elisp-eval-transient)
 
 (evil-define-key 'visual emacs-lisp-mode-map
   "(" #'sp-wrap-round
   ")" #'sp-wrap-round
   "[" #'sp-wrap-square
   "]" #'sp-wrap-square)
+#+end_src
+
+#+begin_src emacs-lisp
+(transient-define-prefix +elisp-eval-transient ()
+  ["Eval..."
+   ("e" "last sexp" eval-last-sexp)
+   ("r" "and replace" crux-eval-and-replace)
+   ("b" "buffer" eval-buffer)])
 #+end_src
 
 ** Clojure
@@ -1332,6 +1363,16 @@ or move the point after the snippet.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref tempel-keybindings
 (define-key tempel-map (kbd "TAB") #'tempel-next)
+#+end_src
+
+** Crux
+
+#+begin_src emacs-lisp
+(use-package crux
+  :commands (crux-delete-file-and-buffer
+             crux-sudo-edit
+             crux-move-beginning-of-line
+             crux-eval-and-replace))
 #+end_src
 
 ** Link hinting
