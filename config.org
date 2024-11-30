@@ -100,7 +100,10 @@ See also https://github.com/hrs/sensible-defaults.el
   :config
   (load custom-file)
   ;; do not use tabs for indentation
-  (indent-tabs-mode -1))
+  (setq-default indent-tabs-mode nil)
+  ;; scrolling settings
+  (setq scroll-conservatively 200
+        scroll-preserve-screen-position 1))
 #+end_src
 
 ** Package management
