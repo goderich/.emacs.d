@@ -271,6 +271,9 @@ or steal selectively. See the "[[https://github.com/Somelauw/evil-org-mode/blob/
 #+end_src
 
 ** Global keybindings
+:PROPERTIES:
+:ID:       483821dc-9279-4372-93b3-a7f4fa65202e
+:END:
 
 Make ESC quit everything.
 I tried setting this up in the minibuffer to no avail,
@@ -346,6 +349,14 @@ and to the first column if pressed again.
 (evil-define-key '(normal visual) 'global
   "H"  #'crux-move-beginning-of-line
   "^"  #'evil-window-top)
+#+end_src
+
+I use the [[https://github.com/bling/evil-visualstar][evil-visualstar]] package to augment =*= and =#= in visual mode.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref evil-keybindings
+(evil-define-key 'visual 'global
+  "*" #'evil-visualstar/begin-search-forward
+  "#" #'evil-visualstar/begin-search-backward)
 #+end_src
 
 Spacemacs also introduced me to mnemonic keybindings.
@@ -450,6 +461,22 @@ In these modes, I turn it off.
 #+begin_src emacs-lisp :tangle no :noweb-ref evil-snipe-settings
 (dolist (it '(ebib-index-mode ebib-entry-mode))
   (push it evil-snipe-disabled-modes))
+#+end_src
+
+** Evil-visualstar
+
+This tiny package allows =*= and =#= to be usable in visual mode.
+Instead of evil's default behaviour, which is to search for the word at point,
+whatever that may be, these commands search for the selection.
+The package also takes care of search history.
+I do not use the package's own setup,
+and instead rely on use-package's autoload functionality.
+The keybindings are get in [[id:483821dc-9279-4372-93b3-a7f4fa65202e][the global keybinds section]].
+
+#+begin_src emacs-lisp
+(use-package evil-visualstar
+  :commands (evil-visualstar/begin-search-forward
+             evil-visualstar/begin-search-forward))
 #+end_src
 
 ** Minibuffer keybindings
