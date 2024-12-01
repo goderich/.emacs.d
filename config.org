@@ -722,6 +722,14 @@ if you are using more keywords than just TODO and DONE.
 ;; Don't show empty lines between collapsed headings
 (setq org-cycle-separator-lines 0)
 
+;; Show tooltips.
+;; I am using this for displaying org link paths.
+;; This may not be the best use of the fns though,
+;; and I have an alternative implementation.
+(setq help-at-pt-display-when-idle t
+      help-at-pt-timer-delay 0.1)
+(help-at-pt-set-timer)
+
 ;; Org todo keywords and colours
 (setq org-todo-keywords
       '((sequence "TODO(t)" "|" "DONE(d)")
@@ -993,6 +1001,36 @@ The only keybinding required is for the transient entry point.
     ("u" "with a unique ID" +org-insert-link-with-id)]
    [("q" "quit" transient-quit-all)
     ("<escape>" "quit" transient-quit-all)]])
+#+end_src
+
+** Link path tooltip
+
+Usually, we hide link URLs and display just the description.
+Doom Emacs shows a link URL tooltip in the echo area,
+similar to how eldoc shows the documentation for the function at point.
+That's pretty neat functionality, but it was surprisingly difficult to search for online.
+I found no discussions or questions about this sort of feature.
+
+This is a relatively simple implementation.
+The function itself checks if the point is in a link regex, and if it is,
+displays the first group (the URL) as a message.
+I then hook it up to =post-command-hook= *locally*,
+so that it only works in org-mode.
+
+I currently have it *turned off* because I'm using =help-at-pt-set-timer=
+(NB: check source of the fn, see also [[info:elisp#Idle Timers][info node]]).
+However, my approach is more flexible, and I might want to come back to it.
+
+#+begin_src emacs-lisp :tangle no
+(defun +org-link-tooltip ()
+  "Display the URL of the link at point in the echo area."
+  (interactive) ; for testing purposes only
+  (when (org-in-regexp org-link-bracket-re)
+    (message "Link: %s" (match-string 1))))
+
+(add-hook 'org-mode-hook
+          (lambda ()
+            (add-hook 'post-command-hook #'+org-link-tooltip 0 'local)))
 #+end_src
 
 ** Cross-referencing
