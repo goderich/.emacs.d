@@ -383,6 +383,8 @@ Spacemacs also introduced me to mnemonic keybindings.
   (kbd "<leader>bq") #'kill-this-buffer
   ;; Windows
   (kbd "<leader>w") #'+window-transient
+  ;; Help
+  (kbd "<leader>h") #'+helpful-transient
   ;; org
   (kbd "<leader>a") #'org-agenda-list
   ;; todo items
@@ -1516,26 +1518,22 @@ https://github.com/Wilfred/helpful
 #+begin_src emacs-lisp
 (use-package helpful
   :commands (+helpful-transient)
-  :init
-  (evil-global-set-key 'normal (kbd "<leader>h") #'+helpful-transient)
   :config
-  (evil-define-key 'normal helpful-mode-map "q" #'kill-buffer-and-window))
-#+end_src
+  (evil-define-key 'normal helpful-mode-map "q" #'kill-buffer-and-window)
 
-#+begin_src emacs-lisp
-(transient-define-prefix +helpful-transient ()
-  ["Emacs help"
-   ["Helpful mode"
-    ("f" "functions and macros" helpful-callable)
-    ("v" "variables" helpful-variable)
-    ("k" "key" helpful-key)
-    ("c" "interactive functions" helpful-command)
-    ("p" "thing at point" helpful-at-point)]
-   ["In-built help"
-    ("m" "describe mode" describe-mode)
-    ("i" "info" info)]
-   [("q" "quit" transient-quit-all)
-    ("<escape>" "quit" transient-quit-all)]])
+  (transient-define-prefix +helpful-transient ()
+    ["Emacs help"
+     ["Helpful mode"
+      ("f" "functions and macros" helpful-callable)
+      ("v" "variables" helpful-variable)
+      ("k" "key" helpful-key)
+      ("c" "interactive functions" helpful-command)
+      ("p" "thing at point" helpful-at-point)]
+     ["In-built help"
+      ("m" "describe mode" describe-mode)
+      ("i" "info" info)]
+     [("q" "quit" transient-quit-all)
+      ("<escape>" "quit" transient-quit-all)]]))
 #+end_src
 
 * Finalize
