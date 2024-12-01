@@ -1,6 +1,10 @@
 ;;; ~/.emacs.d/links.el -*- lexical-binding: t; -*-
 
 ;; Org-mode links
+(require 'org)
+(require 'ol)
+(require 'consult)
+(require 'dash)
 
 (defun +insert-link (address &optional name)
   "Insert an Org link to ADDRESS.
@@ -74,6 +78,6 @@ This is a convenience function to bind it to a single keystroke."
   (interactive)
   (cond
    ((org-at-heading-p) (org-store-link nil 1))
-   ((org-in-regexp org-link-bracket-re 1) (org-insert-link))
+   ((org-in-regexp org-link-bracket-re) (org-insert-link))
    ((and org-stored-links) (+org-insert-last-stored-link))
    (t (+org-insert-link-from-clipboard))))
