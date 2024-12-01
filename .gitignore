@@ -5,6 +5,8 @@ eln-cache/
 elpa/
 history
 recentf
+bookmarks
+projects
 transient/
 .local/
 .org-id-locations
