@@ -194,8 +194,8 @@ Also [[https://coldnew.github.io/d5011be2/][this article]] deals with CJK alignm
   ("goderich-surface"
    (setq my/org-directory "~/org"
          my/default-bibliography "~/academic/bib/bibliography.bib"
-	 my/ebib-file-search-dir "~/papers/ebib"
-	 my/ebib-import-directory "~/papers/papers/articles")))
+         my/ebib-file-search-dir "~/papers/ebib"
+         my/ebib-import-directory "~/papers/papers/articles")))
 #+end_src
 
 ** TODO Utility functions
@@ -663,8 +663,8 @@ where a search string can be entered using space-separated pieces.
   (corfu-auto t)
   (corfu-quit-no-match t)
   :bind (:map corfu-map
-	      ("TAB" . corfu-expand)
-	      ("SPC" . corfu-insert-separator)))
+              ("TAB" . corfu-expand)
+              ("SPC" . corfu-insert-separator)))
 #+end_src
 
 * Org-mode
@@ -717,9 +717,9 @@ if you are using more keywords than just TODO and DONE.
 ;; Set org file associations
 (setq org-file-apps
       `((auto-mode . emacs)
-	(,(rx ".pdf::" (group (one-or-more digit)) string-end) . "zathura %s -P %1")
-	(,(rx ".pdf" string-end) . "zathura %s")
-	(directory . emacs)))
+        (,(rx ".pdf::" (group (one-or-more digit)) string-end) . "zathura %s -P %1")
+        (,(rx ".pdf" string-end) . "zathura %s")
+        (directory . emacs)))
 
 ;; browser needs to be set with a separate function
 (setq browse-url-browser-function 'browse-url-generic
@@ -743,7 +743,7 @@ if you are using more keywords than just TODO and DONE.
 ;; Org todo keywords and colours
 (setq org-todo-keywords
       '((sequence "TODO(t)" "|" "DONE(d)")
-	(sequence "NEXT(n)" "WAITING(w)" "LATER(l)" "LOOP(p)" "|" "CANCELLED(c)")))
+        (sequence "NEXT(n)" "WAITING(w)" "LATER(l)" "LOOP(p)" "|" "CANCELLED(c)")))
 
 ;; Use LOOP keyword for repeating tasks
 ;; (after marking them as done)
@@ -1178,13 +1178,13 @@ Do I want to move to the new position? Depends.
 (defun +org-refile-to-this-file ()
   (interactive)
   (let* ((loc-pair (save-excursion
-		     (consult-org-heading)
-		     (cons (org-get-heading) (point))))
-	 (heading (car loc-pair))
-	 (location (cdr loc-pair)))
+                     (consult-org-heading)
+                     (cons (org-get-heading) (point))))
+         (heading (car loc-pair))
+         (location (cdr loc-pair)))
     (org-refile nil
-		(current-buffer)
-		(list heading (buffer-file-name) nil location))))
+                (current-buffer)
+                (list heading (buffer-file-name) nil location))))
 #+end_src
 
 * Bibliography and citations
@@ -1214,14 +1214,14 @@ TODOs:
 (setq ebib-bibtex-dialect 'biblatex)
 (setq ebib-citation-insert-multiple t)
 (setq ebib-index-columns '(("Author/Editor" 20 t)
-			   ("Year" 6 t)
-			   ("Title" 40 t)))
+                           ("Year" 6 t)
+                           ("Title" 40 t)))
 (map-put! ebib-reference-templates
-	  "Article"
-	  "{Author}. {Date|Year}. {\"Title\".} {Journaltitle|Journal} {Volume}{(Issue)}{:Pages}.{ Doi.}")
+          "Article"
+          "{Author}. {Date|Year}. {\"Title\".} {Journaltitle|Journal} {Volume}{(Issue)}{:Pages}.{ Doi.}")
 (map-put! ebib-reference-templates
-	  "Book"
-	  "{Author|Editor}. {Date|Year}. {\"Title\".} {Address: }{Publisher.}")
+          "Book"
+          "{Author|Editor}. {Date|Year}. {\"Title\".} {Address: }{Publisher.}")
 (setq ebib-notes-name-transform-function #'identity)
 (setq ebib-name-transform-function #'+ebib-generate-filename)
 
@@ -1234,16 +1234,16 @@ TODOs:
 (setq ebib-uniquify-keys t)
 
 (map-put! ebib-citation-commands
-	  'org-mode
-	  '((("text" "[cite/t: %(@%K%< %A%>%; )]")
-	     ("paren" "[cite: %(@%K%< %A%>%; )]")
-	     ("bare" "@%K")
-	     ("no-name" "[cite/na: %(@%K%< %A%>%; )]"))))
+          'org-mode
+          '((("text" "[cite/t: %(@%K%< %A%>%; )]")
+             ("paren" "[cite: %(@%K%< %A%>%; )]")
+             ("bare" "@%K")
+             ("no-name" "[cite/na: %(@%K%< %A%>%; )]"))))
 (map-put! ebib-citation-commands
-	  'markdown-mode
-	  '((("text" "@%K%< [%A]%>")
-	     ("paren" "[%(@%K%<, %A%>%; )]")
-	     ("year" "[-@%K%< %A%>]"))))
+          'markdown-mode
+          '((("text" "@%K%< [%A]%>")
+             ("paren" "[%(@%K%<, %A%>%; )]")
+             ("year" "[-@%K%< %A%>]"))))
 #+end_src
 
 #+begin_src emacs-lisp :tangle no :noweb-ref ebib-settings
@@ -1256,26 +1256,26 @@ TODOs:
 #+begin_src emacs-lisp :tangle no :noweb-ref ebib-functions
 (defun *ebib-get-author-names (key)
   (let ((names
-	 (->>
-	  (ebib-get-field-value "author" key ebib--cur-db "default" 'unbraced)
-	  (s-split " and ")
-	  (--map (car (s-split "," it))))))
+         (->>
+          (ebib-get-field-value "author" key ebib--cur-db "default" 'unbraced)
+          (s-split " and ")
+          (--map (car (s-split "," it))))))
     (if (< 2 (length names))
-	(concat (car names) " et al")
+        (concat (car names) " et al")
       (s-join " and " names))))
 
 (defun *ebib-get-year (key)
   (let ((date
-	 (or
-	  (ebib-get-field-value "date" key ebib--cur-db 'noerror 'unbraced)
-	  (ebib-get-field-value "year" key ebib--cur-db 'noerror 'unbraced))))
+         (or
+          (ebib-get-field-value "date" key ebib--cur-db 'noerror 'unbraced)
+          (ebib-get-field-value "year" key ebib--cur-db 'noerror 'unbraced))))
     (->> date
-	 (s-split "-")
-	 (-first-item))))
+         (s-split "-")
+         (-first-item))))
 
 (defun *ebib-get-title (key)
   (let ((title
-	 (->> (ebib-get-field-value "title" key ebib--cur-db "default" 'unbraced)
+         (->> (ebib-get-field-value "title" key ebib--cur-db "default" 'unbraced)
               (s-split ":")
               (car)
               (replace-regexp-in-string "[{}]" "")
@@ -1284,14 +1284,14 @@ TODOs:
 
 (defun +ebib-generate-filename (key)
   (let ((names (*ebib-get-author-names key))
-	(year (*ebib-get-year key))
-	(title (*ebib-get-title key)))
+        (year (*ebib-get-year key))
+        (title (*ebib-get-title key)))
     (->> (list names year title)
-	 (-non-nil)
-	 (s-join " ")
-	 (replace-regexp-in-string "/" "")
-	 (replace-regexp-in-string "," "")
-	 (replace-regexp-in-string " " "_"))))
+         (-non-nil)
+         (s-join " ")
+         (replace-regexp-in-string "/" "")
+         (replace-regexp-in-string "," "")
+         (replace-regexp-in-string " " "_"))))
 
 (defun +ebib-edit-as-string ()
   "Edit the current field as a string.
@@ -1455,8 +1455,8 @@ See also the following:
   :commands (cider-jack-in cider-jack-in-clj cider-jack-in-cljs)
   :config
   (setq cider-allow-jack-in-without-project t
-	cider-jack-in-default 'babashka
-	cider-repl-pop-to-buffer-on-connect nil)
+        cider-jack-in-default 'babashka
+        cider-repl-pop-to-buffer-on-connect nil)
 
   (evil-define-key 'normal cider-mode-map
     (kbd "<localleader>ee") #'cider-eval-last-sexp
