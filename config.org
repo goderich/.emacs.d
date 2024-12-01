@@ -77,9 +77,12 @@ Some interesting stuff here:
 https://github.com/daviwil/emacs-from-scratch
 
 * Basic settings
-** Early loading
+** NEXT Early loading
 Maybe some of this should be in =early-init.el=?
 See also https://github.com/hrs/sensible-defaults.el
+
+TODO: see if temp backups can be created somewhere else, e.g. /tmp
+(have a look at sensible defaults)
 
 #+begin_src emacs-lisp
 ;; -*- lexical-binding: t -*-
@@ -137,13 +140,20 @@ See also =use-package-defaults= for other settings.
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (display-line-numbers-mode -1)
+(tooltip-mode -1)
 
 ;; Soft wrap long lines
 (global-visual-line-mode 1)
 
 ;; Maintain a small margin when scrolling
 (setq scroll-margin 2)
+#+end_src
 
+I think I'll stick with the solarized-theme package,
+but I would like to change a few things.
+Look into faces and theming.
+
+#+begin_src emacs-lisp
 (use-package solarized-theme
   :config
   (load-theme 'solarized-light t))
