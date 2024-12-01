@@ -1376,6 +1376,22 @@ or move the point after the snippet.
 (define-key tempel-map (kbd "TAB") #'tempel-next)
 #+end_src
 
+** TODO Modeline
+
+ Currently using [[https://gitlab.com/jessieh/mood-line][mood-line]] (see [[https://www.reddit.com/r/emacs/comments/c5mel4/what_mode_line_do_you_use_and_why/][here]] for more great packages.)
+ Check =mood-line-defformat= for custom formatting options.
+ Customization is very simple, see =mood-line-format-default=
+ and =mood-line-format-default-extended= for examples.
+
+#+begin_src emacs-lisp
+(use-package mood-line
+  :config
+  (setq mood-line-format mood-line-format-default)
+  ;; can't use unicode glyphs with my current font
+  (setq mood-line-glyph-alist mood-line-glyphs-fira-code)
+  (mood-line-mode))
+#+end_src
+
 ** Crux
 
 #+begin_src emacs-lisp
