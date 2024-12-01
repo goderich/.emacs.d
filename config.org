@@ -452,7 +452,7 @@ In these modes, I turn it off.
   (push it evil-snipe-disabled-modes))
 #+end_src
 
-** NEXT Minibuffer keybindings
+** Minibuffer keybindings
 
 Keybindings in the minibuffer have to be set differently.
 I am not using evil in the minibuffer, and the bindings
@@ -465,21 +465,32 @@ but if you keep deleting, the parent directories will be deleted
 with a single press of backspace.
 This is pretty convenient when jumping upwards many levels.
 
-Right now my implementation is very naive,
-as it doesn't know if I'm in a file path or some other completion.
-In other places, it will delete the whole line if you press backspace on a slash,
-although I do not foresee many such situations in my Emacs usage.
+Right now my implementation is still relatively naive,
+and I'm still in the process of refining it.
 
 #+begin_src emacs-lisp
 (defun +delete-char-or-directory ()
   (interactive)
-  (if (eq (char-before) ?/)
-      (backward-kill-sexp)
-    (delete-backward-char 1)))
+  (cond
+   ((string= (minibuffer-contents) "/")
+    (delete-backward-char 1))
+   ((string= (minibuffer-contents) "~/")
+    (delete-minibuffer-contents)
+    (insert (expand-file-name "~/")))
+   ((eq (char-before) ?/)
+    (let ((pt (point))
+          (slash-pos (search-backward "/" nil t 2)))
+      (if slash-pos
+          (progn
+            (delete-region (1+ slash-pos) pt)
+            (move-end-of-line nil))
+        (delete-backward-char 1))))
+   (t (delete-backward-char 1))))
 
 (defun +minibuffer-setup ()
   (keymap-set minibuffer-local-map "<backspace>" #'+delete-char-or-directory)
-  (keymap-set minibuffer-local-map "C-w" #'backward-kill-word))
+  (keymap-set minibuffer-local-map "C-w" #'backward-kill-word)
+  (keymap-set minibuffer-local-map "C-<return>" #'vertico-exit-input))
 
 (add-hook 'minibuffer-setup-hook #'+minibuffer-setup)
 #+end_src
