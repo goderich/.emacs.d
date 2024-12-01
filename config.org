@@ -414,6 +414,8 @@ Spacemacs also introduced me to mnemonic keybindings.
   (kbd "<leader>h") #'+helpful-transient
   ;; org
   (kbd "<leader>a") #'org-agenda-list
+  ;; links
+  (kbd "<leader>u") #'link-hint-open-link
   ;; todo items
   (kbd "]t") #'hl-todo-next
   (kbd "[t") #'hl-todo-previous
@@ -1537,11 +1539,7 @@ or move the point after the snippet.
 
 #+begin_src elisp
 (use-package link-hint
-  :commands (link-hint-open-link link-hint-open-link-at-point)
-  :defer 2
-  :init
-  (evil-define-key 'normal 'global
-    (kbd "<leader>u") #'link-hint-open-link))
+  :commands (link-hint-open-link link-hint-open-link-at-point))
 #+end_src
 
 ** Anzu
