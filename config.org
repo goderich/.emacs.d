@@ -287,6 +287,8 @@ or steal selectively. See the "[[https://github.com/Somelauw/evil-org-mode/blob/
 :ID:       483821dc-9279-4372-93b3-a7f4fa65202e
 :END:
 
+*** Escape everything
+
 Make ESC quit everything.
 I tried setting this up in the minibuffer to no avail,
 and with other keybinding methods and functions,
@@ -318,14 +320,19 @@ that I then bind ESC to globally in insert mode.
 (evil-define-key 'insert 'global (kbd "<escape>") #'+evil-normal-state-maybe)
 #+end_src
 
+*** Leader keys
+
 I first encountered the idea of using SPC as the global leader in Spacemacs, and I think it's great.
 I use the comma for localleader binds, because in Dvorak it's very conveniently positioned,
 and not a great loss in normal mode.
+(The lack of =,= in normal mode is remedied by [[id:8c7a6f08-49e4-47c8-acbb-45de731cdb1f][evil-snipe]].)
 
 #+begin_src emacs-lisp :tangle no :noweb-ref evil-keybindings
 (evil-set-leader 'normal (kbd "SPC"))
 (evil-set-leader 'normal (kbd ",") 'localleader)
 #+end_src
+
+*** M-x (execute-extended-command)
 
 I run commands by name quite a lot, and so to me it makes sense
 to bind the command menu to an easily reachable key,
@@ -337,6 +344,8 @@ especially since it is made redundant with [[https://github.com/hlissner/evil-sn
 #+begin_src emacs-lisp :tangle no :noweb-ref evil-keybindings
 (evil-define-key '(normal visual motion) 'global ";" #'execute-extended-command)
 #+end_src
+
+*** Line movements (j and k)
 
 I write a lot of prose, and so encounter wrapped lines quite often.
 For me, =j= and =k= moving by visual line just makes sense.
@@ -351,6 +360,8 @@ as I don't use them interactively.
   "gk" #'evil-previous-line)
 #+end_src
 
+*** Move to beginning of line (H and ^)
+
 Swapping =H= and =^= is an old vimmer trick.
 Since moving to the beginning of the line is arguably a more common action,
 it makes sense to place it on the more reachable =H=.
@@ -363,6 +374,8 @@ and to the first column if pressed again.
   "^"  #'evil-window-top)
 #+end_src
 
+*** Search at point (* and #)
+
 I use the [[https://github.com/bling/evil-visualstar][evil-visualstar]] package to augment =*= and =#= in visual mode.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref evil-keybindings
@@ -370,6 +383,8 @@ I use the [[https://github.com/bling/evil-visualstar][evil-visualstar]] package 
   "*" #'evil-visualstar/begin-search-forward
   "#" #'evil-visualstar/begin-search-backward)
 #+end_src
+
+*** Incrementing numbers
 
 Incrementing numbers with the [[https://github.com/cofi/evil-numbers][evil-numbers]] package.
 
@@ -379,6 +394,8 @@ Incrementing numbers with the [[https://github.com/cofi/evil-numbers][evil-numbe
   "g-"  #'evil-numbers/dec-at-pt
   "g+"  #'evil-numbers/inc-at-pt-incremental)
 #+end_src
+
+*** Other keybindings
 
 Spacemacs also introduced me to mnemonic keybindings.
 
@@ -407,6 +424,8 @@ Spacemacs also introduced me to mnemonic keybindings.
   (kbd "<leader>e") #'ebib)
 #+end_src
 
+*** Home row mod workaround
+
 I hit =C-a= on my keyboard when typing "ea"
 (because of Dvorak + [[https://precondition.github.io/home-row-mods][home row modifiers]]).
 In evil insert mode, it pastes the last insertion my default.
@@ -432,6 +451,7 @@ Note that evil-collection does not include bindings for org-agenda
   :config
   (evil-collection-init '(ebib magit info)))
 #+end_src
+
 *** TODO Undo
 See also Hints and undo-fu-session [[https://codeberg.org/ideasman42/emacs-undo-fu][here]].
 
@@ -440,6 +460,9 @@ See also Hints and undo-fu-session [[https://codeberg.org/ideasman42/emacs-undo-
 #+end_src
 
 *** Evil-snipe
+:PROPERTIES:
+:ID:       8c7a6f08-49e4-47c8-acbb-45de731cdb1f
+:END:
 
 Sniping is an incredibly efficient way to move around nearby text.
 
@@ -787,9 +810,7 @@ They still appear together in the final tangled file.
   (kbd "<localleader>q") #'org-set-tags-command
   (kbd "<localleader>Q") #'+org-remove-tags
   (kbd "<localleader>.") #'+consult-goto-org-heading
-  (kbd "gh") #'+org-up-heading
-  (kbd "gj") #'org-next-visible-heading
-  (kbd "gk") #'+org-down-and-show)
+  (kbd "gh") #'+org-up-heading)
 #+end_src
 
 #+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
@@ -1336,48 +1357,6 @@ Used from the ebib index."
   (kbd "<localleader>f") #'ebib-import-file)
 #+end_src
 
-* Magit
-
-Consider also [[https://github.com/alphapapa/magit-todos][magit-todos]].
-
-#+begin_src emacs-lisp
-(use-package magit
-  :commands (magit)
-  :init
-  (evil-define-key '(normal visual) 'global
-    (kbd "<leader>gg") #'magit)
-  :config
-  (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1))
-#+end_src
-
-** Git diff highlighting
-
-Changed the settings using [[https://www.reddit.com/r/emacs/comments/582yms/question_changing_the_colour_of_diffhl_indicators/][this discussion]] as a reference.
-#+begin_src emacs-lisp :noweb yes
-(use-package diff-hl
-  :defer 2
-  :config
-  <<diff-hl-colors>>
-  (diff-hl-flydiff-mode)
-  (global-diff-hl-mode)
-  <<diff-hl-keybindings>>)
-#+end_src
-
-I stole the insert and delete shades from Doom, because they look really good.
-
-#+begin_src emacs-lisp :tangle no :noweb-ref diff-hl-colors
-(custom-set-faces
- '(diff-hl-change ((t (:background "orange2" :foreground "orange2")))) ; #cb4b16
- '(diff-hl-insert ((t (:background "#859900" :foreground "#859900"))))
- '(diff-hl-delete ((t (:background "#dc322f" :foreground "#dc322f")))))
-#+end_src
-
-#+begin_src emacs-lisp :tangle no :noweb-ref diff-hl-keybindings
-(evil-define-key 'normal 'global
-  (kbd "]h") #'diff-hl-next-hunk
-  (kbd "[h") #'diff-hl-previous-hunk)
-#+end_src
-
 * Programming languages
 
 ** Lisps
@@ -1467,6 +1446,48 @@ See also the following:
 #+end_src
 
 * Utils
+** Magit
+
+Consider also [[https://github.com/alphapapa/magit-todos][magit-todos]].
+
+#+begin_src emacs-lisp
+(use-package magit
+  :commands (magit)
+  :init
+  (evil-define-key '(normal visual) 'global
+    (kbd "<leader>gg") #'magit)
+  :config
+  (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1))
+#+end_src
+
+*** Git diff highlighting
+
+Changed the settings using [[https://www.reddit.com/r/emacs/comments/582yms/question_changing_the_colour_of_diffhl_indicators/][this discussion]] as a reference.
+#+begin_src emacs-lisp :noweb yes
+(use-package diff-hl
+  :defer 2
+  :config
+  <<diff-hl-colors>>
+  (diff-hl-flydiff-mode)
+  (global-diff-hl-mode)
+  <<diff-hl-keybindings>>)
+#+end_src
+
+I stole the insert and delete shades from Doom, because they look really good.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref diff-hl-colors
+(custom-set-faces
+ '(diff-hl-change ((t (:background "orange2" :foreground "orange2")))) ; #cb4b16
+ '(diff-hl-insert ((t (:background "#859900" :foreground "#859900"))))
+ '(diff-hl-delete ((t (:background "#dc322f" :foreground "#dc322f")))))
+#+end_src
+
+#+begin_src emacs-lisp :tangle no :noweb-ref diff-hl-keybindings
+(evil-define-key 'normal 'global
+  (kbd "]h") #'diff-hl-next-hunk
+  (kbd "[h") #'diff-hl-previous-hunk)
+#+end_src
+
 ** Snippets
 :PROPERTIES:
 :ID:       0118536f-8f2f-4e6d-ab30-66bd3101401d
