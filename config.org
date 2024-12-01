@@ -1323,6 +1323,14 @@ Smartparens is THE package for lisp code editing.
 
 Examples can be found in the [[https://github.com/Fuco1/smartparens/wiki][wiki]] and in [[https://ebzzry.com/en/emacs-pairs/][this article]].
 
+** Emacs Lisp
+
+#+begin_src emacs-lisp
+(use-package eldoc
+  :config
+  (setq eldoc-idle-delay 0))
+#+end_src
+
 #+begin_src emacs-lisp :tangle no :noweb-ref smartparens-keybindings
 (evil-define-key '(normal visual) emacs-lisp-mode-map
   "(" #'sp-backward-up-sexp
