@@ -361,13 +361,22 @@ I use the [[https://github.com/bling/evil-visualstar][evil-visualstar]] package 
   "#" #'evil-visualstar/begin-search-backward)
 #+end_src
 
+Incrementing numbers with the [[https://github.com/cofi/evil-numbers][evil-numbers]] package.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref evil-keybindings
+(evil-define-key '(normal visual) 'global
+  "g="  #'evil-numbers/inc-at-pt
+  "g-"  #'evil-numbers/dec-at-pt
+  "g+"  #'evil-numbers/inc-at-pt-incremental)
+#+end_src
+
 Spacemacs also introduced me to mnemonic keybindings.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref evil-keybindings
 (evil-define-key 'normal 'global
+  (kbd "<leader>/") #'consult-line
   ;; Files
   (kbd "<leader>.") #'find-file
-  (kbd "<leader>/") #'consult-line
   (kbd "<leader>f") #'+file-transient
   ;; Buffers
   (kbd "<leader>,") #'consult-buffer
@@ -397,7 +406,8 @@ The two need to be disabled separately.
 (keymap-global-unset "C-a")
 #+end_src
 
-** Evil collection
+** Packages
+*** Evil collection
 
 I'm on the fence about pulling all of [[https://github.com/emacs-evil/evil-collection][evil-collection]] for just a few modes,
 so I'm trying it out for now. Can always copy/rewrite myself later.
@@ -410,15 +420,14 @@ Note that evil-collection does not include bindings for org-agenda
   :config
   (evil-collection-init '(ebib magit info)))
 #+end_src
-
-** TODO Undo
+*** TODO Undo
 See also Hints and undo-fu-session [[https://codeberg.org/ideasman42/emacs-undo-fu][here]].
 
 #+begin_src emacs-lisp
 (use-package undo-fu)
 #+end_src
 
-** Evil-snipe
+*** Evil-snipe
 
 Sniping is an incredibly efficient way to move around nearby text.
 
@@ -465,7 +474,7 @@ In these modes, I turn it off.
   (push it evil-snipe-disabled-modes))
 #+end_src
 
-** Evil-visualstar
+*** Evil-visualstar
 
 This tiny package allows =*= and =#= to be usable in visual mode.
 Instead of evil's default behaviour, which is to search for the word at point,
@@ -479,6 +488,20 @@ The keybindings are get in [[id:483821dc-9279-4372-93b3-a7f4fa65202e][the global
 (use-package evil-visualstar
   :commands (evil-visualstar/begin-search-forward
              evil-visualstar/begin-search-forward))
+#+end_src
+
+*** Evil-numbers
+
+Another small package, this time to manipulate numbers.
+I occasionally find myself needing to add/subtract a sum
+from numbers on a bunch of lines, so this is handy for those situations.
+
+#+begin_src emacs-lisp
+(use-package evil-numbers
+  :commands (evil-numbers/inc-at-pt
+             evil-numbers/dec-at-pt
+             evil-numbers/inc-at-pt-incremental
+             evil-numbers/dec-at-pt-incremental))
 #+end_src
 
 ** Minibuffer keybindings
