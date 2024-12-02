@@ -1176,18 +1176,23 @@ If on a...
   (cond
    ((org-at-item-checkbox-p) (org-toggle-checkbox))
    ((org-at-table-p) (org-table-next-row))
-   ((org-in-regexp +org-image-regexp 1) (+org-toggle-image-at-point))
-   ((org-in-regexp link-hint-url-regexp 1) (link-hint-open-link-at-point))
-   ((org-in-regexp org-link-bracket-re 1) (link-hint-open-link-at-point))
+   ((org-in-regexp *org-image-regexp) (*org-toggle-image-at-point))
+   ((org-in-regexp *url-regexp) (link-hint-open-link-at-point))
+   ((org-in-regexp org-link-bracket-re) (link-hint-open-link-at-point))
    ((org-in-src-block-p) (org-edit-src-code))
    (t (evil-ret))))
 
-(defvar +org-image-regexp
+(defvar *url-regexp
+  (concat "\\<"
+          (regexp-opt '("http://" "https://" "doi:") t)
+          thing-at-point-url-path-regexp)
+  "Basically a simplified version of `goto-address-url-regxp'")
+
+(defvar *org-image-regexp
   (rx (seq "[[./" (+? anything) "." (or "png" "jpg" "jpeg") "]]")))
 
-(defun +org-toggle-image-at-point ()
-  (interactive)
-  (let ((bounds (org-in-regexp +org-image-regexp 1)))
+(defun *org-toggle-image-at-point ()
+  (let ((bounds (org-in-regexp *org-image-regexp)))
       (org-toggle-inline-images nil (car bounds) (cdr bounds))))
 #+end_src
 
@@ -1515,6 +1520,7 @@ or move the point after the snippet.
  Check =mood-line-defformat= for custom formatting options.
  Customization is very simple, see =mood-line-format-default=
  and =mood-line-format-default-extended= for examples.
+ TODO: add indicator for number of lines selected visually.
 
 #+begin_src emacs-lisp
 (use-package mood-line
