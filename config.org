@@ -1106,11 +1106,6 @@ Although it's not like I'm running out of keys. Something to ponder.
     (ebib-db-set-current-entry-key key ebib--cur-db)
     (ebib--update-buffers 'no-refresh)))
 
-(defun +ebib-open-on-key (key)
-  (ebib)
-  (ebib-db-set-current-entry-key key ebib--cur-db)
-  (ebib--update-buffers 'no-refresh))
-
 (org-cite-register-processor '+org-cite-follow-processor
   ;; Note that the citation is passed as an object, not a string.
   ;; The follow function must take two arguments.
@@ -1177,18 +1172,37 @@ If on a...
 - org link: follow it.
 - source block: edit it (run block with =,,=).
 
+Right now the citation regex only recognizes single work citations,
+and will choke on a citation with multiple works.
+This can be improved in future.
+I think I could break the regex into two:
+1. Recognizing the outer bounds of the citation.
+2. Recognizing the keys within the bounds.
+
 #+begin_src emacs-lisp :tangle no :noweb-ref org-functions
 (defun +org-return ()
   "Perform an action dependent on context."
   (interactive)
   (cond
+   ;; list with checkbox
    ((org-at-item-checkbox-p) (org-toggle-checkbox))
+   ;; table
    ((org-at-table-p) (org-table-next-row))
-   ((org-in-regexp *org-image-regexp) (*org-toggle-image-at-point))
-   ((org-in-regexp *org-cite-regexp) (*org-follow-cite))
-   ((org-in-regexp *url-regexp) (link-hint-open-link-at-point))
+   ;; image
+   (when-cond ((bounds (org-in-regexp *org-image-regexp)))
+      (*org-toggle-image (car bounds) (cdr bounds)))
+   ;; citation
+   (when-cond ((bounds (org-in-regexp *org-cite-regexp)))
+      (*org-follow-cite (car bounds) (cdr bounds)))
+   ;; a regular URL string with no description
+   (when-cond ((bounds (org-in-regexp *url-regexp))
+                (url (buffer-substring-no-properties (car bounds) (cdr bounds))))
+      (browse-url url))
+   ;; an org link of any kind, including URLs with descriptions
    ((org-in-regexp org-link-bracket-re) (link-hint-open-link-at-point))
+   ;; org-src block
    ((org-in-src-block-p) (org-edit-src-code))
+   ;; Default action
    (t (evil-ret))))
 
 (defvar *url-regexp
@@ -1209,16 +1223,24 @@ If on a...
            (zero-or-more (not (any ?[ ?] ?@)))
            "]")))
 
-;; This can be made more efficient, but it works right now
-(defun *org-follow-cite ()
-  (let* ((bounds (org-in-regexp *org-cite-regexp))
-         (str (buffer-substring-no-properties (car bounds) (cdr bounds)))
+(defmacro when-cond (spec &rest body)
+  "Like `when-let', but returns true on successful binding.
+Has an extra pair of parens outside, for use inside `cond'."
+  (declare (indent 1) (debug if-let))
+  `((if-let ,spec ,(macroexp-progn (append body (list t))))))
+
+(defun *org-follow-cite (beg end)
+  (let* ((str (buffer-substring-no-properties beg end))
          (key (-second-item (s-match *org-cite-regexp str))))
     (+ebib-open-on-key key)))
 
-(defun *org-toggle-image-at-point ()
-  (let ((bounds (org-in-regexp *org-image-regexp)))
-      (org-toggle-inline-images nil (car bounds) (cdr bounds))))
+(defun +ebib-open-on-key (key)
+  (ebib)
+  (ebib-db-set-current-entry-key key ebib--cur-db)
+  (ebib--update-buffers 'no-refresh))
+
+(defun *org-toggle-image (beg end)
+  (org-toggle-inline-images nil beg end))
 #+end_src
 
 ** TODO Org-refile
