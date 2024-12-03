@@ -249,6 +249,8 @@ https://www.mattduck.com/2023-08-28-extending-use-package-bind
   (evil-respect-visual-line-mode nil)
   ;; Have Y behave like D and C
   (evil-want-Y-yank-to-eol t)
+  ;; * and # search for the whole symbol
+  (evil-symbol-word-search t)
 
   :config
   <<evil-cursor>>
