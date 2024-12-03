@@ -1189,15 +1189,15 @@ I think I could break the regex into two:
    ;; table
    ((org-at-table-p) (org-table-next-row))
    ;; image
-   (when-cond ((bounds (org-in-regexp *org-image-regexp)))
-      (*org-toggle-image (car bounds) (cdr bounds)))
+   ((when-cond ((bounds (org-in-regexp *org-image-regexp)))
+      (*org-toggle-image (car bounds) (cdr bounds))))
    ;; citation
-   (when-cond ((bounds (org-in-regexp *org-cite-regexp)))
-      (*org-follow-cite (car bounds) (cdr bounds)))
+   ((when-cond ((bounds (org-in-regexp *org-cite-regexp)))
+      (*org-follow-cite (car bounds) (cdr bounds))))
    ;; a regular URL string with no description
-   (when-cond ((bounds (org-in-regexp *url-regexp))
+   ((when-cond ((bounds (org-in-regexp *url-regexp))
                 (url (buffer-substring-no-properties (car bounds) (cdr bounds))))
-      (browse-url url))
+      (browse-url url)))
    ;; an org link of any kind, including URLs with descriptions
    ((org-in-regexp org-link-bracket-re) (link-hint-open-link-at-point))
    ;; org-src block
@@ -1225,9 +1225,9 @@ I think I could break the regex into two:
 
 (defmacro when-cond (spec &rest body)
   "Like `when-let', but returns true on successful binding.
-Has an extra pair of parens outside, for use inside `cond'."
+For use inside `cond'."
   (declare (indent 1) (debug if-let))
-  `((if-let ,spec ,(macroexp-progn (append body (list t))))))
+  `(if-let ,spec ,(macroexp-progn (append body (list t)))))
 
 (defun *org-follow-cite (beg end)
   (let* ((str (buffer-substring-no-properties beg end))
