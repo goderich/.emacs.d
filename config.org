@@ -1106,6 +1106,11 @@ Although it's not like I'm running out of keys. Something to ponder.
     (ebib-db-set-current-entry-key key ebib--cur-db)
     (ebib--update-buffers 'no-refresh)))
 
+(defun +ebib-open-on-key (key)
+  (ebib)
+  (ebib-db-set-current-entry-key key ebib--cur-db)
+  (ebib--update-buffers 'no-refresh))
+
 (org-cite-register-processor '+org-cite-follow-processor
   ;; Note that the citation is passed as an object, not a string.
   ;; The follow function must take two arguments.
@@ -1167,6 +1172,7 @@ If on a...
 - list item with checkbox: toggle checkbox.
 - table: move to next row, possibly creating one (jump out of table with =C-RET=).
 - image or image link: toggle displaying the image.
+- citation: open in ebib.
 - URL: open it.
 - org link: follow it.
 - source block: edit it (run block with =,,=).
@@ -1179,6 +1185,7 @@ If on a...
    ((org-at-item-checkbox-p) (org-toggle-checkbox))
    ((org-at-table-p) (org-table-next-row))
    ((org-in-regexp *org-image-regexp) (*org-toggle-image-at-point))
+   ((org-in-regexp *org-cite-regexp) (*org-follow-cite))
    ((org-in-regexp *url-regexp) (link-hint-open-link-at-point))
    ((org-in-regexp org-link-bracket-re) (link-hint-open-link-at-point))
    ((org-in-src-block-p) (org-edit-src-code))
@@ -1192,6 +1199,22 @@ If on a...
 
 (defvar *org-image-regexp
   (rx (seq "[[./" (+? anything) "." (or "png" "jpg" "jpeg") "]]")))
+
+(defvar *org-cite-regexp
+  (rx (seq "[cite"
+           (opt ?/ (one-or-more (any alnum ?/ ?_ ?-)))
+           ":"
+           (zero-or-more (not (any ?[ ?] ?@)))
+           "@" (group (one-or-more (or alnum ?- ?_)))
+           (zero-or-more (not (any ?[ ?] ?@)))
+           "]")))
+
+;; This can be made more efficient, but it works right now
+(defun *org-follow-cite ()
+  (let* ((bounds (org-in-regexp *org-cite-regexp))
+         (str (buffer-substring-no-properties (car bounds) (cdr bounds)))
+         (key (-second-item (s-match *org-cite-regexp str))))
+    (+ebib-open-on-key key)))
 
 (defun *org-toggle-image-at-point ()
   (let ((bounds (org-in-regexp *org-image-regexp)))
