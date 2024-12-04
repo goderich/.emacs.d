@@ -1590,9 +1590,48 @@ or move the point after the snippet.
 
 ** Link hinting
 
-#+begin_src elisp
+I could also hook it up to link-hint (see =link-hint-define-type=).
+
+#+begin_src elisp :noweb yes
 (use-package link-hint
-  :commands (link-hint-open-link link-hint-open-link-at-point))
+  :commands (link-hint-open-link link-hint-open-link-at-point)
+  :config
+  <<link-hint-org-cite>>)
+#+end_src
+
+Here I add a new link type for org citations.
+(Some of the relevant code, e.g. =*org-follow-cite=, is defined elsewhere in the config.)
+The =:next= and =:at-point-p= keywords are required by link-hint,
+and =:open= is the functionality that I want.
+This lets me call link-hint the way I normally do,
+and through it open citations with my custom function.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref link-hint-org-cite
+(link-hint-define-type 'org-cite
+  :next #'link-hint--next-org-cite
+  :at-point-p #'*org-at-cite-p
+  :open #'*org-follow-cite)
+
+(push 'link-hint-org-cite link-hint-types)
+
+(defun *org-at-cite-p ()
+  "If the point is on an org citation, return its bounds.
+The bounds are returned as a list, to be passed to `*org-follow-cite'."
+  (flatten-tree (org-in-regexp *org-cite-regexp)))
+
+(defun link-hint--find-org-cite (start-bound end-bound)
+  "Find the first file link.
+Only search the range between just after START-BOUND and END-BOUND."
+  (save-excursion
+    (let (org-cite-pos)
+      (goto-char start-bound)
+      (link-hint--find-regexp *org-cite-regexp
+                              (point) end-bound))))
+
+(defun link-hint--next-org-cite (bound)
+  "Find the next org citation.
+Only search the range between just after the point and BOUND."
+  (link-hint--find-org-cite (point) bound))
 #+end_src
 
 ** Anzu
