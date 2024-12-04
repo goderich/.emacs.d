@@ -1159,10 +1159,16 @@ This function is specifically for use with org-cycle."
       (tempel--interactive #'tempel-expand)))
 #+end_src
 
+*** My version of org-return
+
 I believe org-mode first started the fashion of
 contextually dependent actions in Emacs (aka "dwim").
 Then Doom took it and expanded it further.
 The idea is great, and here I put my own spin on it.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-functions
+(defun +org-return ()
+  "Perform an action dependent on context.
 If on a...
 - list item with checkbox: toggle checkbox.
 - table: move to next row, possibly creating one (jump out of table with =C-RET=).
@@ -1171,17 +1177,7 @@ If on a...
 - URL: open it.
 - org link: follow it.
 - source block: edit it (run block with =,,=).
-
-Right now the citation regex only recognizes single work citations,
-and will choke on a citation with multiple works.
-This can be improved in future.
-I think I could break the regex into two:
-1. Recognizing the outer bounds of the citation.
-2. Recognizing the keys within the bounds.
-
-#+begin_src emacs-lisp :tangle no :noweb-ref org-functions
-(defun +org-return ()
-  "Perform an action dependent on context."
+"
   (interactive)
   (cond
    ;; list with checkbox
@@ -1205,24 +1201,6 @@ I think I could break the regex into two:
    ;; Default action
    (t (evil-ret))))
 
-(defvar *url-regexp
-  (concat "\\<"
-          (regexp-opt '("http://" "https://" "doi:") t)
-          thing-at-point-url-path-regexp)
-  "Basically a simplified version of `goto-address-url-regxp'")
-
-(defvar *org-image-regexp
-  (rx (seq "[[./" (+? anything) "." (or "png" "jpg" "jpeg") "]]")))
-
-(defvar *org-cite-regexp
-  (rx (seq "[cite"
-           (opt ?/ (one-or-more (any alnum ?/ ?_ ?-)))
-           ":"
-           (zero-or-more (not (any ?[ ?] ?@)))
-           "@" (group (one-or-more (or alnum ?- ?_)))
-           (zero-or-more (not (any ?[ ?] ?@)))
-           "]")))
-
 (defmacro when-cond (spec &rest body)
   "Like `when-let', but returns true on successful binding.
 For use inside `cond'."
@@ -1230,9 +1208,22 @@ For use inside `cond'."
   `(if-let ,spec ,(macroexp-progn (append body (list t)))))
 
 (defun *org-follow-cite (beg end)
-  (let* ((str (buffer-substring-no-properties beg end))
-         (key (-second-item (s-match *org-cite-regexp str))))
-    (+ebib-open-on-key key)))
+  (let* ((keys (->> (buffer-substring-no-properties beg end)
+                    (s-match-strings-all *org-cite-key-regexp)
+                    (-map #'-second-item))))
+    (pcase (length keys)
+      (0 (user-error "No keys found!"))
+      (1 (+ebib-open-on-key (car keys)))
+      (_ (let ((key (completing-read "Choose key to open: " keys)))
+           (+ebib-open-on-key key))))))
+
+(defvar *org-cite-regexp
+  (rx (seq "[cite"
+           (opt ?/ (one-or-more (any alnum ?/ ?_ ?-)))
+           ":" (zero-or-more (not (any ?[ ?]))) "]")))
+
+(defvar *org-cite-key-regexp
+  (rx (seq "@" (group (one-or-more (or alnum ?- ?_))))))
 
 (defun +ebib-open-on-key (key)
   (ebib)
@@ -1241,6 +1232,15 @@ For use inside `cond'."
 
 (defun *org-toggle-image (beg end)
   (org-toggle-inline-images nil beg end))
+
+(defvar *org-image-regexp
+  (rx (seq "[[./" (+? anything) "." (or "png" "jpg" "jpeg") "]]")))
+
+(defvar *url-regexp
+  (concat "\\<"
+          (regexp-opt '("http://" "https://" "doi:") t)
+          thing-at-point-url-path-regexp)
+  "Basically a simplified version of `goto-address-url-regxp'")
 #+end_src
 
 ** TODO Org-refile
