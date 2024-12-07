@@ -1157,7 +1157,8 @@ Respects current indentation and checkbox."
 If expansion fails, return nil.
 This function is specifically for use with org-cycle."
   (ignore-errors
-      (tempel--interactive #'tempel-expand)))
+    (when (evil-insert-state-p)
+      (tempel--interactive #'tempel-expand))))
 #+end_src
 
 *** My version of org-return
