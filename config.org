@@ -458,6 +458,7 @@ Note that evil-collection does not include bindings for org-agenda
 
 *** TODO Undo
 See also Hints and undo-fu-session [[https://codeberg.org/ideasman42/emacs-undo-fu][here]].
+Can also try [[https://github.com/casouri/vundo][vundo]], although my undo needs aren't that sophisticated.
 
 #+begin_src emacs-lisp
 (use-package undo-fu)
@@ -1220,7 +1221,7 @@ For use inside `cond'."
 (defvar *org-cite-regexp
   (rx (seq "[cite"
            (opt ?/ (one-or-more (any alnum ?/ ?_ ?-)))
-           ":" (zero-or-more (not (any ?[ ?]))) "]")))
+           ":" (zero-or-more (not (any ?\[ ?\]))) "]")))
 
 (defvar *org-cite-key-regexp
   (rx (seq "@" (group (one-or-more (or alnum ?- ?_))))))
@@ -1243,7 +1244,7 @@ For use inside `cond'."
   "Basically a simplified version of `goto-address-url-regxp'")
 #+end_src
 
-** TODO Org-refile
+** Org-refile
 
 This bit of code works. I should test it more.
 Right now it does not move the pointer after refiling.
@@ -1647,19 +1648,30 @@ and then it's indispensable.
   :init (global-anzu-mode 1))
 #+end_src
 
-** TODO hl-todo
+** hl-todo
 
 #+begin_src emacs-lisp
 (use-package hl-todo
   :defer 2
-  :config (global-hl-todo-mode 1))
+  :config (global-hl-todo-mode 1)
+  (transient-define-prefix +hl-todo-transient ()
+    ["Change margins..."
+     ("n" "next" hl-todo-next :transient t)
+     ("p" "previous" hl-todo-previous :transient t)
+     ("q" "quit" transient-quit-all)]))
 #+end_src
 
-** TODO Olivetti
+** Olivetti
 
 #+begin_src emacs-lisp
 (use-package olivetti
-  :commands (olivetti-mode))
+  :commands (olivetti-mode)
+  :config
+  (transient-define-prefix +olivetti-transient ()
+    ["Change margins..."
+     ("e" "expand" olivetti-expand :transient t)
+     ("s" "shrink" olivetti-shrink :transient t)
+     ("q" "quit" transient-quit-all)]))
 #+end_src
 
 ** ws-butler
