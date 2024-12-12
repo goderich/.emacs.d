@@ -1487,13 +1487,14 @@ See also the following:
 
 #+begin_src emacs-lisp
 (use-package cider
-  :commands (cider-jack-in cider-jack-in-clj cider-jack-in-cljs)
+  :commands (cider-jack-in cider-jack-in-clj cider-jack-in-cljs
+             cider-connect-clj cider-connect-cljs)
   :config
   (setq cider-allow-jack-in-without-project t
         cider-jack-in-default 'babashka
         cider-repl-pop-to-buffer-on-connect nil)
 
-  (evil-define-key 'normal cider-mode-map
+  (evil-define-key 'normal clojure-mode-map
     (kbd "<localleader>ee") #'cider-eval-last-sexp
     (kbd "<localleader>pp") #'cider-pprint-eval-last-sexp-to-comment
     (kbd "<localleader>(") #'sp-backward-slurp-sexp
