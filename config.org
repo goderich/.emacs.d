@@ -335,8 +335,8 @@ and not a great loss in normal mode.
 (The lack of =,= in normal mode is remedied by [[id:8c7a6f08-49e4-47c8-acbb-45de731cdb1f][evil-snipe]].)
 
 #+begin_src emacs-lisp :tangle no :noweb-ref evil-keybindings
-(evil-set-leader 'normal (kbd "SPC"))
-(evil-set-leader 'normal (kbd ",") 'localleader)
+(evil-set-leader '(normal visual) (kbd "SPC"))
+(evil-set-leader '(normal visual) (kbd ",") 'localleader)
 #+end_src
 
 *** M-x (execute-extended-command)
