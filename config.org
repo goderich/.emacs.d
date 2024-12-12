@@ -104,6 +104,9 @@ TODO: see if temp backups can be created somewhere else, e.g. /tmp
   (load custom-file)
   ;; do not use tabs for indentation
   (setq-default indent-tabs-mode nil)
+  ;; 100 recent items should be enough
+  (setq recentf-max-saved-items 100
+        recentf-max-menu-items 100)
   ;; scrolling settings
   (setq scroll-conservatively 200
         scroll-preserve-screen-position 1))
@@ -163,6 +166,8 @@ Look into faces and theming.
 Simple font config from [[https://protesilaos.com/codelog/2024-11-28-basic-emacs-configuration/#h:c7528f3d-9fc8-49e5-9468-6868fb5c07b5][Prot's tutorial]].
 Some ideas for font configuration in [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/][this blog post]] and [[https://stackoverflow.com/questions/28428382/how-to-manage-fonts-in-emacs][this SO answer]].
 [[https://github.com/be5invis/Iosevka][Iosevka]] gets mentioned a lot as a monospace font.
+Triplicate (fixed) and Heliotrope (variable) by Matthew Butterick in [[https://www.reddit.com/r/emacs/comments/1hbddab/emacs_has_never_felt_so_good/][this config]].
+
 #+begin_src emacs-lisp
 (use-package mixed-pitch
   :hook (text-mode . mixed-pitch-mode))
