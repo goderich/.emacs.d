@@ -154,13 +154,85 @@ See also =use-package-defaults= for other settings.
 
 I think I'll stick with the solarized-theme package,
 but I would like to change a few things.
-Look into faces and theming.
+Looking into faces and theming.
 
 #+begin_src emacs-lisp
 (use-package solarized-theme
   :config
-  (load-theme 'solarized-light t))
+  (load-theme 'solarized-light t)
+
+  (face-spec-set 'org-done
+                 '((t :foreground "gray"
+                      :weight bold)))
+  (face-spec-set 'org-headline-done
+                 '((t :foreground "gray")))
+  (face-spec-set 'org-todo
+                 '((t :foreground "#cc9393")))
+  (face-spec-set 'font-lock-builtin-face
+                 '((t :foreground "#d33682"
+                      :weight normal)))
+  (face-spec-set 'org-level-1
+                 '((t :foreground "#076678"
+                      :height 1.3)))
+  (face-spec-set 'org-block
+                 '((t :background "#faf1d9"
+                      :extend t))))
 #+end_src
+
+Values of some faces from doom-solarized-light:
+#+begin_src emacs-lisp :tangle no
+org-level-1
+Height: 1.3
+Foreground: #076678
+
+org-level-2
+Height: 1.2
+Foreground: #b57614
+
+org-level-3
+Height: 1.15
+Foreground: #8f3f71
+
+org-block-begin-line
+Background: #f7edd0
+Underline: t
+Extend: t
+Inherit: org-meta-line
+
+org-block-end-line
+Background: #f7edd0
+Overline: t
+Extend: t
+Inherit: org-meta-line
+
+org-meta-line
+Slant: italic
+Foreground: #35a69c
+
+link
+Weight: bold
+Foreground: #268bd2
+Underline: t
+
+default
+Foreground: #556b72
+Background: #FDF6E3
+
+font-lock-constant-face (symbols)
+Weight: bold
+Foreground: #6c71c4
+
+font-lock-keyword-face (functions)
+Weight: bold
+Foreground: #859900
+
+font-lock-function-name-face (fn name in defun)
+Foreground: #b58900
+#+end_src
+
+See also:
+https://colorcodes.io/yellow/cream-color-codes/
+https://colorcodes.io/beige-color-codes/
 
 ** Fonts
 Simple font config from [[https://protesilaos.com/codelog/2024-11-28-basic-emacs-configuration/#h:c7528f3d-9fc8-49e5-9468-6868fb5c07b5][Prot's tutorial]].
@@ -786,9 +858,24 @@ if you are using more keywords than just TODO and DONE.
 ;; into a single hidden file.
 (setq org-archive-location ".archive.org::")
 
-;; My custom faces for todo items. I'm reusing most from Doom.
-(with-no-warnings
-  (custom-declare-face '+org-todo-important '((t (:inherit (bold default)))) ""))
+;; My custom faces for todo items.
+(defface *org-todo-important
+  '((t :inherit org-todo
+       :foreground "#dc322f"))
+  "For very important todo items.")
+
+;; Colour taken from hl-todo.
+(defface *org-todo-unimportant
+  '((t :inherit org-todo
+       :foreground "#d0bf8f"))
+  "For less urgent todo items.")
+
+(setq org-todo-keyword-faces
+      '(("LATER"     *org-todo-unimportant)
+        ("NEXT"      *org-todo-important)
+        ("WAITING"   *org-todo-unimportant)
+        ("LOOP"      *org-todo-unimportant)
+        ("CANCELLED" org-done)))
 
 ;; In the datetime prompt, if entering a time that has already
 ;; passed today, interpret it as a time for tomorrow.
@@ -1572,9 +1659,6 @@ or move the point after the snippet.
 ** Modeline
 
  Currently using [[https://gitlab.com/jessieh/mood-line][mood-line]] (see [[https://www.reddit.com/r/emacs/comments/c5mel4/what_mode_line_do_you_use_and_why/][here]] for more great packages.)
- Check =mood-line-defformat= for custom formatting options.
- Customization is very simple, see =mood-line-format-default=
- and =mood-line-format-default-extended= for examples.
 
 #+begin_src emacs-lisp
 (use-package mood-line
