@@ -76,6 +76,20 @@ See [[https://www.reddit.com/r/emacs/comments/9zad13/managing_personal_packages_
 Some interesting stuff here:
 https://github.com/daviwil/emacs-from-scratch
 
+* Introduction
+
+- Evil-based
+  - Mnemonic, but I use Dvorak
+- use-package with defers
+  - elpaca?
+- Transient-heavy config
+- Function naming conventions (=+= and =*= prefixes)
+
+Emacs, while a powerful tool, at the same time lies somewhere between
+an intellectually stimulating hobby and structured procrastination.
+
+History (Vim -> Spacemacs -> Doom Emacs -> this)
+
 * Basic settings
 ** NEXT Early loading
 Maybe some of this should be in =early-init.el=?
