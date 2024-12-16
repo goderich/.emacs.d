@@ -175,38 +175,63 @@ Looking into faces and theming.
   :config
   (load-theme 'solarized-light t)
 
+  (face-spec-set 'default
+                 '((t :background "#fdf6e3")))
   (face-spec-set 'org-done
                  '((t :foreground "gray"
                       :weight bold)))
   (face-spec-set 'org-headline-done
                  '((t :foreground "gray")))
   (face-spec-set 'org-todo
-                 '((t :foreground "#cc9393")))
+                 '((t :foreground "#859900")))
   (face-spec-set 'font-lock-builtin-face
                  '((t :foreground "#d33682"
                       :weight normal)))
   (face-spec-set 'org-level-1
-                 '((t :foreground "#076678"
+                 '((t :foreground "#268bd2"
                       :height 1.3)))
+  (face-spec-set 'org-level-2
+                 '((t :foreground "#d33682"
+                      :height 1.2)))
+  (face-spec-set 'org-level-3
+                 '((t :foreground "#6c71c4"
+                      :height 1.15)))
+  (face-spec-set 'org-level-4
+                 '((t :foreground "#5ca8dd"
+                      :height 1.15)))
+  (face-spec-set 'org-level-5
+                 '((t :foreground "#de68a1"
+                      :height 1.15)))
+  (face-spec-set 'org-level-6
+                 '((t :foreground "#92c4e8"
+                      :height 1.15)))
+  (face-spec-set 'org-level-7
+                 '((t :foreground "#e99ac0"
+                      :height 1.15)))
+  (face-spec-set 'org-level-8
+                 '((t :foreground "#d3e7f6"
+                      :height 1.15)))
+  (face-spec-set 'org-table
+                 '((t :foreground "#6c71c4")))
+  (face-spec-set 'org-cite
+                 '((t :foreground "#b58900")))
   (face-spec-set 'org-block
                  '((t :background "#faf1d9"
-                      :extend t))))
+                      :extend t)))
+  ;; org agenda
+  (face-spec-set 'org-agenda-date
+                 '((t :foreground "#657b83" ; same as default
+                      :weight bold)))
+  (face-spec-set 'org-scheduled-previously
+                 '((t :foreground "#657b83"))) ; same as default
+  (face-spec-set 'link
+                 '((t :foreground "#268bd2"
+                      :weight bold
+                      :underline t))))
 #+end_src
 
 Values of some faces from doom-solarized-light:
 #+begin_src emacs-lisp :tangle no
-org-level-1
-Height: 1.3
-Foreground: #076678
-
-org-level-2
-Height: 1.2
-Foreground: #b57614
-
-org-level-3
-Height: 1.15
-Foreground: #8f3f71
-
 org-block-begin-line
 Background: #f7edd0
 Underline: t
@@ -222,19 +247,6 @@ Inherit: org-meta-line
 org-meta-line
 Slant: italic
 Foreground: #35a69c
-
-link
-Weight: bold
-Foreground: #268bd2
-Underline: t
-
-default
-Foreground: #556b72
-Background: #FDF6E3
-
-font-lock-constant-face (symbols)
-Weight: bold
-Foreground: #6c71c4
 
 font-lock-keyword-face (functions)
 Weight: bold
