@@ -882,7 +882,7 @@ if you are using more keywords than just TODO and DONE.
 This bit of witchcraft, extracted from Doom and simplified, colours a file link with a different colour (from the current theme's warning face) if Emacs can't find the file it refers to. Very simple idea, but brilliant in its simplicity, and wonderfully executed.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref org-settings
-;; Source: https://github.com/doomemacs/doomemacs/blob/master/modules/lang/org/config.el#L503C1-L517C43
+;; Source: https://github.com/doomemacs/doomemacs/blob/ba1dca322f9a07bc2b7bec6a98f2c3c55c0bbd77/modules/lang/org/config.el#L503-L517
 ;; Modify default file: links to colorize broken file links red
 (org-link-set-parameters
  "file" :face (lambda (path)
