@@ -224,6 +224,8 @@ Looking into faces and theming.
                       :weight bold)))
   (face-spec-set 'org-scheduled-previously
                  '((t :foreground "#657b83"))) ; same as default
+  (face-spec-set 'org-agenda-done
+                 '((t :slant normal)))
   (face-spec-set 'link
                  '((t :foreground "#268bd2"
                       :weight bold
