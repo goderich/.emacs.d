@@ -909,7 +909,8 @@ Headings with DONE have a special face that's in-built and can be customized, bu
 (defun *org-add-checked-font-lock ()
   (font-lock-add-keywords
    nil
-   `((,(rx (seq line-start (* space) "- [X] " (+ not-newline))) 0 'org-headline-done prepend))
+   ;; (rx (seq line-start (* space) "- [X] " (+ not-newline)))
+   `(("^[[:space:]]*- \\[X] .+" 0 'org-headline-done prepend))
    'append))
 
 (add-hook 'org-mode-hook #'*org-add-checked-font-lock)
