@@ -209,9 +209,15 @@ Looking into faces and theming.
                  '((t :foreground "#6c71c4")))
   (face-spec-set 'org-cite
                  '((t :foreground "#b58900")))
+  ;; org src blocks
   (face-spec-set 'org-block
                  '((t :background "#faf1d9"
                       :extend t)))
+  (face-spec-set 'org-meta-line
+                 '((t :slant normal)))
+  ;; org checkbox
+  (face-spec-set 'org-checkbox
+                 '((t :box unspecified)))
   ;; org agenda
   (face-spec-set 'org-agenda-date
                  '((t :foreground "#657b83" ; same as default
@@ -222,32 +228,6 @@ Looking into faces and theming.
                  '((t :foreground "#268bd2"
                       :weight bold
                       :underline t))))
-#+end_src
-
-Values of some faces from doom-solarized-light:
-#+begin_src emacs-lisp :tangle no
-org-block-begin-line
-Background: #f7edd0
-Underline: t
-Extend: t
-Inherit: org-meta-line
-
-org-block-end-line
-Background: #f7edd0
-Overline: t
-Extend: t
-Inherit: org-meta-line
-
-org-meta-line
-Slant: italic
-Foreground: #35a69c
-
-font-lock-keyword-face (functions)
-Weight: bold
-Foreground: #859900
-
-font-lock-function-name-face (fn name in defun)
-Foreground: #b58900
 #+end_src
 
 See also:
@@ -506,6 +486,7 @@ Spacemacs also introduced me to mnemonic keybindings.
   (kbd "<leader>f") #'+file-transient
   ;; Buffers
   (kbd "<leader>,") #'consult-buffer
+  (kbd "<leader>bd") #'kill-this-buffer
   (kbd "<leader>bq") #'kill-this-buffer
   ;; Windows
   (kbd "<leader>w") #'+window-transient
@@ -835,10 +816,6 @@ if you are using more keywords than just TODO and DONE.
 #+end_src
 
 #+begin_src emacs-lisp :tangle no :noweb-ref org-settings
-;; (setq org-tag-faces (:foreground "blue" :weight normal))
-#+end_src
-
-#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
 ;; Set org file associations
 (setq org-file-apps
       `((auto-mode . emacs)
@@ -852,7 +829,7 @@ if you are using more keywords than just TODO and DONE.
 
 ;; Don't use blank lines between text and the following heading
 (setq org-blank-before-new-entry
-      '((heading . nil) (plain-list-item . nil)))
+      '((heading . t) (plain-list-item . nil)))
 
 ;; Don't show empty lines between collapsed headings
 (setq org-cycle-separator-lines 0)
@@ -902,11 +879,41 @@ if you are using more keywords than just TODO and DONE.
 (setq org-read-date-prefer-future 'time)
 #+end_src
 
+This bit of witchcraft, extracted from Doom and simplified, colours a file link with a different colour (from the current theme's warning face) if Emacs can't find the file it refers to. Very simple idea, but brilliant in its simplicity, and wonderfully executed.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
+;; Source: https://github.com/doomemacs/doomemacs/blob/master/modules/lang/org/config.el#L503C1-L517C43
+;; Modify default file: links to colorize broken file links red
+(org-link-set-parameters
+ "file" :face (lambda (path)
+                (if (file-exists-p path)
+                    'org-link
+                  '(warning org-link))))
+#+end_src
+
 #+begin_src emacs-lisp :tangle no :noweb-ref org-src-settings
 (setq org-edit-src-content-indentation 0)
 (setq org-confirm-babel-evaluate nil)
 #+end_src
 
+** Font lock for text in org checked items
+
+Yet another fantastic idea from Doom: a special face for list items with a checked checkbox, as in this example:
+
+- [ ] unchecked
+- [X] checked
+
+Headings with DONE have a special face that's in-built and can be customized, but the same does not exist for checked list items. Doom had its own workaround, which I was unable to find after a couple days' searching, but I did find [[https://fuco1.github.io/2017-05-25-Fontify-done-checkbox-items-in-org-mode.html][this blog post]], which referenced hlissner's config from 2017 (aka proto-Doom). Based on the code therein and on the [[info:elisp#Search-based Fontification][info node]], I wrote my own version. Using a hook appears to be more reliable.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
+(defun *org-add-checked-font-lock ()
+  (font-lock-add-keywords
+   nil
+   `((,(rx (seq line-start (* space) "- [X] " (+ not-newline))) 0 'org-headline-done prepend))
+   'append))
+
+(add-hook 'org-mode-hook #'*org-add-checked-font-lock)
+#+end_src
 
 ** Org keybindings
 
@@ -1040,7 +1047,9 @@ https://github.com/minad/org-modern
   :hook org-mode
   :config
   (setq org-modern-todo nil
-        org-modern-table nil))
+        org-modern-table nil)
+  ;; I prefer typing `-' but seeing bullets
+  (map-put! org-modern-list ?- "•"))
 #+end_src
 
 ** Transient navigation
@@ -1837,6 +1846,7 @@ https://github.com/Wilfred/helpful
       ("p" "thing at point" helpful-at-point)]
      ["In-built help"
       ("m" "describe mode" describe-mode)
+      ("F" "describe face" describe-face)
       ("i" "info" info)]
      [("q" "quit" transient-quit-all)
       ("<escape>" "quit" transient-quit-all)]]))
