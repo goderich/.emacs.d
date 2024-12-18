@@ -11,7 +11,6 @@ Programming langs and other modes (check my doom/init.el):
 - unify smartparens keybindings for lisps
 - Elisp
   - macroexpand
-- Clojure
 - Zig
 - Odin
 - LSP/treesitter
@@ -41,13 +40,7 @@ These are some of the packages I should consider:
 - Should also look into terminal emulation in Emacs perhaps. Then again, perhaps not.
 - Org-mode:
   - https://github.com/rougier/agenda <- python script, but might be useful?
-- Theming:
-  - https://github.com/doomemacs/themes
-  - https://github.com/rougier/nano-emacs and related packages
-  - https://github.com/bbatsov/zenburn-emacs
-  - https://github.com/oneKelvinSmith/monokai-emacs
-  - https://github.com/kunalb/poet
-  - https://github.com/rougier/nano-theme
+  - =(setq org-hide-emphasis-markers t)= with https://github.com/awth13/org-appear
 - https://github.com/Wilfred/deadgrep
 - https://github.com/vedang/pdf-tools
 - Mail? Consider.
@@ -67,6 +60,7 @@ I can read other people's configs, not limited to literate ones.
 - [[https://zzamboni.org/post/my-doom-emacs-configuration-with-commentary/][Zzamboni's Doom config]]
 - [[https://github.com/rougier/dotemacs/blob/master/dotemacs.org][Nicholas Rougier's literate config]]
 - See [[https://github.com/jschaf/dotfiles/blob/master/emacs/core/abn-core-emacs-settings.el][this config]] (including other files) for some obscure settings and startup hacks.
+- [[https://sophiebos.io/posts/prettifying-emacs-org-mode/][org prettifying]]
 
 See [[https://www.reddit.com/r/emacs/comments/9zad13/managing_personal_packages_with_usepackage/][here]] for instructions on how to load local files with =use-package=
 (so that they can be deferred, of course)
