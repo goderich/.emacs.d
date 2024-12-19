@@ -62,6 +62,7 @@ Creates the ID if one isn't already present."
 
 (defun +org-insert-file-path ()
   "Insert file path at point as an org-link, with autocompletion."
+  ;; see `org-link-complete-file'
   (interactive)
   (let ((result (find-file-read-args "Copy file path: "
                                      (confirm-nonexistent-file-or-buffer))))
