@@ -514,6 +514,8 @@ Spacemacs also introduced me to mnemonic keybindings.
   (kbd "<leader>a") #'org-agenda-list
   ;; links
   (kbd "<leader>u") #'link-hint-open-link
+  ;; olivetti
+  (kbd "<leader>o") #'+olivetti-transient
   ;; todo items
   (kbd "]t") #'hl-todo-next
   (kbd "[t") #'hl-todo-previous
@@ -1860,11 +1862,20 @@ and then it's indispensable.
 (use-package olivetti
   :commands (olivetti-mode)
   :config
+  (defun turn-off-olivetti-mode ()
+    (interactive)
+    (olivetti-mode -1))
+
   (transient-define-prefix +olivetti-transient ()
-    ["Change margins..."
-     ("e" "expand" olivetti-expand :transient t)
-     ("s" "shrink" olivetti-shrink :transient t)
-     ("q" "quit" transient-quit-all)]))
+    ["Change text width..."
+     [("w" "wider" olivetti-expand :transient t)
+      ("n" "narrower" olivetti-shrink :transient t)]
+     [("f" "turn off olivetti" turn-off-olivetti-mode)
+      ("q" "quit" transient-quit-all)]]
+    (interactive)
+    (unless olivetti-mode
+      (olivetti-mode))
+    (transient-setup '+olivetti-transient)))
 #+end_src
 
 ** ws-butler
