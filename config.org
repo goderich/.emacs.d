@@ -1638,7 +1638,8 @@ Consider also [[https://github.com/alphapapa/magit-todos][magit-todos]].
   (evil-define-key '(normal visual) 'global
     (kbd "<leader>gg") #'magit)
   :config
-  (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1))
+  (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
+  (setq git-commit-summary-max-length 50))
 #+end_src
 
 *** Git diff highlighting
