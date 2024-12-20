@@ -230,7 +230,9 @@ Looking into faces and theming.
                  '((t :background "#faf1d9"
                       :extend t)))
   (face-spec-set 'org-meta-line
-                 '((t :slant normal)))
+                 '((t :background "#faf1d9"
+                      :slant normal
+                      :extend t)))
   ;; org checkbox
   (face-spec-set 'org-checkbox
                  '((t :box unspecified)))
@@ -295,6 +297,9 @@ Also [[https://coldnew.github.io/d5011be2/][this article]] deals with CJK alignm
 
 ** TODO Utility functions
 Should move these under appropriate headings.
+
+Fn for renaming current file:
+https://github.com/jakebox/jake-emacs/blob/main/jake-emacs/jib-funcs.el#L79
 
 #+begin_src emacs-lisp
 (defun +consult-goto-org-heading ()
@@ -1039,6 +1044,8 @@ I went with the DIY option, but took some inspiration from [[https://github.com/
 ** Org bling
 
 Org-mode is amazing, but doesn't look it out of the box. Some light eye candy makes it an even bigger pleasure to use.
+
+I could also consider pimping my [[https://pank.eu/blog/pretty-babel-src-blocks.html][source blocks]]. Some of this functionality can be achieved through org-modern.
 
 *** Org-modern
 
