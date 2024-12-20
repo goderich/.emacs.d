@@ -914,26 +914,6 @@ This bit of witchcraft, extracted from Doom and simplified, colours a file link 
 (setq org-confirm-babel-evaluate nil)
 #+end_src
 
-** Font lock for text in org checked items
-
-Yet another fantastic idea from Doom: a special face for list items with a checked checkbox, as in this example:
-
-- [ ] unchecked
-- [X] checked
-
-Headings with DONE have a special face that's in-built and can be customized, but the same does not exist for checked list items. Doom had its own workaround, which I was unable to find after a couple days' searching, but I did find [[https://fuco1.github.io/2017-05-25-Fontify-done-checkbox-items-in-org-mode.html][this blog post]], which referenced hlissner's config from 2017 (aka proto-Doom). Based on the code therein and on the [[info:elisp#Search-based Fontification][info node]], I wrote my own version. Using a hook appears to be more reliable.
-
-#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
-(defun *org-add-checked-font-lock ()
-  (font-lock-add-keywords
-   nil
-   ;; (rx (seq line-start (* space) "- [X] " (+ not-newline)))
-   `(("^[[:space:]]*- \\[X] .+" 0 'org-headline-done prepend))
-   'append))
-
-(add-hook 'org-mode-hook #'*org-add-checked-font-lock)
-#+end_src
-
 ** Org keybindings
 
 Note that some keybindings are set in their respective modes.
@@ -1054,12 +1034,17 @@ I went with the DIY option, but took some inspiration from [[https://github.com/
   (kbd "<return>") #'org-agenda-goto)
 #+end_src
 
-** TODO Org-modern bling
+** Org bling
 
-Just tried this out on the Surface go, and it isn't slow at all.
-I think I'll keep using this package,
-but I'll need to research the settings some more.
-https://github.com/minad/org-modern
+Org-mode is amazing, but doesn't look it out of the box. Some light eye candy makes it an even bigger pleasure to use.
+
+*** Org-modern
+
+When using Doom, I bounced on one of its org beautification settings, which slowed down my Emacs quite noticeably. Right now I am using [[https://github.com/minad/org-modern][org-modern]] on a Surface Go 2, and it isn't slow at all.
+
+I don't use all of the defaults though. I prefer my own faces for todos, and I'm not yet sure what to do with the tables.
+
+With org-lists, I use "-" everywhere, because it's easily reachable on Dvorak. The defaults replacement for "-" is a longer dash, but I like nice fat dots instead.
 
 #+begin_src emacs-lisp
 (use-package org-modern
@@ -1067,8 +1052,52 @@ https://github.com/minad/org-modern
   :config
   (setq org-modern-todo nil
         org-modern-table nil)
-  ;; I prefer typing `-' but seeing bullets
   (map-put! org-modern-list ?- "•"))
+#+end_src
+
+*** Font lock for text in org checked items
+
+Yet another fantastic idea from Doom: a special face for list items with a checked checkbox, as in this example:
+
+- [ ] unchecked
+- [X] checked
+
+Headings with DONE have a special face that's in-built and can be customized, but the same does not exist for checked list items. Doom had its own workaround, which I was unable to find after a couple days' searching, but I did find [[https://fuco1.github.io/2017-05-25-Fontify-done-checkbox-items-in-org-mode.html][this blog post]], which referenced hlissner's config from 2017 (aka proto-Doom). Based on the code therein and on the [[info:elisp#Search-based Fontification][info node]], I wrote my own version. I use a simpler regex than what I've seen online, because I don't use =[X/Y]= in checkboxes.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-functions
+(defun *org-add-checked-font-lock ()
+  (font-lock-add-keywords
+   nil
+   ;; (rx (seq line-start (* space) "- [X] " (+ not-newline)))
+   `(("^[[:space:]]*- \\[X] .+" 0 'org-headline-done prepend))
+   'append))
+#+end_src
+
+Using a hook appears to be more reliable than just a bare =font-lock-add-keywords= setting, though. I'm not sure why, since other people's configs use it without a hook. Some part of my config must be interfering with it.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-hooks
+(org-mode . *org-add-checked-font-lock)
+#+end_src
+
+*** Org-appear
+
+Hiding emphasis markers in org-mode makes it look quite nice, however it also makes editing more difficult. The [[https://github.com/awth13/org-appear][org-appear]] package shows hidden emphasis markers when the cursor is on an emphasized word, solving that problem.
+
+#+begin_src emacs-lisp
+(use-package org-appear
+  :commands (org-appear-mode))
+#+end_src
+
+I hook the package to open together with org.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-hooks
+(org-mode . org-appear-mode)
+#+end_src
+
+Now the emphasis markers may safely be hidden.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
+(setq org-hide-emphasis-markers t)
 #+end_src
 
 ** Transient navigation
