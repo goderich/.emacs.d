@@ -55,7 +55,7 @@ https://github.com/emacs-tw/awesome-emacs
 
 I can read other people's configs, not limited to literate ones.
 - [[https://github.com/bbatsov/emacs.d/blob/master/init.el][bbatsov's minimalist config]]
-- [[https://github.com/hrs/dotfiles/blob/main/emacs/.config/emacs/configuration.org][Great evil-based config]]
+- [[https://github.com/hrs/dotfiles/blob/main/emacs/.config/emacs/configuration.org][Great evil-based config]] with a bunch of functional lang settings.
 - [[https://github.com/zzamboni/dot-emacs/blob/master/init.org][Zzamboni's evil-based config]] prior to his migration to Doom. Lots of org gems there.
 - [[https://zzamboni.org/post/my-doom-emacs-configuration-with-commentary/][Zzamboni's Doom config]]
 - [[https://github.com/rougier/dotemacs/blob/master/dotemacs.org][Nicholas Rougier's literate config]]
@@ -118,6 +118,22 @@ TODO: see if temp backups can be created somewhere else, e.g. /tmp
   ;; scrolling settings
   (setq scroll-conservatively 200
         scroll-preserve-screen-position 1))
+#+end_src
+
+** In-built packages
+
+Packages that form part of Emacs live here.
+
+Some in-built packages are very useful, but not needed at startup. They may also lack handy trigger functions to bind them to. I defer the loading of these packages with idle timers as suggested [[https://blog.d46.us/advanced-emacs-startup/][here]].
+
+*** Save place mode
+
+I prefer not to defer save-place-mode. Waiting a couple of seconds after startup to ensure it loads seems counterproductive to me, if it adds a few centiseconds to startup time at best. When trying it with defers, I found that I was often too quick to open a file, and save-place-mode hadn't started yet.
+
+#+begin_src emacs-lisp
+(use-package saveplace
+  :init (save-place-mode 1)
+  :config (setq save-place-forget-unreadable-files nil))
 #+end_src
 
 ** Package management
