@@ -262,7 +262,8 @@ Triplicate (fixed) and Heliotrope (variable) by Matthew Butterick in [[https://w
 
 #+begin_src emacs-lisp
 (use-package mixed-pitch
-  :hook (text-mode . mixed-pitch-mode))
+  :hook ((text-mode . mixed-pitch-mode)
+         (Info-mode . mixed-pitch-mode)))
 
 (set-frame-font "Source Code Pro-20")
 #+end_src
@@ -1868,7 +1869,9 @@ and then it's indispensable.
 #+begin_src emacs-lisp
 (use-package olivetti
   :commands (olivetti-mode)
+  :hook (Info-mode . olivetti-mode)
   :config
+  (setq-default olivetti-body-width 60)
   (defun turn-off-olivetti-mode ()
     (interactive)
     (olivetti-mode -1))
