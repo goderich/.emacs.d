@@ -298,9 +298,6 @@ Also [[https://coldnew.github.io/d5011be2/][this article]] deals with CJK alignm
 ** TODO Utility functions
 Should move these under appropriate headings.
 
-Fn for renaming current file:
-https://github.com/jakebox/jake-emacs/blob/main/jake-emacs/jib-funcs.el#L79
-
 #+begin_src emacs-lisp
 (defun +consult-goto-org-heading ()
     "Find an org heading in the current buffer, and open it.
@@ -716,6 +713,7 @@ and I'm still in the process of refining it.
    ["With this file..."
     ("s" "save" save-buffer)
     ("D" "delete" crux-delete-file-and-buffer)
+    ("R" "rename" crux-rename-file-and-buffer)
     ("u" "sudo edit" crux-sudo-edit)]
    ["Open..."
     ("r" "recent file" recentf)
@@ -1786,6 +1784,7 @@ or move the point after the snippet.
 #+begin_src emacs-lisp
 (use-package crux
   :commands (crux-delete-file-and-buffer
+             crux-rename-file-and-buffer
              crux-sudo-edit
              crux-move-beginning-of-line
              crux-eval-and-replace))
