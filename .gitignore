@@ -3,10 +3,7 @@ custom.el
 *~
 eln-cache/
 elpa/
-history
-recentf
-bookmarks
-projects
 transient/
+tmp/
 .local/
 .org-id-locations

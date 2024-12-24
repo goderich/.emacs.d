@@ -111,9 +111,6 @@ TODO: see if temp backups can be created somewhere else, e.g. /tmp
   (load custom-file)
   ;; do not use tabs for indentation
   (setq-default indent-tabs-mode nil)
-  ;; 100 recent items should be enough
-  (setq recentf-max-saved-items 100
-        recentf-max-menu-items 100)
   ;; scrolling settings
   (setq scroll-conservatively 200
         scroll-preserve-screen-position 1))
@@ -132,7 +129,47 @@ I prefer not to defer save-place-mode. Waiting a couple of seconds after startup
 #+begin_src emacs-lisp
 (use-package saveplace
   :init (save-place-mode 1)
-  :config (setq save-place-forget-unreadable-files nil))
+  :config
+  (setq save-place-forget-unreadable-files nil
+        save-place-file (file-name-concat user-emacs-directory "tmp/places")))
+#+end_src
+
+*** Savehist move
+
+#+begin_src emacs-lisp
+(use-package savehist
+  :init (savehist-mode 1)
+  :config
+  (setq savehist-file (file-name-concat user-emacs-directory "tmp/history")))
+#+end_src
+
+*** Tramp
+
+#+begin_src emacs-lisp
+(use-package tramp
+  :defer 2
+  :config
+  (setq tramp-persistency-file-name
+        (file-name-concat user-emacs-directory "tmp/tramp")))
+#+end_src
+
+*** Recentf
+
+#+begin_src emacs-lisp
+(use-package recentf
+  :init (recentf-mode 1)
+  :config
+  (setq recentf-max-saved-items 1000
+        recentf-max-menu-items 1000
+        recentf-save-file (file-name-concat user-emacs-directory "tmp/recentf")))
+#+end_src
+
+*** Bookmarks
+
+#+begin_src emacs-lisp
+(use-package bookmark
+  :config
+  (setq bookmark-default-file (file-name-concat user-emacs-directory "tmp/bookmarks")))
 #+end_src
 
 ** Package management
