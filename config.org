@@ -257,7 +257,6 @@ https://colorcodes.io/beige-color-codes/
 Simple font config from [[https://protesilaos.com/codelog/2024-11-28-basic-emacs-configuration/#h:c7528f3d-9fc8-49e5-9468-6868fb5c07b5][Prot's tutorial]].
 Some ideas for font configuration in [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/][this blog post]] and [[https://stackoverflow.com/questions/28428382/how-to-manage-fonts-in-emacs][this SO answer]].
 [[https://github.com/be5invis/Iosevka][Iosevka]] gets mentioned a lot as a monospace font.
-Triplicate (fixed) and Heliotrope (variable) by Matthew Butterick in [[https://www.reddit.com/r/emacs/comments/1hbddab/emacs_has_never_felt_so_good/][this config]].
 
 #+begin_src emacs-lisp
 (use-package mixed-pitch
@@ -267,6 +266,7 @@ Triplicate (fixed) and Heliotrope (variable) by Matthew Butterick in [[https://w
 (set-frame-font "Source Code Pro-20")
 #+end_src
 For CJK fonts specifically, check [[https://www.shimmy1996.com/en/posts/2018-06-24-fun-with-fonts-in-emacs/][this]], or [[https://www.reddit.com/r/emacs/comments/8tz1r0/how_to_set_font_according_to_languages_that_i/e1bjce6/][this snippet]].
+[[https://github.com/be5invis/Sarasa-Gothic][Sarasa]] is a CJK font affiliated with Iosevka.
 Also [[https://coldnew.github.io/d5011be2/][this article]] deals with CJK alignment in org tables.
 
 ** Vars
@@ -1060,6 +1060,15 @@ With org-lists, I use "-" everywhere, because it's easily reachable on Dvorak. T
   (setq org-modern-todo nil
         org-modern-table nil)
   (map-put! org-modern-list ?- "•"))
+#+end_src
+
+*** Table alignment with valign
+
+Valign works much better with tables containing CJK and symbols than other similar packages. However, I've had it be a little slow, so I'm not turning it on by default, at least not yet.
+
+#+begin_src emacs-lisp
+(use-package valign
+  :commands (valign-mode))
 #+end_src
 
 *** Font lock for text in org checked items
