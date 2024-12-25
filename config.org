@@ -1873,7 +1873,10 @@ Consider also [[https://github.com/alphapapa/magit-todos][magit-todos]].
     (kbd "<leader>gg") #'magit)
   :config
   (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
-  (setq git-commit-summary-max-length 50))
+  (setq git-commit-summary-max-length 50)
+  (with-eval-after-load 'magit
+    (define-key git-commit-mode-map [remap save-buffers-kill-terminal] 'with-editor-finish)
+    (define-key git-commit-mode-map [remap kill-emacs]                 'with-editor-cancel)))
 #+end_src
 
 *** Git diff highlighting
