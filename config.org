@@ -803,7 +803,11 @@ but what I'm seeing so far is pretty nice.
      '("h" . meow-left)
      '("t" . meow-next)
      '("c" . meow-prev)
-     '("n" . meow-right))
+     '("n" . meow-right)
+     '("H" . "H-h")
+     '("T" . "H-t")
+     '("C" . "H-c")
+     '("N" . "H-n"))
 
     (meow-normal-define-key
      '("0" . meow-expand-0)
