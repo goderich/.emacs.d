@@ -412,7 +412,7 @@ or steal selectively. See the "[[https://github.com/Somelauw/evil-org-mode/blob/
 (blink-cursor-mode -1)
 #+end_src
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package evil-surround
   :ensure t
   :config (global-evil-surround-mode 1))
@@ -1200,7 +1200,7 @@ There are no bindings for agenda in evil-collection,
 so I had a choice between pulling another package and rolling my own.
 I went with the DIY option, but took some inspiration from [[https://github.com/Somelauw/evil-org-mode/blob/master/evil-org-agenda.el][evil-org]] in setting up mine.
 
-#+begin_src emacs-lisp :tangle no :noweb-ref org-agenda
+#+begin_src emacs-lisp :tangle no
 (evil-set-initial-state 'org-agenda-mode 'motion)
 
 (evil-define-key 'motion org-agenda-mode-map
@@ -1600,11 +1600,12 @@ For use inside `cond'."
 (defvar *org-image-regexp
   (rx (seq "[[./" (+? anything) "." (or "png" "jpg" "jpeg" "svg") "]]")))
 
-(defvar *url-regexp
-  (concat "\\<"
-          (regexp-opt '("http://" "https://" "doi:") t)
-          thing-at-point-url-path-regexp)
-  "Basically a simplified version of `goto-address-url-regxp'")
+(with-eval-after-load 'thingatpt
+  (defvar *url-regexp
+    (concat "\\<"
+            (regexp-opt '("http://" "https://" "doi:") t)
+            thing-at-point-url-path-regexp)
+    "Basically a simplified version of `goto-address-url-regxp'"))
 #+end_src
 
 ** Org-refile
@@ -1785,7 +1786,8 @@ Smartparens is THE package for lisp code editing.
   :config
   ;; load default config
   (require 'smartparens-config)
-  <<smartparens-keybindings>>)
+  ;; <<smartparens-keybindings>>
+  )
 #+end_src
 
 #+begin_src emacs-lisp
@@ -1872,9 +1874,9 @@ Consider also [[https://github.com/alphapapa/magit-todos][magit-todos]].
 #+begin_src emacs-lisp
 (use-package magit
   :commands (magit)
-  :init
-  (evil-define-key '(normal visual) 'global
-    (kbd "<leader>gg") #'magit)
+  ;; :init
+  ;; (evil-define-key '(normal visual) 'global
+  ;;   (kbd "<leader>gg") #'magit)
   :bind (:map magit-mode-map
               ("p" . magit-push))
   :config
@@ -1895,7 +1897,8 @@ Changed the settings using [[https://www.reddit.com/r/emacs/comments/582yms/ques
   <<diff-hl-colors>>
   (diff-hl-flydiff-mode)
   (global-diff-hl-mode)
-  <<diff-hl-keybindings>>)
+  ;; <<diff-hl-keybindings>>
+  )
 #+end_src
 
 I stole the insert and delete shades from Doom, because they look really good.
@@ -2093,7 +2096,7 @@ https://github.com/Wilfred/helpful
 (use-package helpful
   :commands (+helpful-transient)
   :config
-  (evil-define-key 'normal helpful-mode-map "q" #'kill-buffer-and-window)
+  ;; (evil-define-key 'normal helpful-mode-map "q" #'kill-buffer-and-window)
 
   (transient-define-prefix +helpful-transient ()
     ["Emacs help"
