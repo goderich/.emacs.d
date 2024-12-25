@@ -360,12 +360,12 @@ Should move these under appropriate headings.
   (toggle-truncate-lines 1))
 #+end_src
 
-* Evil
+* Evil (disabled)
 
 Check out this great macro for evil keybindings with use-package:
 https://www.mattduck.com/2023-08-28-extending-use-package-bind
 
-#+begin_src elisp :noweb yes
+#+begin_src elisp :tangle no :noweb yes
 (use-package evil
   :init
   ;; for use with evil-collection
@@ -389,7 +389,7 @@ https://www.mattduck.com/2023-08-28-extending-use-package-bind
   :config
   <<evil-cursor>>
   <<evil-keybindings>>
-  <<evil-transients>>
+  <<transients>>
 
   ;; Elisp mode
   (evil-define-key 'normal emacs-lisp-mode-map
@@ -586,7 +586,7 @@ so I'm trying it out for now. Can always copy/rewrite myself later.
 Consider also modes: [[https://github.com/emacs-evil/evil-collection/blob/master/modes/macrostep/evil-collection-macrostep.el][macrostep]], [[https://github.com/emacs-evil/evil-collection/tree/master/modes/smerge-mode][smerge]], calendar (?), calc
 Note that evil-collection does not include bindings for org-agenda
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package evil-collection
   :after evil
   :config
@@ -727,7 +727,7 @@ and I'm still in the process of refining it.
 ** Transient commands
 *** Window resizing transient
 
-#+begin_src emacs-lisp :tangle no :noweb-ref evil-transients
+#+begin_src emacs-lisp
 (transient-define-prefix +window-transient ()
   ["Resizing windows"
    ["Transient"
@@ -744,7 +744,7 @@ and I'm still in the process of refining it.
 
 *** File transient
 
-#+begin_src emacs-lisp :tangle no :noweb-ref evil-transients
+#+begin_src emacs-lisp
 (transient-define-prefix +file-transient ()
   ["File commands"
    ["With this file..."
@@ -758,6 +758,139 @@ and I'm still in the process of refining it.
     ("c" "config.org" +open-config)]
    [("q" "quit" transient-quit-all)
     ("<escape>" "quit" transient-quit-all)]])
+#+end_src
+
+* Meow
+
+Keymap based on [[https://github.com/meow-edit/meow/blob/master/KEYBINDING_DVORAK.org][suggested Dvorak bindings]], but with my own ideas.
+Press =SPC ?= for cheatsheet.
+I think the "o/O" bindings can be safely removed.
+So far the config is highly evil/vim-like, as I'm getting used to meow,
+but what I'm seeing so far is pretty nice.
+
+#+begin_src emacs-lisp
+(use-package meow
+  :init
+  (defun meow-setup ()
+    (setq meow-cheatsheet-layout meow-cheatsheet-layout-dvorak)
+
+    ;; Global leader under SPC,
+    ;; can use any keys except {x, c, h, g, m},
+    ;; which get translated into Emacs commands
+    (meow-leader-define-key
+     '("1" . meow-digit-argument)
+     '("2" . meow-digit-argument)
+     '("3" . meow-digit-argument)
+     '("4" . meow-digit-argument)
+     '("5" . meow-digit-argument)
+     '("6" . meow-digit-argument)
+     '("7" . meow-digit-argument)
+     '("8" . meow-digit-argument)
+     '("9" . meow-digit-argument)
+     '("0" . meow-digit-argument)
+     '("e" . +elisp-eval-transient)
+     '("w" . +window-transient)
+     '("f" . +file-transient)
+     '("u" . link-hint-open-link)
+     '("," . switch-to-buffer)
+     '("." . find-file)
+     '("?" . meow-cheatsheet))
+
+    (meow-motion-overwrite-define-key
+     ;; custom keybinding for motion state
+     '("<escape>" . ignore)
+     '("\\" . execute-extended-command)
+     '("h" . meow-left)
+     '("t" . meow-next)
+     '("c" . meow-prev)
+     '("n" . meow-right))
+
+    (meow-normal-define-key
+     '("0" . meow-expand-0)
+     '("9" . meow-expand-9)
+     '("8" . meow-expand-8)
+     '("7" . meow-expand-7)
+     '("6" . meow-expand-6)
+     '("5" . meow-expand-5)
+     '("4" . meow-expand-4)
+     '("3" . meow-expand-3)
+     '("2" . meow-expand-2)
+     '("1" . meow-expand-1)
+     '("-" . negative-argument)
+     '("/" . meow-visit) ; superfluous?
+     '("?" . consult-line)
+     '(";" . ignore)
+     '("," . meow-inner-of-thing)
+     '("." . meow-bounds-of-thing)
+     '("<" . meow-beginning-of-thing)
+     '(">" . meow-end-of-thing)
+     '("a" . meow-append) ; superfluous?
+     '("A" . meow-open-below) ; superfluous?
+     '("b" . meow-back-word)
+     '("B" . meow-back-symbol)
+     '("c" . meow-prev)
+     '("C" . meow-prev-expand)
+     '("d" . meow-change)
+     '("D" . meow-delete)
+     '("e" . meow-line)
+     '("E" . meow-goto-line)
+     '("f" . meow-find)
+     '("g" . meow-cancel-selection)
+     '("G" . meow-grab)
+     '("h" . meow-left)
+     '("H" . meow-left-expand)
+     '("i" . meow-insert)
+     '("I" . meow-open-above) ; superfluous?
+     '("j" . meow-join)
+     '("k" . meow-kill)
+     '("l" . meow-till)
+     '("m" . meow-mark-word)
+     '("M" . meow-mark-symbol)
+     '("n" . meow-right)
+     '("N" . meow-right-expand)
+     '("o" . meow-open-below)
+     '("O" . meow-open-above)
+     '("p" . meow-yank)
+     '("q" . meow-quit)
+     '("Q" . meow-goto-line)
+     '("r" . meow-replace)
+     '("R" . meow-swap-grab) ; unneeded?
+     '("s" . meow-search)
+     '("S" . meow-visit)
+     '("t" . meow-next)
+     '("T" . meow-next-expand)
+     '("u" . meow-undo)
+     '("U" . meow-undo-in-selection) ; redo?
+     '("v" . meow-reverse)
+     '("w" . meow-next-word)
+     '("W" . meow-next-symbol)
+     ;; x functioning as local leader
+     '("x" . +meow-localleader)
+     ;; '("X" . meow-sync-grab)
+     '("y" . meow-save)
+     '("z" . meow-pop-selection)
+     '("ZZ" . save-buffers-kill-terminal)
+     '("ZQ" . kill-emacs)
+     '("'" . repeat)
+     '("\\" . execute-extended-command)
+     '("<escape>" . nil))) ; bind something to ESC?
+
+  (require 'meow)
+  (meow-setup)
+  (meow-global-mode 1)
+
+  (keymap-set org-mode-map "<return>" #'+org-return)
+  (keymap-set org-mode-map "C-<return>" #'+org-insert-item)
+  (keymap-global-set "C-h" #'+helpful-transient)
+
+  (defun +meow-localleader ()
+    (interactive)
+    (meow-keypad-start-with "C-c x"))
+
+  (with-eval-after-load 'org-src
+    (define-key org-src-mode-map [remap save-buffers-kill-terminal] 'org-edit-src-exit)
+    (define-key org-src-mode-map [remap save-buffers-kill-terminal] 'org-edit-src-exit)
+    (define-key org-src-mode-map [remap kill-emacs]                 'org-edit-src-abort)))
 #+end_src
 
 * Narrowing and completion
@@ -847,11 +980,14 @@ and I feel the convenience outweighs it.
 (use-package org
   :init <<org-init>>
   :hook <<org-hooks>>
+  :bind (:map org-mode-map
+              ("C-c x h" . +consult-goto-org-heading)
+              ("C-c x x" . org-ctrl-c-ctrl-c))
   :config
   <<org-settings>>
   <<org-src-settings>>
   <<org-functions>>
-  <<org-keybindings>>
+  ;; <<org-keybindings>>
   <<org-agenda>>
   <<org-navigation-transient>>
   <<org-modules>>)
@@ -1423,7 +1559,7 @@ If on a...
    ;; org-src block
    ((org-in-src-block-p) (org-edit-src-code))
    ;; Default action
-   (t (evil-ret))))
+   (t (newline-and-indent))))
 
 (defmacro when-cond (spec &rest body)
   "Like `when-let', but returns true on successful binding.
