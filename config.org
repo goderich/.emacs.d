@@ -1875,6 +1875,8 @@ Consider also [[https://github.com/alphapapa/magit-todos][magit-todos]].
   :init
   (evil-define-key '(normal visual) 'global
     (kbd "<leader>gg") #'magit)
+  :bind (:map magit-mode-map
+              ("p" . magit-push))
   :config
   (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
   (setq git-commit-summary-max-length 50)
