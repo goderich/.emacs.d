@@ -765,7 +765,6 @@ and I'm still in the process of refining it.
 
 Keymap based on [[https://github.com/meow-edit/meow/blob/master/KEYBINDING_DVORAK.org][suggested Dvorak bindings]], but with my own ideas.
 Press =SPC ?= for cheatsheet.
-I think the "o/O" bindings can be safely removed.
 So far the config is highly evil/vim-like, as I'm getting used to meow,
 but what I'm seeing so far is pretty nice.
 
@@ -777,24 +776,18 @@ but what I'm seeing so far is pretty nice.
 
     ;; Global leader under SPC,
     ;; can use any keys except {x, c, h, g, m},
-    ;; which get translated into Emacs commands
+    ;; which get translated into Emacs commands.
+    ;; This is basically the C-c menu.
+    ;; I'm also using o (C-c o) as local-leader.
     (meow-leader-define-key
-     '("1" . meow-digit-argument)
-     '("2" . meow-digit-argument)
-     '("3" . meow-digit-argument)
-     '("4" . meow-digit-argument)
-     '("5" . meow-digit-argument)
-     '("6" . meow-digit-argument)
-     '("7" . meow-digit-argument)
-     '("8" . meow-digit-argument)
-     '("9" . meow-digit-argument)
-     '("0" . meow-digit-argument)
-     '("e" . +elisp-eval-transient)
-     '("w" . +window-transient)
+     '("a" . org-agenda-list)
      '("f" . +file-transient)
      '("u" . link-hint-open-link)
+     '("v" . magit) ; v for +vendetta+ version control
+     '("w" . +window-transient)
      '("," . switch-to-buffer)
      '("." . find-file)
+     '("/" . consult-line)
      '("?" . meow-cheatsheet))
 
     (meow-motion-overwrite-define-key
@@ -823,14 +816,13 @@ but what I'm seeing so far is pretty nice.
      '("1" . meow-expand-1)
      '("-" . negative-argument)
      '("/" . meow-visit) ; superfluous?
-     '("?" . consult-line)
      '(";" . ignore)
      '("," . meow-inner-of-thing)
      '("." . meow-bounds-of-thing)
      '("<" . meow-beginning-of-thing)
      '(">" . meow-end-of-thing)
-     '("a" . meow-append) ; superfluous?
-     '("A" . meow-open-below) ; superfluous?
+     '("a" . meow-append)
+     '("A" . meow-open-below)
      '("b" . meow-back-word)
      '("B" . meow-back-symbol)
      '("c" . meow-prev)
@@ -840,12 +832,12 @@ but what I'm seeing so far is pretty nice.
      '("e" . meow-line)
      '("E" . meow-goto-line)
      '("f" . meow-find)
-     '("g" . meow-cancel-selection)
+     '("g" . meow-cancel-selection) ; superfluous
      '("G" . meow-grab)
      '("h" . meow-left)
      '("H" . meow-left-expand)
      '("i" . meow-insert)
-     '("I" . meow-open-above) ; superfluous?
+     '("I" . meow-open-above)
      '("j" . meow-join)
      '("k" . meow-kill)
      '("l" . meow-till)
@@ -853,8 +845,7 @@ but what I'm seeing so far is pretty nice.
      '("M" . meow-mark-symbol)
      '("n" . meow-right)
      '("N" . meow-right-expand)
-     '("o" . meow-open-below) ; could be localleader instead
-     '("O" . meow-open-above)
+     '("o" . +meow-localleader)
      '("p" . meow-yank)
      '("q" . meow-quit)
      '("Q" . meow-goto-line)
@@ -869,16 +860,14 @@ but what I'm seeing so far is pretty nice.
      '("v" . meow-reverse)
      '("w" . meow-next-word)
      '("W" . meow-next-symbol)
-     ;; x functioning as local leader
-     '("x" . +meow-localleader)
-     '("X" . execute-extended-command)
+     '("x" . execute-extended-command)
      '("y" . meow-save)
      '("z" . meow-pop-selection)
      '("ZZ" . save-buffers-kill-terminal)
      '("ZQ" . kill-emacs)
-     '("'" . repeat)
+     '("'" . repeat) ; not as useful as in evil
      '("\\" . execute-extended-command)
-     '("<escape>" . nil))) ; bind something to ESC?
+     '("<escape>" . meow-cancel-selection))) ; bind something to ESC?
 
   (require 'meow)
   (meow-setup)
@@ -890,7 +879,7 @@ but what I'm seeing so far is pretty nice.
 
   (defun +meow-localleader ()
     (interactive)
-    (meow-keypad-start-with "C-c x"))
+    (meow-keypad-start-with "C-c o"))
 
   (with-eval-after-load 'org-src
     (define-key org-src-mode-map [remap save-buffers-kill-terminal] 'org-edit-src-exit)
@@ -986,8 +975,16 @@ and I feel the convenience outweighs it.
   :init <<org-init>>
   :hook <<org-hooks>>
   :bind (:map org-mode-map
-              ("C-c x h" . +consult-goto-org-heading)
-              ("C-c x x" . org-ctrl-c-ctrl-c))
+              ("C-c o h" . +consult-goto-org-heading)
+              ("C-c o o" . org-ctrl-c-ctrl-c)
+              ("C-c o s" . org-edit-src-code)
+              ("C-c o t" . org-todo)
+              ("C-c o d d" . org-deadline)
+              ("C-c o d s" . org-schedule)
+              ("C-c o d t" . org-time-stamp)
+              ("C-c o S" . org-sparse-tree)
+              ("C-c o q" . org-set-tags-command)
+              ("C-c o Q" . +org-remove-tags))
   :config
   <<org-settings>>
   <<org-src-settings>>
@@ -1180,6 +1177,22 @@ Here I just add the function to the hook run before =org-cycle=.
 #+end_src
 
 ** Org agenda
+
+#+begin_src emacs-lisp
+(use-package org-agenda
+  :after org
+  :bind
+  (:map org-agenda-mode-map
+   ("b" . org-agenda-earlier)
+   ("f" . org-agenda-later)
+   ("(" . org-agenda-earlier)
+   (")" . org-agenda-later)
+   ("u" . link-hint-open-link)
+   ("vw" . org-agenda-week-view)
+   ("vm" . org-agenda-month-view)
+   ;; bit different behaviour from link-hint
+   ("<return>" . org-agenda-goto)))
+#+end_src
 
 #+begin_src emacs-lisp :tangle no :noweb-ref org-agenda
 (setq org-agenda-files (list org-directory))
@@ -1801,6 +1814,18 @@ Smartparens is THE package for lisp code editing.
 Examples can be found in the [[https://github.com/Fuco1/smartparens/wiki][wiki]] and in [[https://ebzzry.com/en/emacs-pairs/][this article]].
 
 ** Emacs Lisp
+
+#+begin_src emacs-lisp
+;; (use-package elisp-mode
+;;   :bind (:map emacs-lisp-mode-map
+;;               ("C-c o e" . +elisp-eval-transient)))
+
+(keymap-set emacs-lisp-mode-map "C-c o e" #'+elisp-eval-transient)
+(keymap-set emacs-lisp-mode-map "C-c o (" #'sp-backward-slurp-sexp)
+(keymap-set emacs-lisp-mode-map "C-c o )" #'sp-forward-slurp-sexp)
+(keymap-set emacs-lisp-mode-map "C-c o <" #'sp-backward-barf-sexp)
+(keymap-set emacs-lisp-mode-map "C-c o >" #'sp-forward-barf-sexp)
+#+end_src
 
 #+begin_src emacs-lisp
 (use-package eldoc
