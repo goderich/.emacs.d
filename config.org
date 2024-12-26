@@ -71,7 +71,7 @@ https://github.com/daviwil/emacs-from-scratch
 
 * Introduction
 
-- Evil-based
+- Evil-based (meow-based now)
   - Mnemonic, but I use Dvorak
 - use-package with defers
   - elpaca?
@@ -109,6 +109,7 @@ TODO: see if temp backups can be created somewhere else, e.g. /tmp
   (custom-file "~/.emacs.d/custom.el")
   :config
   (load custom-file)
+  (setq warning-minimum-level :emergency)
   ;; do not use tabs for indentation
   (setq-default indent-tabs-mode nil)
   ;; scrolling settings
@@ -852,7 +853,7 @@ but what I'm seeing so far is pretty nice.
      '("M" . meow-mark-symbol)
      '("n" . meow-right)
      '("N" . meow-right-expand)
-     '("o" . meow-open-below)
+     '("o" . meow-open-below) ; could be localleader instead
      '("O" . meow-open-above)
      '("p" . meow-yank)
      '("q" . meow-quit)
@@ -870,7 +871,7 @@ but what I'm seeing so far is pretty nice.
      '("W" . meow-next-symbol)
      ;; x functioning as local leader
      '("x" . +meow-localleader)
-     ;; '("X" . meow-sync-grab)
+     '("X" . execute-extended-command)
      '("y" . meow-save)
      '("z" . meow-pop-selection)
      '("ZZ" . save-buffers-kill-terminal)
@@ -1519,7 +1520,8 @@ Respects current indentation and checkbox."
 If expansion fails, return nil.
 This function is specifically for use with org-cycle."
   (ignore-errors
-    (when (evil-insert-state-p)
+    ;; (when (evil-insert-state-p)
+    (when meow-insert-mode
       (tempel--interactive #'tempel-expand))))
 #+end_src
 
@@ -1544,6 +1546,7 @@ If on a...
 "
   (interactive)
   (cond
+   (meow-insert-mode (newline-and-indent))
    ;; list with checkbox
    ((org-at-item-checkbox-p) (org-toggle-checkbox))
    ;; table
@@ -1563,7 +1566,7 @@ If on a...
    ;; org-src block
    ((org-in-src-block-p) (org-edit-src-code))
    ;; Default action
-   (t (newline-and-indent))))
+   (t nil)))
 
 (defmacro when-cond (spec &rest body)
   "Like `when-let', but returns true on successful binding.
@@ -1916,7 +1919,7 @@ I stole the insert and delete shades from Doom, because they look really good.
   (kbd "[h") #'diff-hl-previous-hunk)
 #+end_src
 
-** Snippets
+** Tempel snippets
 :PROPERTIES:
 :ID:       0118536f-8f2f-4e6d-ab30-66bd3101401d
 :END:
