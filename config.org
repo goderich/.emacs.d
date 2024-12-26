@@ -1953,7 +1953,7 @@ or move the point after the snippet.
           ((or (mood-line-segment-buffer-status) " ") . " ")
           ((mood-line-segment-buffer-name) . " ")
           ((mood-line-segment-anzu) . " ")
-          ((*count-selected-lines) . " ")
+          ;; ((*count-selected-lines) . " ")
           ((mood-line-segment-cursor-position) . " ")
           ((mood-line-segment-scroll) . " "))
          :right
