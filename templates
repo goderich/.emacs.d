@@ -34,16 +34,10 @@ org-mode
 ;; (gnuplot "#+begin_src gnuplot :var data=" (p "table") " :file " (p "plot.png") n r n "#+end_src" :post (org-edit-src-code))
 (elisp
  "#+begin_src emacs-lisp" n r n "#+end_src"
- :post (progn
-	 (evil-normal-state)
-	 (org-edit-src-code)
-	 (evil-insert-state)))
+ :post (org-edit-src-code))
 (elnt
  "#+begin_src emacs-lisp :tangle no :noweb-ref " p n r n "#+end_src"
- :post (progn
-	 (evil-normal-state)
-	 (org-edit-src-code)
-	 (evil-insert-state)))
+ :post (org-edit-src-code))
 (tbl
 "#+caption: " p n
 "#+label: tbl:" p n
