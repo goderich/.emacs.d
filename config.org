@@ -908,6 +908,8 @@ but what I'm seeing so far is pretty nice.
   (meow-global-mode 1)
 
   (keymap-global-set "C-h" #'+helpful-transient)
+  ;; home row mod esc
+  (keymap-global-set "C-t" "<escape>")
 
   (defun +meow-localleader ()
     (interactive)
