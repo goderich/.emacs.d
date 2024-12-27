@@ -800,6 +800,7 @@ but what I'm seeing so far is pretty nice.
     ;; This is basically the C-c menu.
     ;; I'm also using o (C-c o) as local-leader.
     (meow-leader-define-key
+     '("SPC" . execute-extended-command)
      '("a" . org-agenda-list)
      '("b" . +buffer-transient)
      ;; "c" reserved by meow
