@@ -898,7 +898,15 @@ Press =SPC ?= for cheatsheet.
      '("<escape>" . meow-cancel-selection))
 
     (meow-define-keys 'insert
-      '("<escape>" . +meow-insert-exit-maybe)))
+      '("<escape>" . +meow-insert-exit-maybe)
+      '("C-w" . meow-backward-kill-symbol)))
+
+  ;; the default normal cursor and region selection faces
+  ;; are too similar
+  (custom-set-faces
+   '(meow-normal-cursor ((t (:background "#aab2ac")))))
+  (setq meow-cursor-type-region-cursor '(box . 2))
+  (blink-cursor-mode -1)
 
   (require 'meow)
   (meow-setup)
@@ -919,11 +927,27 @@ Press =SPC ?= for cheatsheet.
      (tempel--active (tempel-done))
      (t (meow-insert-exit))))
 
+  ;; config
+  ;; When k is used without a selection, delete char
+  (map-put! meow-selection-command-fallback
+            #'meow-kill
+            #'meow-delete)
+
+  ;; call avy from meow's goto-line
+  (setq meow-goto-line-function #'avy-goto-line)
+
+  (setq meow-use-clipboard t)
+
   (with-eval-after-load 'org-src
     (define-key org-src-mode-map [remap save-buffers-kill-terminal] 'org-edit-src-exit)
     (define-key org-src-mode-map [remap save-buffers-kill-terminal] 'org-edit-src-exit)
     (define-key org-src-mode-map [remap kill-emacs]                 'org-edit-src-abort)))
 #+end_src
+
+** Meow packages and resources
+
+- [[https://github.com/juliapath/evil-numbers][evil-numbers]] for incrementing/decrementing (does not require evil)
+- Look into [[https://www.emacswiki.org/emacs/KeyboardMacros][Emacs macros]]
 
 * Narrowing and completion
 ** Narrowing
