@@ -761,6 +761,20 @@ and I'm still in the process of refining it.
     ("<escape>" "quit" transient-quit-all)]])
 #+end_src
 
+*** Buffer transient
+
+#+begin_src emacs-lisp
+(transient-define-prefix +buffer-transient ()
+  ["Buffer commands"
+   [("b" "open" consult-buffer)
+    ("s" "save" save-buffer)
+    ("u" "sudo edit" crux-sudo-edit)]
+   [("d" "quit" kill-this-buffer)
+    ("q" "quit" kill-this-buffer)]
+   [("<escape>" "quit" transient-quit-all)]])
+#+end_src
+
+
 * Meow
 
 Keymap based on [[https://github.com/meow-edit/meow/blob/master/KEYBINDING_DVORAK.org][suggested Dvorak bindings]], but with my own ideas.
@@ -773,6 +787,7 @@ but what I'm seeing so far is pretty nice.
   :init
   (defun meow-setup ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-dvorak)
+    (setq meow-use-cursor-position-hack t)
 
     ;; Global leader under SPC,
     ;; can use any keys except {x, c, h, g, m},
@@ -781,10 +796,18 @@ but what I'm seeing so far is pretty nice.
     ;; I'm also using o (C-c o) as local-leader.
     (meow-leader-define-key
      '("a" . org-agenda-list)
+     '("b" . +buffer-transient)
+     ;; "c" reserved by meow
+     '("e" . ebib)
      '("f" . +file-transient)
+     ;; "g" reserved by meow
+     ;; "h" reserved by meow
+     ;; "m" reserved by meow
+     ;; "o" is my personal local leader
      '("u" . link-hint-open-link)
      '("v" . magit) ; v for +vendetta+ version control
      '("w" . +window-transient)
+     ;; "x" reserved by meow
      '("," . switch-to-buffer)
      '("." . find-file)
      '("/" . consult-line)
@@ -798,6 +821,8 @@ but what I'm seeing so far is pretty nice.
      '("t" . meow-next)
      '("c" . meow-prev)
      '("n" . meow-right)
+     '("<" . beginning-of-buffer)
+     '(">" . end-of-buffer)
      '("H" . "H-h")
      '("T" . "H-t")
      '("C" . "H-c")
@@ -867,19 +892,27 @@ but what I'm seeing so far is pretty nice.
      '("ZQ" . kill-emacs)
      '("'" . repeat) ; not as useful as in evil
      '("\\" . execute-extended-command)
-     '("<escape>" . meow-cancel-selection))) ; bind something to ESC?
+     '("<escape>" . meow-cancel-selection)) ; bind something to ESC?
+
+    (meow-define-keys 'insert
+      '("<escape>" . +meow-insert-exit-maybe)))
 
   (require 'meow)
   (meow-setup)
   (meow-global-mode 1)
 
-  (keymap-set org-mode-map "<return>" #'+org-return)
-  (keymap-set org-mode-map "C-<return>" #'+org-insert-item)
   (keymap-global-set "C-h" #'+helpful-transient)
 
   (defun +meow-localleader ()
     (interactive)
     (meow-keypad-start-with "C-c o"))
+
+  (defun +meow-insert-exit-maybe ()
+    (interactive)
+    (cond
+     ((and corfu-mode completion-in-region-mode) (corfu-quit))
+     (tempel--active (tempel-done))
+     (t (meow-insert-exit))))
 
   (with-eval-after-load 'org-src
     (define-key org-src-mode-map [remap save-buffers-kill-terminal] 'org-edit-src-exit)
@@ -944,7 +977,7 @@ Using [[https://github.com/minad/corfu][Corfu]].
 I do NOT normally want completion on in org, because that's distracting.
 I do want completion when programming, and I want it to open up automatically.
 
-Trying out SPC as separator:
+I'm using SPC as separator:
 pressing space does not exit completion, but instead begins a second chunk.
 This makes corfu work a lot like consult et al,
 where a search string can be entered using space-separated pieces.
@@ -975,14 +1008,19 @@ and I feel the convenience outweighs it.
   :init <<org-init>>
   :hook <<org-hooks>>
   :bind (:map org-mode-map
-              ("C-c o h" . +consult-goto-org-heading)
-              ("C-c o o" . org-ctrl-c-ctrl-c)
-              ("C-c o s" . org-edit-src-code)
-              ("C-c o t" . org-todo)
+              ("<return>" . +org-return)
+              ("C-<return>" . +org-insert-item)
+              ;; could move to M-l instead, together with M-c and M-r
+              ("C-l" . +org-link-dwim)
               ("C-c o d d" . org-deadline)
               ("C-c o d s" . org-schedule)
               ("C-c o d t" . org-time-stamp)
+              ("C-c o h" . +consult-goto-org-heading)
+              ("C-c o l" . +link-transient)
+              ("C-c o o" . org-ctrl-c-ctrl-c)
+              ("C-c o s" . org-edit-src-code)
               ("C-c o S" . org-sparse-tree)
+              ("C-c o t" . org-todo)
               ("C-c o q" . org-set-tags-command)
               ("C-c o Q" . +org-remove-tags))
   :config
@@ -1099,7 +1137,7 @@ This bit of witchcraft, extracted from Doom and simplified, colours a file link 
 Note that some keybindings are set in their respective modes.
 They still appear together in the final tangled file.
 
-#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
+#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings-evil
 (evil-define-key '(normal visual) org-mode-map
   (kbd "<tab>") #'org-cycle
   (kbd "<return>") #'+org-return
@@ -1116,20 +1154,20 @@ They still appear together in the final tangled file.
   (kbd "gh") #'+org-up-heading)
 #+end_src
 
-#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
+#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings-evil
 (evil-define-key '(normal insert) org-mode-map
   (kbd "C-l") #'+org-link-dwim
   (kbd "C-c") #'ebib-insert-citation)
 #+end_src
 
-#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
+#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings-evil
 (evil-define-key 'normal org-mode-map
   (kbd "<localleader>l") #'+link-transient)
 #+end_src
 
 Some keybindings, namely ones using a modifier key,
 should be accessible in both normal and insert modes.
-#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
+#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings-evil
 (evil-define-key '(normal insert) org-mode-map
   (kbd "M-h") #'org-metaleft
   (kbd "M-j") #'org-metadown
@@ -1143,7 +1181,7 @@ should be accessible in both normal and insert modes.
 #+end_src
 
 From evil-org, use evil bindings in source and table editing modes:
-#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
+#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings-evil
 (with-eval-after-load 'org-src
   (define-key org-src-mode-map [remap evil-save-and-close]          'org-edit-src-exit)
   (define-key org-src-mode-map [remap evil-save-modified-and-close] 'org-edit-src-exit)
@@ -1180,6 +1218,7 @@ Here I just add the function to the hook run before =org-cycle=.
 
 #+begin_src emacs-lisp
 (use-package org-agenda
+  :ensure nil
   :after org
   :bind
   (:map org-agenda-mode-map
@@ -1188,6 +1227,7 @@ Here I just add the function to the hook run before =org-cycle=.
    ("(" . org-agenda-earlier)
    (")" . org-agenda-later)
    ("u" . link-hint-open-link)
+   ("v" . nil)
    ("vw" . org-agenda-week-view)
    ("vm" . org-agenda-month-view)
    ;; bit different behaviour from link-hint
@@ -1361,12 +1401,12 @@ makes sense to me to combine into a single keybinding."
 (transient-define-prefix +org-movement-transient ()
   ["Moving around in org"
    [("h" "up level" +org-up-level-and-show :transient t)
-    ("k" "up (same level)" +org-up-same-level :transient t)
-    ("j" "down (same level)" +org-down-same-level :transient t)
-    ("l" "down level" +org-down-and-show :transient t)]
+    ("c" "up (same level)" +org-up-same-level :transient t)
+    ("t" "down (same level)" +org-down-same-level :transient t)
+    ("n" "down level" +org-down-and-show :transient t)]
    [("<tab>" "cycle" org-cycle :transient t)
     ("<backtab>" "cycle all" org-shifttab :transient t)
-    ("<SPC>" "scroll down" evil-scroll-down :transient t)]
+    ("<SPC>" "scroll down" scroll-down :transient t)]
    [("q" "quit" transient-quit-all)]])
 #+end_src
 
@@ -1653,10 +1693,11 @@ TODOs:
 #+begin_src emacs-lisp :noweb yes
 (use-package ebib
   :commands (ebib ebib-insert-citation)
+  :bind
+  <<ebib-keybindings>>
   :config
   <<ebib-functions>>
-  <<ebib-settings>>
-  <<ebib-keybindings>>)
+  <<ebib-settings>>)
 #+end_src
 
 *** Settings
@@ -1769,7 +1810,31 @@ Used from the ebib index."
 
 *** Keybindings
 
+Meow-agnostic keybindings for ebib. I should unbind or rebind "h" and "n" though, since lateral movement doesn't figure in ebib.
+
 #+begin_src emacs-lisp :tangle no :noweb-ref ebib-keybindings
+(:map ebib-index-mode-map
+      ("q" . ebib-quit)
+      ("s" . ebib-save-current-database)
+      ("S" . ebib-save-all-databases)
+      ;; Unset N while I'm figuring out what to do with notes.
+      ("N" . nil)
+      ("/" . ebib-jump-to-entry)
+      ("<tab>" . ebib-edit-entry)
+      ;; ("of" . +ebib-import-file-from-index)
+ :map ebib-entry-mode-map
+      ("q" . ebib-quit)
+      ("z" . ebib-leave-ebib-windows)
+      ("E" . +ebib-edit-as-string)
+      ("s" . ebib-save-current-database)
+      ("S" . ebib-save-all-databases)
+      ("D" . ebib-delete-current-field-contents)
+      ("<tab>" . ebib-quit-entry-buffer)
+      ;; ("of" . ebib-import-file)
+      )
+#+end_src
+
+#+begin_src emacs-lisp :tangle no :noweb-ref ebib-keybindings-evil
 (evil-define-key 'normal ebib-index-mode-map
   "q" #'ebib-quit
   "s" #'ebib-save-current-database
@@ -1816,41 +1881,21 @@ Examples can be found in the [[https://github.com/Fuco1/smartparens/wiki][wiki]]
 ** Emacs Lisp
 
 #+begin_src emacs-lisp
-;; (use-package elisp-mode
-;;   :bind (:map emacs-lisp-mode-map
-;;               ("C-c o e" . +elisp-eval-transient)))
-
-(keymap-set emacs-lisp-mode-map "C-c o e" #'+elisp-eval-transient)
-(keymap-set emacs-lisp-mode-map "C-c o (" #'sp-backward-slurp-sexp)
-(keymap-set emacs-lisp-mode-map "C-c o )" #'sp-forward-slurp-sexp)
-(keymap-set emacs-lisp-mode-map "C-c o <" #'sp-backward-barf-sexp)
-(keymap-set emacs-lisp-mode-map "C-c o >" #'sp-forward-barf-sexp)
+(use-package elisp-mode
+  :ensure nil
+  :bind (:map emacs-lisp-mode-map
+              ("C-c o e" . +elisp-eval-transient)
+              ("C-c o w" . sp-wrap-round)
+              ("C-c o (" . sp-backward-slurp-sexp)
+              ("C-c o )" . sp-forward-slurp-sexp)
+              ("C-c o <" . sp-backward-barf-sexp)
+              ("C-c o >" . sp-forward-barf-sexp)))
 #+end_src
 
 #+begin_src emacs-lisp
 (use-package eldoc
   :config
   (setq eldoc-idle-delay 0))
-#+end_src
-
-#+begin_src emacs-lisp :tangle no :noweb-ref smartparens-keybindings
-(evil-define-key '(normal visual) emacs-lisp-mode-map
-  "(" #'sp-backward-up-sexp
-  ")" #'sp-up-sexp)
-
-(evil-define-key 'normal emacs-lisp-mode-map
-  (kbd "<localleader>(") #'sp-backward-slurp-sexp
-  (kbd "<localleader>)") #'sp-forward-slurp-sexp
-  (kbd "<localleader><") #'sp-backward-barf-sexp
-  (kbd "<localleader>>") #'sp-forward-barf-sexp
-  (kbd "<localleader>w") #'sp-wrap-round
-  (kbd "<localleader>e") #'+elisp-eval-transient)
-
-(evil-define-key 'visual emacs-lisp-mode-map
-  "(" #'sp-wrap-round
-  ")" #'sp-wrap-round
-  "[" #'sp-wrap-square
-  "]" #'sp-wrap-square)
 #+end_src
 
 #+begin_src emacs-lisp
