@@ -851,7 +851,7 @@ but what I'm seeing so far is pretty nice.
      '("Q" . meow-goto-line)
      '("r" . meow-replace)
      '("R" . meow-swap-grab) ; unneeded?
-     '("s" . meow-search)
+     '("s" . avy-goto-char-timer)
      '("S" . meow-visit)
      '("t" . meow-next)
      '("T" . meow-next-expand)
@@ -2012,9 +2012,16 @@ or move the point after the snippet.
              crux-eval-and-replace))
 #+end_src
 
-** Link hinting
+** Avy
 
-I could also hook it up to link-hint (see =link-hint-define-type=).
+#+begin_src emacs-lisp
+(use-package avy
+  :config
+  ;; use Dvorak home row hints
+  (setq avy-keys '(?a ?o ?e ?u ?i ?d ?h ?t ?n ?s)))
+#+end_src
+
+** Link hinting
 
 #+begin_src elisp :noweb yes
 (use-package link-hint
