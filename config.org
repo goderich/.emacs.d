@@ -129,19 +129,19 @@ I prefer not to defer save-place-mode. Waiting a couple of seconds after startup
 
 #+begin_src emacs-lisp
 (use-package saveplace
-  :init (save-place-mode 1)
-  :config
+  :init
   (setq save-place-forget-unreadable-files nil
-        save-place-file (file-name-concat user-emacs-directory "tmp/places")))
+        save-place-file (file-name-concat user-emacs-directory "tmp/places"))
+  (save-place-mode 1))
 #+end_src
 
 *** Savehist move
 
 #+begin_src emacs-lisp
 (use-package savehist
-  :init (savehist-mode 1)
-  :config
-  (setq savehist-file (file-name-concat user-emacs-directory "tmp/history")))
+  :init
+  (setq savehist-file (file-name-concat user-emacs-directory "tmp/history"))
+  (savehist-mode 1))
 #+end_src
 
 *** Tramp
@@ -158,11 +158,11 @@ I prefer not to defer save-place-mode. Waiting a couple of seconds after startup
 
 #+begin_src emacs-lisp
 (use-package recentf
-  :init (recentf-mode 1)
-  :config
+  :init
   (setq recentf-max-saved-items 1000
         recentf-max-menu-items 1000
-        recentf-save-file (file-name-concat user-emacs-directory "tmp/recentf")))
+        recentf-save-file (file-name-concat user-emacs-directory "tmp/recentf"))
+  (recentf-mode 1))
 #+end_src
 
 *** Bookmarks
@@ -857,7 +857,7 @@ Press =SPC ?= for cheatsheet.
      '("c" . meow-prev)
      '("C" . meow-prev-expand)
      '("d" . meow-change)
-     '("D" . meow-delete)
+     ;; '("D" . meow-delete) ; no longer needed
      '("e" . meow-line)
      '("E" . meow-goto-line)
      '("f" . meow-find)
@@ -947,7 +947,9 @@ Press =SPC ?= for cheatsheet.
 ** Meow packages and resources
 
 - [[https://github.com/juliapath/evil-numbers][evil-numbers]] for incrementing/decrementing (does not require evil)
-- Look into [[https://www.emacswiki.org/emacs/KeyboardMacros][Emacs macros]]
+- Look into [[https://www.emacswiki.org/emacs/KeyboardMacros][Emacs macros]] to replace vim =q=
+- Look into [[info:emacs#Replace][replacement commands]] instead of vim =:=
+- [[https://github.com/magnars/change-inner.el][change-inner]] (like vim =ci= and =ca=)
 
 * Narrowing and completion
 ** Narrowing
