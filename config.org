@@ -346,6 +346,11 @@ Should move these under appropriate headings.
     (org-fold-show-entry)
     (org-fold-show-children))
 
+(defun +scroll-line-to-top ()
+  ;; Taken from `evil-scroll-line-to-top'
+  (interactive)
+  (recenter (1- (max 1 scroll-margin))))
+
 (defun +open-config ()
   (interactive)
   (find-file "~/.emacs.d/config.org"))
@@ -892,7 +897,7 @@ but what I'm seeing so far is pretty nice.
      '("ZQ" . kill-emacs)
      '("'" . repeat) ; not as useful as in evil
      '("\\" . execute-extended-command)
-     '("<escape>" . meow-cancel-selection)) ; bind something to ESC?
+     '("<escape>" . meow-cancel-selection))
 
     (meow-define-keys 'insert
       '("<escape>" . +meow-insert-exit-maybe)))
@@ -1359,7 +1364,7 @@ and because it's now built into Emacs (as of 28).
 (defmacro with-org-show (&rest body)
   `(progn
      ,@body
-     (evil-scroll-line-to-top nil)
+     (+scroll-line-to-top)
      (org-fold-show-entry)
      (org-fold-show-children)))
 
@@ -1371,18 +1376,25 @@ If already on a heading, goes higher up in the tree. This
 makes sense to me to combine into a single keybinding."
   (interactive)
   (if (org-at-heading-p)
-      (org-up-element)
+      (with-org-show
+       (org-previous-visible-heading 1))
     (org-back-to-heading)))
 
 (defun +org-up-level-and-show ()
   (interactive)
-  (with-org-show
-   (org-up-heading-safe)))
+  (cond
+   ((not (org-at-heading-p)) (org-back-to-heading))
+   ((= 1 (org-current-level)) (ignore))
+   (t (org-up-element))))
+
+  ;; (with-org-show
+  ;;  (org-up-heading-safe)))
 
 (defun +org-down-and-show ()
   (interactive)
-  (with-org-show
-   (org-next-visible-heading 1)))
+  (when (org-at-heading-p)
+    (with-org-show
+     (org-next-visible-heading 1))))
 
 (defun +org-up-same-level ()
   (interactive)
@@ -1401,12 +1413,12 @@ makes sense to me to combine into a single keybinding."
 (transient-define-prefix +org-movement-transient ()
   ["Moving around in org"
    [("h" "up level" +org-up-level-and-show :transient t)
-    ("c" "up (same level)" +org-up-same-level :transient t)
+    ("c" "up (same level)" +org-up-heading :transient t)
     ("t" "down (same level)" +org-down-same-level :transient t)
     ("n" "down level" +org-down-and-show :transient t)]
    [("<tab>" "cycle" org-cycle :transient t)
     ("<backtab>" "cycle all" org-shifttab :transient t)
-    ("<SPC>" "scroll down" scroll-down :transient t)]
+    ("<SPC>" "scroll down" scroll-up :transient t)]
    [("q" "quit" transient-quit-all)]])
 #+end_src
 
