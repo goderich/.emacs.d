@@ -784,8 +784,6 @@ and I'm still in the process of refining it.
 
 Keymap based on [[https://github.com/meow-edit/meow/blob/master/KEYBINDING_DVORAK.org][suggested Dvorak bindings]], but with my own ideas.
 Press =SPC ?= for cheatsheet.
-So far the config is highly evil/vim-like, as I'm getting used to meow,
-but what I'm seeing so far is pretty nice.
 
 #+begin_src emacs-lisp
 (use-package meow
@@ -879,15 +877,14 @@ but what I'm seeing so far is pretty nice.
      '("o" . +meow-localleader)
      '("p" . meow-yank)
      '("q" . meow-quit)
-     '("Q" . meow-goto-line)
      '("r" . meow-replace)
      '("R" . meow-swap-grab) ; unneeded?
      '("s" . avy-goto-char-timer)
      '("S" . meow-visit)
      '("t" . meow-next)
      '("T" . meow-next-expand)
-     '("u" . meow-undo)
-     '("U" . meow-undo-in-selection) ; redo?
+     '("u" . undo-fu-only-undo)
+     '("U" . undo-fu-only-redo)
      '("v" . meow-reverse)
      '("w" . meow-next-word)
      '("W" . meow-next-symbol)
@@ -944,10 +941,6 @@ https://github.com/minad/consult
   ;; (vertico-cycle t) ;; Enable cycling for `vertico-next/previous'
   :init (vertico-mode))
 
-;; Persist history over Emacs restarts.
-(use-package savehist
-  :init (savehist-mode))
-
 (use-package orderless
   :custom
   (completion-styles '(orderless basic))
@@ -965,11 +958,11 @@ https://github.com/minad/consult
   :init (marginalia-mode))
 
 ;; Do not delay which-key (delay has to be above zero)
-(use-package which-key
-  :init (which-key-mode)
-  :config
-  (setq which-key-idle-delay 1)
-  (setq which-key-idle-secondary-delay 0.05))
+;; (use-package which-key
+;;   :init (which-key-mode)
+;;   :config
+;;   (setq which-key-idle-delay 1)
+;;   (setq which-key-idle-secondary-delay 0.05))
 #+end_src
 
 There is also https://github.com/oantolin/embark/,
