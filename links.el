@@ -19,7 +19,7 @@ in normal mode."
          (prompt (concat "Link name (default \"" default "\"): "))
          (link-name (read-string prompt "" nil default))
          (link-string (org-link-make-string address link-name)))
-    (if (and (evil-eolp) (= (char-after) 32))
+    (if (and (eolp) (= (char-after) 32))
         (insert " " link-string)
       (insert link-string))))
 
