@@ -915,7 +915,7 @@ Press =SPC ?= for cheatsheet.
       '("<escape>" . +meow-insert-exit-maybe)
       '("C-w" . meow-backward-kill-symbol)
       ;; I tend to hit C-a when typing "ea" with home row mods
-      '("C-a" . nil)))
+      '("C-a" . ignore)))
 
   ;; the default normal cursor and region selection faces
   ;; are too similar
