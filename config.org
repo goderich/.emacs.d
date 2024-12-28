@@ -1,3 +1,63 @@
+* Table of Contents :TOC:
+- [[#introduction][Introduction]]
+  - [[#history][History]]
+  - [[#resources][Resources]]
+- [[#basic-settings][Basic settings]]
+  - [[#early-loading][Early loading]]
+  - [[#package-management][Package management]]
+  - [[#in-built-packages][In-built packages]]
+  - [[#theming][Theming]]
+  - [[#fonts][Fonts]]
+  - [[#vars][Vars]]
+  - [[#utility-functions][Utility functions]]
+- [[#meow][Meow]]
+  - [[#meow-packages-and-resources][Meow packages and resources]]
+- [[#minibuffer-keybindings][Minibuffer keybindings]]
+- [[#transient-commands][Transient commands]]
+  - [[#window-resizing-transient][Window resizing transient]]
+  - [[#file-transient][File transient]]
+  - [[#buffer-transient][Buffer transient]]
+  - [[#helpful-transient][Helpful transient]]
+  - [[#olivetti-transient][Olivetti transient]]
+- [[#narrowing-and-completion][Narrowing and completion]]
+  - [[#narrowing][Narrowing]]
+  - [[#completion][Completion]]
+- [[#org-mode][Org-mode]]
+  - [[#org-settings][Org settings]]
+  - [[#org-keybindings][Org keybindings]]
+  - [[#org-agenda][Org agenda]]
+  - [[#org-bling][Org bling]]
+  - [[#transient-navigation][Transient navigation]]
+  - [[#pandoc-integration][Pandoc integration]]
+  - [[#links][Links]]
+  - [[#link-path-tooltip][Link path tooltip]]
+  - [[#cross-referencing][Cross-referencing]]
+  - [[#org-cite][Org cite]]
+  - [[#org-functions][Org functions]]
+  - [[#org-refile][Org-refile]]
+  - [[#toc-org][Toc-org]]
+- [[#bibliography-and-citations][Bibliography and citations]]
+  - [[#ebib][Ebib]]
+- [[#programming-languages][Programming languages]]
+  - [[#lisps][Lisps]]
+  - [[#emacs-lisp][Emacs Lisp]]
+  - [[#clojure][Clojure]]
+- [[#utils][Utils]]
+  - [[#magit][Magit]]
+  - [[#tempel-snippets][Tempel snippets]]
+  - [[#modeline][Modeline]]
+  - [[#crux][Crux]]
+  - [[#avy][Avy]]
+  - [[#link-hinting][Link hinting]]
+  - [[#anzu][Anzu]]
+  - [[#hl-todo][hl-todo]]
+  - [[#olivetti][Olivetti]]
+  - [[#ws-butler][ws-butler]]
+  - [[#help][Help]]
+  - [[#undo][Undo]]
+  - [[#evil-numbers][Evil-numbers]]
+- [[#finalize][Finalize]]
+
 * Introduction
 
 Welcome to my literate Emacs configuration file! I suggest you read this section first before you go on. Note that some of the links in this file are org-mode links. If you are reading this file online, they won't work.
@@ -104,6 +164,30 @@ Some of these settings were taken from the [[https://github.com/hrs/sensible-def
         scroll-preserve-screen-position 1))
 #+end_src
 
+** Package management
+Instead of putting =:ensure t= everywhere, I can just set it here once.
+(This is not recommended by some.)
+
+#+begin_src elisp
+(require 'use-package-ensure)
+(setq use-package-always-ensure t)
+#+end_src
+
+I also turn on the profiler, so that I can see which packages
+take the longest amount of time to load
+(with the =use-package-report= command)
+and see if their loading can be deferred.
+
+#+begin_src emacs-lisp
+(setq use-package-compute-statistics t)
+#+end_src
+
+See also =use-package-defaults= for other settings.
+
+#+begin_src elisp
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+#+end_src
+
 ** In-built packages
 
 Packages that form part of Emacs live here.
@@ -158,30 +242,6 @@ I prefer not to defer save-place-mode. Waiting a couple of seconds after startup
 (use-package bookmark
   :config
   (setq bookmark-default-file (file-name-concat user-emacs-directory "tmp/bookmarks")))
-#+end_src
-
-** Package management
-Instead of putting =:ensure t= everywhere, I can just set it here once.
-(This is not recommended by some.)
-
-#+begin_src elisp
-(require 'use-package-ensure)
-(setq use-package-always-ensure t)
-#+end_src
-
-I also turn on the profiler, so that I can see which packages
-take the longest amount of time to load
-(with the =use-package-report= command)
-and see if their loading can be deferred.
-
-#+begin_src emacs-lisp
-(setq use-package-compute-statistics t)
-#+end_src
-
-See also =use-package-defaults= for other settings.
-
-#+begin_src elisp
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 #+end_src
 
 ** Theming
@@ -384,7 +444,7 @@ Should move these under appropriate headings.
   (toggle-truncate-lines 1))
 #+end_src
 
-* Evil (disabled)
+* Evil (disabled) :noexport:
 
 #+begin_src elisp :tangle no :noweb yes
 (use-package evil
@@ -607,14 +667,6 @@ Note that evil-collection does not include bindings for org-agenda
   (evil-collection-init '(ebib magit info)))
 #+end_src
 
-*** TODO Undo
-See also Hints and undo-fu-session [[https://codeberg.org/ideasman42/emacs-undo-fu][here]].
-Can also try [[https://github.com/casouri/vundo][vundo]], although my undo needs aren't that sophisticated.
-
-#+begin_src emacs-lisp
-(use-package undo-fu)
-#+end_src
-
 *** Evil-snipe
 :PROPERTIES:
 :ID:       8c7a6f08-49e4-47c8-acbb-45de731cdb1f
@@ -679,150 +731,6 @@ The keybindings are get in [[id:483821dc-9279-4372-93b3-a7f4fa65202e][the global
 (use-package evil-visualstar
   :commands (evil-visualstar/begin-search-forward
              evil-visualstar/begin-search-forward))
-#+end_src
-
-*** Evil-numbers
-
-Another small package, this time to manipulate numbers.
-I occasionally find myself needing to add/subtract a sum
-from numbers on a bunch of lines, so this is handy for those situations.
-
-#+begin_src emacs-lisp
-(use-package evil-numbers
-  :commands (evil-numbers/inc-at-pt
-             evil-numbers/dec-at-pt
-             evil-numbers/inc-at-pt-incremental
-             evil-numbers/dec-at-pt-incremental))
-#+end_src
-
-* Minibuffer keybindings
-
-Keybindings in the minibuffer have to be set differently.
-I am not using evil in the minibuffer, and the bindings
-have to be set up using a hook each time.
-
-I went through this trouble to replicate Doom's behaviour
-when pressing backspace in the minibuffer.
-It works as normal when typing the name of a file,
-but if you keep deleting, the parent directories will be deleted
-with a single press of backspace.
-This is pretty convenient when jumping upwards many levels.
-
-Right now my implementation is still relatively naive,
-and I'm still in the process of refining it.
-
-#+begin_src emacs-lisp
-(defun +delete-char-or-directory ()
-  (interactive)
-  (cond
-   ((string= (minibuffer-contents) "/")
-    (delete-backward-char 1))
-   ((string= (minibuffer-contents) "~/")
-    (delete-minibuffer-contents)
-    (insert (expand-file-name "~/")))
-   ((eq (char-before) ?/)
-    (let ((pt (point))
-          (slash-pos (search-backward "/" nil t 2)))
-      (if slash-pos
-          (progn
-            (delete-region (1+ slash-pos) pt)
-            (move-end-of-line nil))
-        (delete-backward-char 1))))
-   (t (delete-backward-char 1))))
-
-(defun +minibuffer-setup ()
-  (keymap-set minibuffer-local-map "<backspace>" #'+delete-char-or-directory)
-  (keymap-set minibuffer-local-map "C-w" #'backward-kill-word)
-  (keymap-set minibuffer-local-map "C-<return>" #'vertico-exit-input))
-
-(add-hook 'minibuffer-setup-hook #'+minibuffer-setup)
-#+end_src
-
-* Transient commands
-
-Right now, all my transient menus live here.
-So far they are missing descriptions.
-
-*** Window resizing transient
-
-#+begin_src emacs-lisp
-(transient-define-prefix +window-transient ()
-  ["Resizing windows"
-   ["Transient"
-    ("b" "bigger" enlarge-window :transient t)
-    ("s" "smaller" shrink-window :transient t)
-    ("=" "balance" balance-windows :transient t)]
-   ["Non-transient"
-    ("d" "delete" delete-window)
-    ("w" "other" other-window)
-    ("m" "maximize" delete-other-windows)]
-   [("q" "quit" transient-quit-all)
-    ("<escape>" "quit" transient-quit-all)]])
-#+end_src
-
-*** File transient
-
-#+begin_src emacs-lisp
-(transient-define-prefix +file-transient ()
-  ["File commands"
-   ["With this file..."
-    ("s" "save" save-buffer)
-    ("D" "delete" crux-delete-file-and-buffer)
-    ("R" "rename" crux-rename-file-and-buffer)
-    ("u" "sudo edit" crux-sudo-edit)]
-   ["Open..."
-    ("r" "recent file" recentf)
-    ("o" "org directory" +open-org-dir)
-    ("c" "config.org" +open-config)]
-   [("q" "quit" transient-quit-all)
-    ("<escape>" "quit" transient-quit-all)]])
-#+end_src
-
-*** Buffer transient
-
-#+begin_src emacs-lisp
-(transient-define-prefix +buffer-transient ()
-  ["Buffer commands"
-   [("b" "open" consult-buffer)
-    ("s" "save" save-buffer)
-    ("u" "sudo edit" crux-sudo-edit)]
-   [("d" "quit" kill-this-buffer)
-    ("q" "quit" kill-this-buffer)]
-   [("<escape>" "quit" transient-quit-all)]])
-#+end_src
-
-
-*** Helpful transient
-
-#+begin_src emacs-lisp
-(transient-define-prefix +helpful-transient ()
-  ["Emacs help"
-   ["Helpful mode"
-    ("f" "functions and macros" helpful-callable)
-    ("v" "variables" helpful-variable)
-    ("k" "key" helpful-key)
-    ("c" "interactive functions" helpful-command)
-    ("p" "thing at point" helpful-at-point)]
-   ["In-built help"
-    ("m" "describe mode" describe-mode)
-    ("F" "describe face" describe-face)
-    ("i" "info" info)]
-   [("q" "quit" transient-quit-all)
-    ("<escape>" "quit" transient-quit-all)]])
-#+end_src
-
-*** Olivetti transient
-
-#+begin_src emacs-lisp
-(transient-define-prefix +olivetti-transient ()
-  ["Change text column width..."
-   [("w" "wider" olivetti-expand :transient t)
-    ("n" "narrower" olivetti-shrink :transient t)]
-   [("f" "turn off olivetti" turn-off-olivetti-mode)
-    ("q" "quit" transient-quit-all)]]
-  (interactive)
-  (olivetti-mode +1)
-  (transient-setup '+olivetti-transient))
 #+end_src
 
 * Meow
@@ -996,6 +904,136 @@ This block is way too long and will need to be split up.
 - Look into [[https://www.emacswiki.org/emacs/KeyboardMacros][Emacs macros]] to replace vim =q=
 - Look into [[info:emacs#Replace][replacement commands]] instead of vim =:=
 - [[https://github.com/magnars/change-inner.el][change-inner]] (like vim =ci= and =ca=)
+
+* Minibuffer keybindings
+
+Keybindings in the minibuffer have to be set differently.
+I am not using evil in the minibuffer, and the bindings
+have to be set up using a hook each time.
+
+I went through this trouble to replicate Doom's behaviour
+when pressing backspace in the minibuffer.
+It works as normal when typing the name of a file,
+but if you keep deleting, the parent directories will be deleted
+with a single press of backspace.
+This is pretty convenient when jumping upwards many levels.
+
+Right now my implementation is still relatively naive,
+and I'm still in the process of refining it.
+
+#+begin_src emacs-lisp
+(defun +delete-char-or-directory ()
+  (interactive)
+  (cond
+   ((string= (minibuffer-contents) "/")
+    (delete-backward-char 1))
+   ((string= (minibuffer-contents) "~/")
+    (delete-minibuffer-contents)
+    (insert (expand-file-name "~/")))
+   ((eq (char-before) ?/)
+    (let ((pt (point))
+          (slash-pos (search-backward "/" nil t 2)))
+      (if slash-pos
+          (progn
+            (delete-region (1+ slash-pos) pt)
+            (move-end-of-line nil))
+        (delete-backward-char 1))))
+   (t (delete-backward-char 1))))
+
+(defun +minibuffer-setup ()
+  (keymap-set minibuffer-local-map "<backspace>" #'+delete-char-or-directory)
+  (keymap-set minibuffer-local-map "C-w" #'backward-kill-word)
+  (keymap-set minibuffer-local-map "C-<return>" #'vertico-exit-input))
+
+(add-hook 'minibuffer-setup-hook #'+minibuffer-setup)
+#+end_src
+
+* Transient commands
+
+Right now, all my transient menus live here.
+So far they are missing descriptions.
+
+** Window resizing transient
+
+#+begin_src emacs-lisp
+(transient-define-prefix +window-transient ()
+  ["Resizing windows"
+   ["Transient"
+    ("b" "bigger" enlarge-window :transient t)
+    ("s" "smaller" shrink-window :transient t)
+    ("=" "balance" balance-windows :transient t)]
+   ["Non-transient"
+    ("d" "delete" delete-window)
+    ("w" "other" other-window)
+    ("m" "maximize" delete-other-windows)]
+   [("q" "quit" transient-quit-all)
+    ("<escape>" "quit" transient-quit-all)]])
+#+end_src
+
+** File transient
+
+#+begin_src emacs-lisp
+(transient-define-prefix +file-transient ()
+  ["File commands"
+   ["With this file..."
+    ("s" "save" save-buffer)
+    ("D" "delete" crux-delete-file-and-buffer)
+    ("R" "rename" crux-rename-file-and-buffer)
+    ("u" "sudo edit" crux-sudo-edit)]
+   ["Open..."
+    ("r" "recent file" recentf)
+    ("o" "org directory" +open-org-dir)
+    ("c" "config.org" +open-config)]
+   [("q" "quit" transient-quit-all)
+    ("<escape>" "quit" transient-quit-all)]])
+#+end_src
+
+** Buffer transient
+
+#+begin_src emacs-lisp
+(transient-define-prefix +buffer-transient ()
+  ["Buffer commands"
+   [("b" "open" consult-buffer)
+    ("s" "save" save-buffer)
+    ("u" "sudo edit" crux-sudo-edit)]
+   [("d" "quit" kill-this-buffer)
+    ("q" "quit" kill-this-buffer)]
+   [("<escape>" "quit" transient-quit-all)]])
+#+end_src
+
+
+** Helpful transient
+
+#+begin_src emacs-lisp
+(transient-define-prefix +helpful-transient ()
+  ["Emacs help"
+   ["Helpful mode"
+    ("f" "functions and macros" helpful-callable)
+    ("v" "variables" helpful-variable)
+    ("k" "key" helpful-key)
+    ("c" "interactive functions" helpful-command)
+    ("p" "thing at point" helpful-at-point)]
+   ["In-built help"
+    ("m" "describe mode" describe-mode)
+    ("F" "describe face" describe-face)
+    ("i" "info" info)]
+   [("q" "quit" transient-quit-all)
+    ("<escape>" "quit" transient-quit-all)]])
+#+end_src
+
+** Olivetti transient
+
+#+begin_src emacs-lisp
+(transient-define-prefix +olivetti-transient ()
+  ["Change text column width..."
+   [("w" "wider" olivetti-expand :transient t)
+    ("n" "narrower" olivetti-shrink :transient t)]
+   [("f" "turn off olivetti" turn-off-olivetti-mode)
+    ("q" "quit" transient-quit-all)]]
+  (interactive)
+  (olivetti-mode +1)
+  (transient-setup '+olivetti-transient))
+#+end_src
 
 * Narrowing and completion
 ** Narrowing
@@ -1485,7 +1523,6 @@ makes sense to me to combine into a single keybinding."
    (org-fold-hide-subtree)
    (org-forward-heading-same-level 1 t)))
 
-;; added SPC scrolling, but need to add `org-back-to-heading' to h/k
 ;; add link-hint on u?
 (transient-define-prefix +org-movement-transient ()
   ["Moving around in org"
@@ -1770,6 +1807,14 @@ Do I want to move to the new position? Depends.
     (org-refile nil
                 (current-buffer)
                 (list heading (buffer-file-name) nil location))))
+#+end_src
+
+** Toc-org
+
+#+begin_src emacs-lisp
+(use-package toc-org
+  :after org
+  :hook (org-mode . toc-org-mode))
 #+end_src
 
 * Bibliography and citations
@@ -2255,6 +2300,28 @@ https://github.com/Wilfred/helpful
   :commands (+helpful-transient))
 #+end_src
 
+** TODO Undo
+See also Hints and undo-fu-session [[https://codeberg.org/ideasman42/emacs-undo-fu][here]].
+Can also try [[https://github.com/casouri/vundo][vundo]], although my undo needs aren't that sophisticated.
+
+#+begin_src emacs-lisp
+(use-package undo-fu)
+#+end_src
+
+** Evil-numbers
+
+Another small package, this time to manipulate numbers.
+I occasionally find myself needing to add/subtract a sum
+from numbers on a bunch of lines, so this is handy for those situations.
+
+#+begin_src emacs-lisp
+(use-package evil-numbers
+  :commands (evil-numbers/inc-at-pt
+             evil-numbers/dec-at-pt
+             evil-numbers/inc-at-pt-incremental
+             evil-numbers/dec-at-pt-incremental))
+#+end_src
+
 * Finalize
 
 Trick from [[https://blog.d46.us/advanced-emacs-startup/][here]]:
@@ -2268,7 +2335,7 @@ when I'm actually using Emacs.
 (setq gc-cons-threshold (* 2 1000 1000))
 #+end_src
 
-* More packages
+* More packages :noexport:
 
 Here are some packages I should consider trying out:
 - Startup screen
