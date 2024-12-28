@@ -1,58 +1,65 @@
-* NEXT Outgoing TODOs
+* Introduction
 
-This is actually going quite nicely, but I still need the following:
-- Fonts (+variable width for org+, CJK font config)
+Welcome to my literate Emacs configuration file! I suggest you read this section first before you go on. Note that some of the links in this file are org-mode links. If you are reading this file online, they won't work.
 
-Other TODOs:
-- org-books (maybe migrate to codeberg and rename?)
-- [[https://blog.d46.us/advanced-emacs-startup/][how to speed up Emacs startup time]] (already began)
+My config is:
+- centered on [[https://github.com/jwiegley/use-package][use-package]] with defers,
+- based around modal editing, currently [[https://github.com/meow-edit/meow][meow]],
+- [[https://github.com/magit/transient][transient]]- and leader-key heavy,
+- full of my personal functions and quirks,
+- still very much in flux.
 
-Programming langs and other modes (check my doom/init.el):
-- unify smartparens keybindings for lisps
-- Elisp
-  - macroexpand
-- Zig
-- Odin
-- LSP/treesitter
-- YAML
-- JSON
-- HTML
+Let's break some of the above down a little.
 
-** Packages
-These are some of the packages I should consider:
-- Startup screen
-  - https://github.com/emacs-dashboard/emacs-dashboard
-  - https://github.com/ichernyshovvv/enlight
-  - I could also go straight into org-agenda on startup
-- https://github.com/alphapapa/org-super-agenda
-- https://github.com/jacktasia/dumb-jump for jumping to definition
-- https://github.com/jamescherti/inhibit-mouse.el <- completely disable the mouse
-- What's the Doom package that shows usage examples in the help menu?
-- https://github.com/hlissner/emacs-solaire-mode (necessary? I don't use splits that much)
-- https://github.com/edkolev/evil-lion <- not necessary all the time, but nice when needed
-- Maybe https://github.com/redguardtoo/evil-nerd-commenter if what I'm using now is insufficient
-- https://github.com/kuanyui/tldr.el
-- https://github.com/manateelazycat/lsp-bridge <- eglot alternative, advertised as blazingly fast
-- https://github.com/flycheck/flycheck
-- https://github.com/minad/jinx for spelling
-- Think about giving Dired another go
-  - Check the [[https://github.com/Fuco1/dired-hacks][dired hacks]] repo for more dired related packages.
-- Should also look into terminal emulation in Emacs perhaps. Then again, perhaps not.
-- Org-mode:
-  - https://github.com/rougier/agenda <- python script, but might be useful?
-- https://github.com/Wilfred/deadgrep
-- https://github.com/vedang/pdf-tools
-- Mail? Consider.
-- https://github.com/progfolio/elpaca consider
+=use-package= is favoured by many Emacs gurus as a configuration technique /par excellence/ (along with literal configs of course). It helps keep related code in one place, instead of all around your config. And since it's included in newer versions of Emacs, using it is a no-brainer.
 
-A few useful packages are mentioned [[https://blog.d46.us/advanced-emacs-startup/][here]] as well.
+Crucially, =use-package= also supports lazy loading (i.e. delayed evaluation), which speeds up Emacs start-up time tremendously. The term used in =use-package= for this is 'defer'. Deferring packages is not particularly difficult, but it does require some thinking ahead and maybe tinkering. Of course, optimization is a never-ending game, but I try to keep it reasonable. As of this writing, Emacs starts in 2.6 seconds on my Surface Go 2 tablet (and a lot faster on my laptop and desktop), so I'm happy with where it is right now.
 
-For more packages see here:
-https://github.com/emacs-tw/awesome-emacs
+I am currently using the =meow= package for modal editing. However, my keybindings are somewhat idiosyncratic if not outright esoteric. This is partly to do with me using the [[https://en.wikipedia.org/wiki/Dvorak_layout][Dvorak]] layout on all my keyboards, and partly with the kind of configs I used before (see the [[History][history section]] below for details). Not only that, but I also use [[https://precondition.github.io/home-row-mods][home row modifiers]] on my mechanical keyboards, and on my laptop I [[https://gist.github.com/tanyuan/55bca522bf50363ae4573d4bdcf06e2e][bind the CapsLock key to both Escape and Ctrl]] (Escape if pressed and released, Ctrl if held down). I try to keep my bindings ergonomic and mnemonic: the most common commands should be easy to type, and the less common ones easy to remember. What's ergonomic for me may not be ergonomic for you; adjust to your own setup.
+
+For reasons of both ergonomics and mnemonics, I tend to eschew commands that require modifiers (Ctrl and Alt, or =C= and =M= in Emacs parlance), and instead opt for key combinations. That's the whole premise of a modal editing system like the one I'm using, of course. But I take this further by using (and sometimes abusing) leader keys, including transient commands, to build my own mini-menus for all kinds of tasks from window management to export via pandoc.
+
+I use quite a lot of my own functions in this config. As seems to be a convention with many users, I add a =+= to the beginning of my own functions to serve as a kind of namespace.
+
+This config is still very much a work in progress, but it has reached a state where I can publish it for others to see.
+
+** History
+
+This section merely explains my history with Emacs, and may give a glimpse into my reasoning with some of the choices I have made. Feel free to skip it.
+
+Before using Emacs, I cut my teeth on [[https://en.wikipedia.org/wiki/Vim_(text_editor)][vim]]. I kept hearing about Emacs of course, with its amazing features like [[https://orgmode.org/][org-mode]] and [[https://www.gnu.org/software/auctex/][auctex]] and [[https://magit.vc/][magit]], and that it wasn't just an editor, etc etc. But it was all so intimidating! I had no idea where to start. I tried a couple of times but got nowhere, and it seemed way too complicated and arcane.
+
+My gateway to Emacs began with various [[https://github.com/emacs-evil/evil][evil]]-based "distributions" (really just ready-made configurations with a bunch of stuff already configured, mostly for programming). The first I found was [[https://github.com/syl20bnr/spacemacs][Spacemacs]], probably around the year 2015 or thereabouts, which I actually didn't even realize was just Emacs from its [[https://www.spacemacs.org/][website]]. (It says Emacs front and center now, but I seem to recall that wasn't the case ten years ago). Spacemacs was amazing! Suddenly I could use my vim knowledge for editing, and everything made sense! It had "layers" that you could enable and activate all the functionality you needed! You didn't even need to write much Elisp, just comment/uncomment stuff based on the layers you required. And it was slick, too. That futuristic pimp-purple theme made Emacs sexy again.
+
+But Spacemacs was slow. It was huge, and its layers were a detriment to the editing experience. They even had a Spacemacs lite version, with a minimal amount of layers activated, so it wouldn't feel so sluggish. Another of Spacemacs' woes was its opacity, which in a way was its /raison d'être/: the Spacemacs config was (and still is) almost fully detached from Emacs internals. In a way, that's the whole point: separating the users from the 40-year history of Emacs idiosyncracies, and just letting them get on with their work. However, when things broke, and break they did, fixing them by yourself was nigh impossible. At about this time, talk of a newer, sexier Emacs distribution reached my ears---Doom Emacs.
+
+As far as I have been able to determine, [[https://github.com/doomemacs/doomemacs/][Doom Emacs]] began as hlissner's personal config based on the good parts of Spacemacs, and also centered on [[https://github.com/emacs-evil/evil][evil]], but as a thinner layer on top of Emacs itself. Doom was for *advanced* users. It unabashedly required you to read and write Elisp, follow the Doom discord channel, and keep up to date with Doom's development. It occasionally broke in unexpected ways, and required you to change things in your config, or sometimes just reinstall Doom completely.
+
+Doom had "modules", kind of like Spacemacs layers, but with an added layer of customizability. You could add extra flags to your module to activate certain features (LSP or org-roam, for example), but that required you to actually try and figure out what those flags were doing, and exposed you to the underlying packages. Which is really all those modules did: they added an extra package and some keybindings to go with it.
+
+Doom also had lots of churn in its early days. Packages were constantly added to and discarded from the distribution, which had the (perhaps unintended) effect of exposing me to a whole lot of Emacs packages. Unlike Spacemacs, which hid the complexity from the user, with Doom you were forced to choose: helm, ivy, or vertico? company or corfu? lsp-mode or eglot?
+
+All in all, I learned a whole lot about Emacs through Doom. In fact, I learned so much that I started to strain against the limits it imposed on me. The Doom layer, thinner than Spacemacs though it may be, was still a barrier between me and the soft underbelly of Emacs. Customizing certain settings or keybindings looked very different from how others were doing it. Doom grew in popularity, and became more stable. At the same time, I grew restless, and started chafing at the bit a little, daydreaming about having a literal config of my own one day, but not daring to take that first step.
+
+And then one fateful day, with only my Surface Go tablet at my disposal, I failed to update Doom. I tried reinstalling, and failed again, multiple times. The Doom install process fetches a whole lot of packages from source repositories, which led [[https://codeberg.org/][Codeberg]] to block my IP in case I was trawling their repos to train a new LLM.
+
+And that was it. With no other option for using Emacs during a whole long weekend, I bit the bullet and took the plunge. I knew precisely the packages I needed first and foremost. I had my Doom configuration right at my disposal, so I could copy and paste from it to my heart's content. What I did not have was that thin layer of protection between me and the pure unadulterated essense of Emacs. I had no access to Doom's convenience macros, so I had to learn to configure =use-package= and =evil= as they were meant to be configured. I had to look for packages that provided the functionality that I took for granted with Doom. I found alternative packages that I hadn't heard of before. I learned about functionality that Doom provided by itself, some of it quite impressive. Bit by bit, I got to a config that was reasonably close to what I had within Doom.
+
+But that was not the end. Having finally weaned myself off Emacs distributions, I found myself staring in the face of yet another barrier, one that I never thought I could forsake: [[https://github.com/emacs-evil/evil][evil]] itself. I had not dared to imagine using something else, but all that configuration [[https://en.wikipedia.org/wiki/Inception][planted the seeds of an idea]] in me. What if vim was not editing perfection? What if, instead of donning the scuba-suit of evil to venture out into the oceans of Elisp, I could take off the mask and swim freely? What if I could shave off a whole 0.5s of Emacs init time?
+
+Evil is a behemoth. It is a complete editor inside an editor. Just like how Emacs distributions hide the complexity of Emacs behind a sleek (yet necessarily limited) API, evil hides the editing functionality of Emacs by replacing *everything* with vim-like alternatives. I was using =:s= and =:norm=, vim macros, [[https://github.com/emacs-evil/evil-surround][evil-surround]], [[https://github.com/hlissner/evil-snipe][evil-snipe]], [[https://github.com/bling/evil-visualstar][evil-visualstar]], and [[https://github.com/edkolev/evil-lion][evil-lion]]. I was a vim maestro, flying through both code and prose with the speed of thought. How could I give up ten years of muscle memory for [[http://xahlee.info/emacs/emacs/emacs_pinky.html][RSI]]?
+
+I couldn't, of course. Not just give up evil for default keybindings. Why would I ever do that? The whole point of Emacs, as I see it, is infinite customizability. Why should anyone ever tell me how I should be using *my Emacs*?
+
+It was not hard to find other modal editing schemes for Emacs. In fact, Emacs has plenty of those. The difference is, people arriving to Emacs from vim tend to miss the comfort of that editing model, and evil exists to fill that niche. Other modal editing packages mostly exist for people coming from default Emacs keybindings, when they decide they want to keep the use of their hands a little longer. Evil stands apart from the pack in that it is, essentially, vim. It implements pretty much all vim functionality in Emacs; anything different is considered a bug. Other packages, by choice and by necessity, play nice with Emacs internals. This makes them a lot more lightweight, at the cost of having to know more about the default Emacs editing experience.
+
+In for a penny, in for a pound, I decided. I had had my eyes on =meow= for some time. It's a lightweight package that respects Emacs conventions, yet at the same time provides a full-fledged modal editing experience. Its editing mentality is not that of vim, but rather of [[https://kakoune.org/][kakoune]]: normal and visual modes are combined, so that you select the text first before performing an action on it. To my surprise, it didn't take me particularly long to acclimatize. I took a few liberties with the suggested [[https://github.com/meow-edit/meow/blob/master/KEYBINDING_DVORAK.org][bindings for Dvorak]], based on my vim/evil experiences, but also my personal ideas. And that's okay! Unlike vim land, where almost any rebinding is frowned upon, and online discussions frequently feature games of one-upmanship about whose config is the shortest, meow doesn't even have a default layout, and encourages its users to create their own bindings.
+
+This is where I am right now. Ten years of vim/evil, most of them spent using Doom. Suddenly, I'm in territory that's at once familiar and not. I've learned a lot about Emacs using Doom, and I've learned a lot more about Emacs after leaving Doom for my own config. I'm really grateful for Spacemacs, Doom, and evil, because without these projects I likely would not have started using Emacs. Now though, I'm ready for something new.
 
 ** Resources
 
-I can read other people's configs, not limited to literate ones.
+Here are some of the resources I have consulted while writing my own config:
 - [[https://github.com/bbatsov/emacs.d/blob/master/init.el][bbatsov's minimalist config]]
 - [[https://github.com/hrs/dotfiles/blob/main/emacs/.config/emacs/configuration.org][Great evil-based config]] with a bunch of functional lang settings.
 - [[https://github.com/zzamboni/dot-emacs/blob/master/init.org][Zzamboni's evil-based config]] prior to his migration to Doom. Lots of org gems there.
@@ -60,33 +67,14 @@ I can read other people's configs, not limited to literate ones.
 - [[https://github.com/rougier/dotemacs/blob/master/dotemacs.org][Nicholas Rougier's literate config]]
 - See [[https://github.com/jschaf/dotfiles/blob/master/emacs/core/abn-core-emacs-settings.el][this config]] (including other files) for some obscure settings and startup hacks.
 - [[https://sophiebos.io/posts/prettifying-emacs-org-mode/][org prettifying]]
-
-See [[https://www.reddit.com/r/emacs/comments/9zad13/managing_personal_packages_with_usepackage/][here]] for instructions on how to load local files with =use-package=
-(so that they can be deferred, of course)
-
-[[https://github.com/positron-solutions/transient-showcase][transient showcase]]
-
-Some interesting stuff here:
-https://github.com/daviwil/emacs-from-scratch
-
-* Introduction
-
-- Evil-based (meow-based now)
-  - Mnemonic, but I use Dvorak
-- use-package with defers
-  - elpaca?
-- Transient-heavy config
-- Function naming conventions (=+= and =*= prefixes)
-
-Emacs, while a powerful tool, at the same time lies somewhere between
-an intellectually stimulating hobby and structured procrastination.
-
-History (Vim -> Spacemacs -> Doom Emacs -> this)
+- See [[https://www.reddit.com/r/emacs/comments/9zad13/managing_personal_packages_with_usepackage/][here]] for instructions on how to load local files with =use-package= (so that they can be deferred, of course).
+- [[https://github.com/positron-solutions/transient-showcase][transient showcase]]
+- Some interesting stuff here: https://github.com/daviwil/emacs-from-scratch
 
 * Basic settings
-** NEXT Early loading
-Maybe some of this should be in =early-init.el=?
-See also https://github.com/hrs/sensible-defaults.el
+** Early loading
+
+Some of these settings were taken from the [[https://github.com/hrs/sensible-defaults.el][sensible-defaults]] package.
 
 #+begin_src emacs-lisp
 ;; -*- lexical-binding: t -*-
@@ -925,7 +913,9 @@ Press =SPC ?= for cheatsheet.
 
     (meow-define-keys 'insert
       '("<escape>" . +meow-insert-exit-maybe)
-      '("C-w" . meow-backward-kill-symbol)))
+      '("C-w" . meow-backward-kill-symbol)
+      ;; I tend to hit C-a when typing "ea" with home row mods
+      '("C-a" . nil)))
 
   ;; the default normal cursor and region selection faces
   ;; are too similar
@@ -2275,3 +2265,41 @@ when I'm actually using Emacs.
 #+begin_src emacs-lisp
 (setq gc-cons-threshold (* 2 1000 1000))
 #+end_src
+
+* More packages
+
+Here are some packages I should consider trying out:
+- Startup screen
+  - https://github.com/emacs-dashboard/emacs-dashboard
+  - https://github.com/ichernyshovvv/enlight
+  - I could also go straight into org-agenda on startup
+- https://github.com/alphapapa/org-super-agenda
+- https://github.com/jacktasia/dumb-jump for jumping to definition
+- https://github.com/jamescherti/inhibit-mouse.el <- completely disable the mouse
+- What's the Doom package that shows usage examples in the help menu? I think it's [[https://github.com/xuchunyang/elisp-demos][elisp-demos]]
+- https://github.com/emacsorphanage/macrostep
+- https://github.com/snosov1/toc-org
+- https://github.com/wwwjfy/emacs-fish
+- https://github.com/yoshiki/yaml-mode
+- https://github.com/emacsorphanage/quickrun
+- https://github.com/radian-software/apheleia/
+- https://github.com/jorgenschaefer/emacs-buttercup
+- https://github.com/hlissner/emacs-solaire-mode (necessary? I don't use splits that much)
+- https://github.com/kuanyui/tldr.el
+- https://github.com/manateelazycat/lsp-bridge <- eglot alternative, advertised as blazingly fast
+- https://github.com/flycheck/flycheck
+- https://github.com/minad/jinx for spelling
+- Think about giving Dired another go
+  - Check the [[https://github.com/Fuco1/dired-hacks][dired hacks]] repo for more dired related packages.
+- Should also look into terminal emulation in Emacs perhaps. Then again, perhaps not.
+- Org-mode:
+  - https://github.com/rougier/agenda <- python script, but might be useful?
+- https://github.com/Wilfred/deadgrep
+- https://github.com/vedang/pdf-tools
+- Mail? Consider.
+- https://github.com/progfolio/elpaca consider
+
+A few useful packages are mentioned [[https://blog.d46.us/advanced-emacs-startup/][here]] as well.
+
+For more packages see here:
+https://github.com/emacs-tw/awesome-emacs
