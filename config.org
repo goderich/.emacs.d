@@ -211,6 +211,7 @@ Looking into faces and theming.
 
   (face-spec-set 'default
                  '((t :background "#fdf6e3")))
+  ;; org headlines
   (face-spec-set 'org-done
                  '((t :foreground "gray"
                       :weight bold)))
@@ -385,9 +386,6 @@ Should move these under appropriate headings.
 
 * Evil (disabled)
 
-Check out this great macro for evil keybindings with use-package:
-https://www.mattduck.com/2023-08-28-extending-use-package-bind
-
 #+begin_src elisp :tangle no :noweb yes
 (use-package evil
   :init
@@ -418,13 +416,6 @@ https://www.mattduck.com/2023-08-28-extending-use-package-bind
   (evil-define-key 'normal emacs-lisp-mode-map
     (kbd "<localleader>ee") #'eval-last-sexp))
 #+end_src
-
-Maybe use https://github.com/emacs-evil/evil-collection ?
-Modules can be loaded incrementally.
-
-For org-mode specifically, https://github.com/Somelauw/evil-org-mode
-has some great ideas, which I could take wholesale as a package,
-or steal selectively. See the "[[https://github.com/Somelauw/evil-org-mode/blob/master/doc/example_config.el][elaborate setup]]" example.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref evil-cursor
 (setq evil-emacs-state-cursor  '("red" box))
@@ -704,7 +695,7 @@ from numbers on a bunch of lines, so this is handy for those situations.
              evil-numbers/dec-at-pt-incremental))
 #+end_src
 
-** Minibuffer keybindings
+* Minibuffer keybindings
 
 Keybindings in the minibuffer have to be set differently.
 I am not using evil in the minibuffer, and the bindings
@@ -747,7 +738,11 @@ and I'm still in the process of refining it.
 (add-hook 'minibuffer-setup-hook #'+minibuffer-setup)
 #+end_src
 
-** Transient commands
+* Transient commands
+
+Right now, all my transient menus live here.
+So far they are missing descriptions.
+
 *** Window resizing transient
 
 #+begin_src emacs-lisp
@@ -797,10 +792,45 @@ and I'm still in the process of refining it.
 #+end_src
 
 
+*** Helpful transient
+
+#+begin_src emacs-lisp
+(transient-define-prefix +helpful-transient ()
+  ["Emacs help"
+   ["Helpful mode"
+    ("f" "functions and macros" helpful-callable)
+    ("v" "variables" helpful-variable)
+    ("k" "key" helpful-key)
+    ("c" "interactive functions" helpful-command)
+    ("p" "thing at point" helpful-at-point)]
+   ["In-built help"
+    ("m" "describe mode" describe-mode)
+    ("F" "describe face" describe-face)
+    ("i" "info" info)]
+   [("q" "quit" transient-quit-all)
+    ("<escape>" "quit" transient-quit-all)]])
+#+end_src
+
+*** Olivetti transient
+
+#+begin_src emacs-lisp
+(transient-define-prefix +olivetti-transient ()
+  ["Change text column width..."
+   [("w" "wider" olivetti-expand :transient t)
+    ("n" "narrower" olivetti-shrink :transient t)]
+   [("f" "turn off olivetti" turn-off-olivetti-mode)
+    ("q" "quit" transient-quit-all)]]
+  (interactive)
+  (olivetti-mode +1)
+  (transient-setup '+olivetti-transient))
+#+end_src
+
 * Meow
 
 Keymap based on [[https://github.com/meow-edit/meow/blob/master/KEYBINDING_DVORAK.org][suggested Dvorak bindings]], but with my own ideas.
 Press =SPC ?= for cheatsheet.
+
+This block is way too long and will need to be split up.
 
 #+begin_src emacs-lisp
 (use-package meow
@@ -809,10 +839,9 @@ Press =SPC ?= for cheatsheet.
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-dvorak)
 
     ;; Global leader under SPC,
-    ;; can use any keys except {x, c, h, g, m},
+    ;; can be followed by any keys except {x, c, h, g, m},
     ;; which get translated into Emacs commands.
     ;; This is basically the C-c menu.
-    ;; I'm also using o (C-c o) as local-leader.
     (meow-leader-define-key
      '("SPC" . execute-extended-command)
      '("a" . org-agenda-list)
@@ -821,9 +850,9 @@ Press =SPC ?= for cheatsheet.
      '("e" . ebib)
      '("f" . +file-transient)
      ;; "g" reserved by meow
-     ;; "h" reserved by meow
+     ;; "h" reserved by meow, I set it elsewhere
      ;; "m" reserved by meow
-     ;; "o" is my personal local leader
+     '("o" . +olivetti-transient)
      '("u" . link-hint-open-link)
      '("v" . magit) ; v for +vendetta+ version control
      '("w" . +window-transient)
@@ -834,7 +863,6 @@ Press =SPC ?= for cheatsheet.
      '("?" . meow-cheatsheet))
 
     (meow-motion-overwrite-define-key
-     ;; custom keybinding for motion state
      '("<escape>" . ignore)
      '("\\" . execute-extended-command)
      '("h" . meow-left)
@@ -2207,18 +2235,7 @@ and then it's indispensable.
   (setq-default olivetti-body-width 60)
   (defun turn-off-olivetti-mode ()
     (interactive)
-    (olivetti-mode -1))
-
-  (transient-define-prefix +olivetti-transient ()
-    ["Change text width..."
-     [("w" "wider" olivetti-expand :transient t)
-      ("n" "narrower" olivetti-shrink :transient t)]
-     [("f" "turn off olivetti" turn-off-olivetti-mode)
-      ("q" "quit" transient-quit-all)]]
-    (interactive)
-    (unless olivetti-mode
-      (olivetti-mode))
-    (transient-setup '+olivetti-transient)))
+    (olivetti-mode -1)))
 #+end_src
 
 ** ws-butler
@@ -2235,24 +2252,7 @@ https://github.com/Wilfred/helpful
 
 #+begin_src emacs-lisp
 (use-package helpful
-  :commands (+helpful-transient)
-  :config
-  ;; (evil-define-key 'normal helpful-mode-map "q" #'kill-buffer-and-window)
-
-  (transient-define-prefix +helpful-transient ()
-    ["Emacs help"
-     ["Helpful mode"
-      ("f" "functions and macros" helpful-callable)
-      ("v" "variables" helpful-variable)
-      ("k" "key" helpful-key)
-      ("c" "interactive functions" helpful-command)
-      ("p" "thing at point" helpful-at-point)]
-     ["In-built help"
-      ("m" "describe mode" describe-mode)
-      ("F" "describe face" describe-face)
-      ("i" "info" info)]
-     [("q" "quit" transient-quit-all)
-      ("<escape>" "quit" transient-quit-all)]]))
+  :commands (+helpful-transient))
 #+end_src
 
 * Finalize
