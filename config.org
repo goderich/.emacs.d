@@ -1061,21 +1061,30 @@ and I feel the convenience outweighs it.
   :init <<org-init>>
   :hook <<org-hooks>>
   :bind (:map org-mode-map
-              ("<return>" . +org-return)
-              ("C-<return>" . +org-insert-item)
-              ;; could move to M-l instead, together with M-c and M-r
-              ("C-l" . +org-link-dwim)
-              ("C-c o d d" . org-deadline)
-              ("C-c o d s" . org-schedule)
-              ("C-c o d t" . org-time-stamp)
-              ("C-c o h" . +consult-goto-org-heading)
-              ("C-c o l" . +link-transient)
-              ("C-c o o" . org-ctrl-c-ctrl-c)
-              ("C-c o s" . org-edit-src-code)
-              ("C-c o S" . org-sparse-tree)
-              ("C-c o t" . org-todo)
-              ("C-c o q" . org-set-tags-command)
-              ("C-c o Q" . +org-remove-tags))
+         ("<return>" . +org-return)
+         ("C-<return>" . +org-insert-item)
+         ;; could move to M-l instead, together with M-c and M-r
+         ("C-l" . +org-link-dwim)
+         ("C-c o d d" . org-deadline)
+         ("C-c o d s" . org-schedule)
+         ("C-c o d t" . org-time-stamp)
+         ("C-c o h" . +consult-goto-org-heading)
+         ("C-c o l" . +link-transient)
+         ("C-c o o" . org-ctrl-c-ctrl-c)
+         ("C-c o s" . org-edit-src-code)
+         ("C-c o S" . org-sparse-tree)
+         ("C-c o t" . org-todo)
+         ("C-c o q" . org-set-tags-command)
+         ("C-c o Q" . +org-remove-tags)
+         ;; org movement
+         ("M-h" . org-metaleft)
+         ("M-t" . org-metadown)
+         ("M-c" . org-metaup)
+         ("M-n" . org-metaright)
+         ("M-H" . org-shiftmetaleft)
+         ("M-T" . org-shiftmetadown)
+         ("M-C" . org-shiftmetaup)
+         ("M-N" . org-shiftmetaright))
   :config
   <<org-settings>>
   <<org-src-settings>>
