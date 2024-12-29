@@ -29,7 +29,7 @@
   - [[#olivetti-transient][Olivetti transient]]
 - [[#narrowing-and-completion][Narrowing and completion]]
   - [[#narrowing][Narrowing]]
-  - [[#completion][Completion]]
+  - [[#completion-corfu][Completion (Corfu)]]
 - [[#org-mode][Org-mode]]
   - [[#org-settings][Org settings]]
   - [[#org-keybindings][Org keybindings]]
@@ -910,15 +910,10 @@ I like having =C-w= delete the previous word. I'm not sure where I picked up thi
 
 With my [[https://precondition.github.io/home-row-mods][home row modifiers]] and sausage fingers, I sometimes end up hitting a modifier + a key instead of typing a sequence like "ea", "pa", or "ga". On Dvorak, this tends to happen with a-final sequences. I disable these commands in insert mode by setting them to =ignore=.
 
-Finally, I rebind the Escape key to give it extra functionality. I discuss this in the [[id:1e5a8fcf-39f6-41ce-a9a0-88583045fcde][meow functions]] section.
-
 #+begin_src emacs-lisp :tangle no :noweb-ref meow-keybindings
 (meow-define-keys 'insert
-  '("<escape>" . +meow-insert-exit-maybe)
   '("C-w" . meow-backward-kill-symbol)
-  ;; I tend to hit C-a when typing "ea" with home row mods
   '("C-a" . ignore)
-  ;; Same but for "pa" and "ga"
   '("M-a" . ignore))
 #+end_src
 
@@ -963,18 +958,6 @@ The beauty of this approach is that I can have more that one local leader if I w
 (defun +meow-localleader ()
   (interactive)
   (meow-keypad-start-with "C-c o"))
-#+end_src
-
-When I'm in insert mode and a [[id:2ca8bb84-790f-4e68-8d3d-4893ef154e43][completion]] overlay is active,
-or if I'm currently in the middle of inserting a [[id:0118536f-8f2f-4e6d-ab30-66bd3101401d][snippet]], I want ESC to quit completion or templating *while keeping me in insert mode*. In my evil config, I used a wrapper function that I modified slightly for meow. It's working as is, but I should try binding ESC in those modes directly, since I haven't done that with meow yet.
-
-#+begin_src emacs-lisp :tangle no :noweb-ref meow-functions
-(defun +meow-insert-exit-maybe ()
-  (interactive)
-  (cond
-   ((and corfu-mode completion-in-region-mode) (corfu-quit))
-   (tempel--active (tempel-done))
-   (t (meow-insert-exit))))
 #+end_src
 
 ** Meow settings
@@ -1199,20 +1182,18 @@ https://github.com/minad/consult
 There is also https://github.com/oantolin/embark/,
 but I haven't learned how to use it properly.
 
-** Completion
+** Completion (Corfu)
 :PROPERTIES:
 :ID:       2ca8bb84-790f-4e68-8d3d-4893ef154e43
 :END:
 
 Using [[https://github.com/minad/corfu][Corfu]].
 
-I do NOT normally want completion on in org, because that's distracting.
-I do want completion when programming, and I want it to open up automatically.
+I do NOT normally want completion on in org, because that's distracting. I do want completion when programming, and I want it to open up automatically.
 
-I'm using SPC as separator:
-pressing space does not exit completion, but instead begins a second chunk.
-This makes corfu work a lot like consult et al,
-where a search string can be entered using space-separated pieces.
+I'm using SPC as separator: pressing space does not exit completion, but instead begins a second chunk. This makes corfu work a lot like consult et al, where a search string can be entered using space-separated pieces.
+
+When I'm in insert mode and a [[id:2ca8bb84-790f-4e68-8d3d-4893ef154e43][completion]] overlay is active, I want ESC to quit completion or templating *while keeping me in insert mode*. In my evil config, I used a wrapper function. With meow, I can just bind the keys directly in the respective modes.
 
 #+begin_src emacs-lisp
 (use-package corfu
@@ -1222,7 +1203,8 @@ where a search string can be entered using space-separated pieces.
   (corfu-quit-no-match t)
   :bind (:map corfu-map
               ("TAB" . corfu-expand)
-              ("SPC" . corfu-insert-separator)))
+              ("SPC" . corfu-insert-separator)
+              ("<escape>" . corfu-quit)))
 #+end_src
 
 * Org-mode
@@ -2250,17 +2232,13 @@ I stole the insert and delete shades from Doom, because they look really good.
 :END:
 Trying https://github.com/minad/tempel.
 
+Once I'm inside a snippet, chances are I no longer need to expand more snippets. Instead, I want to be able to use TAB to jump to next placeholder, or move the point after the snippet.
+
 #+begin_src elisp :noweb yes
 (use-package tempel
-  :config <<tempel-keybindings>>)
-#+end_src
-
-Once I'm inside a snippet, chances are I no longer need to expand more snippets.
-Instead, I want to be able to use TAB to jump to next placeholder,
-or move the point after the snippet.
-
-#+begin_src emacs-lisp :tangle no :noweb-ref tempel-keybindings
-(define-key tempel-map (kbd "TAB") #'tempel-next)
+  :bind (:map tempel-map
+          ("TAB" . tempel-next)
+          ("<escape>" . tempel-done)))
 #+end_src
 
 ** Modeline
