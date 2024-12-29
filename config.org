@@ -11,6 +11,14 @@
   - [[#vars][Vars]]
   - [[#utility-functions][Utility functions]]
 - [[#meow][Meow]]
+  - [[#leader-map-bindings][Leader map bindings]]
+  - [[#normal-state-bindings][Normal state bindings]]
+  - [[#motion-state-bindings][Motion state bindings]]
+  - [[#insert-state-bindings][Insert state bindings]]
+  - [[#global-bindings][Global bindings]]
+  - [[#org-src-bindings][org-src bindings]]
+  - [[#meow-functions][Meow functions]]
+  - [[#meow-settings][Meow settings]]
   - [[#meow-packages-and-resources][Meow packages and resources]]
 - [[#minibuffer-keybindings][Minibuffer keybindings]]
 - [[#transient-commands][Transient commands]]
@@ -201,6 +209,8 @@ Some in-built packages are very useful, but not needed at startup. They may also
 
 *** Save place mode
 
+Save place mode, as may be guessed from its name, saves the cursor position in files you visit. It's nice to open a file in Emacs and immediately see where you left off last time.
+
 I prefer not to defer save-place-mode. Waiting a couple of seconds after startup to ensure it loads seems counterproductive to me, if it adds a few centiseconds to startup time at best. When trying it with defers, I found that I was often too quick to open a file, and save-place-mode hadn't started yet.
 
 #+begin_src emacs-lisp
@@ -211,7 +221,9 @@ I prefer not to defer save-place-mode. Waiting a couple of seconds after startup
   (save-place-mode 1))
 #+end_src
 
-*** Savehist move
+*** Savehist mode
+
+Savehist mode might be confused with save-place mode, but they do very different things. Savehist mode keeps track of *minibuffer* history, so that (for example) recently used =M-x= commands are shown on top.
 
 #+begin_src emacs-lisp
 (use-package savehist
@@ -232,6 +244,8 @@ I prefer not to defer save-place-mode. Waiting a couple of seconds after startup
 
 *** Recentf
 
+The 'f' in recentf stands for 'file'. I tend to open lots of different files from lots of different directories, and most of them are org-mode files rather than programming projects. Most of the time whenever I need to open a file, the first thing I do is try =recentf= (with [[id:53556f3d-c05c-4d6f-a9ae-3a59785b03e3][incremental narrowing and completion]]). Usually I only need to type a few disconnected syllables to filter out the file I need.
+
 #+begin_src emacs-lisp
 (use-package recentf
   :init
@@ -251,6 +265,10 @@ I prefer not to defer save-place-mode. Waiting a couple of seconds after startup
 
 ** Theming
 
+As has been a longstanding tradition of Emacs tutorials since time immemorial, the first thing users are recommended to put into their config is the code to turn off all menus. Since I came to Emacs from vim, that has never been an issue with me. I never would have used them anyway.
+
+Unlike vimmers (and a lot of Emacs users who had been clamoring for the functionality), I prefer *not* to display line numbers in the fringe. I can still go to specific lines by number, and I still see the current line number in my mode line in case I ever need it (which is never). When editing existing text, I use semantic operations like paragraphs, sentences, or parenthetic blocks. I haven't regretted turning line numbers off, and I don't miss them at all.
+
 #+begin_src elisp
 (menu-bar-mode -1)
 (tool-bar-mode -1)
@@ -265,9 +283,9 @@ I prefer not to defer save-place-mode. Waiting a couple of seconds after startup
 (setq scroll-margin 2)
 #+end_src
 
-I think I'll stick with the solarized-theme package,
-but I would like to change a few things.
-Looking into faces and theming.
+Dark themes are all the rage with Linux hackers, but I usually work during the day, when a light theme makes text more readable. With Doom, I used =doom-solarized-light= most of the time, and its palette is gorgeous. I considered using the [[https://github.com/doomemacs/themes][doom themes]] package, but it's a little too large for my taste. Bozhidar Batsov's [[https://github.com/bbatsov/solarized-emacs][solarized themes]] package, while no bantamweight itself, provides a reasonable alternative.
+
+Having said that, I found myself missing a few of the colours in Doom's version of solarized light, so I set them here. For some other settings I prefer bbatsov's way, or even my own tweaks.
 
 #+begin_src emacs-lisp
 (use-package solarized-theme
@@ -340,10 +358,6 @@ Looking into faces and theming.
                       :underline t))))
 #+end_src
 
-See also:
-https://colorcodes.io/yellow/cream-color-codes/
-https://colorcodes.io/beige-color-codes/
-
 ** Fonts
 
 Font configuration in Emacs is a little complicated, and tied to theming as well. I try to keep it relatively simple, but I also like my Emacs to look nice.
@@ -392,6 +406,8 @@ Also [[https://coldnew.github.io/d5011be2/][this article]] deals with CJK alignm
 
 ** Vars
 
+I use the same Emacs config on three machines at the moment. Most things do not need to change, but a few file locations differ from system to system. I set these here.
+
 #+begin_src emacs-lisp
 (pcase (system-name)
   ;; Laptop
@@ -417,7 +433,8 @@ Also [[https://coldnew.github.io/d5011be2/][this article]] deals with CJK alignm
 #+end_src
 
 ** TODO Utility functions
-Should move these under appropriate headings.
+
+Some functions I use in my config. They are placed here temporarily, and I should move them under more appropriate headings.
 
 #+begin_src emacs-lisp
 (defun +consult-goto-org-heading ()
@@ -450,6 +467,8 @@ Should move these under appropriate headings.
 #+end_src
 
 * Evil (disabled) :noexport:
+
+I am no longer using evil as of December 2024. Feel free to go ahead and jump straight to [[#meow][meow]]. This config is here temporarily, but I will remove it once I'm fully settled with meow, which now appears to be only a question of time.
 
 #+begin_src elisp :tangle no :noweb yes
 (use-package evil
@@ -514,15 +533,6 @@ See also [[https://github.com/doomemacs/doomemacs/blob/9c8cfaadde1ccc96a780d713d
 #+begin_src emacs-lisp :tangle no :noweb-ref evil-escape
 ("<escape>" . keyboard-escape-quit)
 #+end_src
-
-Not only that, but when I'm in insert mode and a [[id:2ca8bb84-790f-4e68-8d3d-4893ef154e43][completion]] overlay is active,
-or if I'm currently in the middle of inserting a [[id:0118536f-8f2f-4e6d-ab30-66bd3101401d][snippet]],
-I want ESC to quit completion or templating *while keeping me in insert mode*.
-There does not appear to be a simple way of doing with with settings or hooks,
-and evil is greedily capturing keypresses,
-so remapping ESC in =corfu-mode= and =tempel-mode= did not work.
-During times like these, my solution is a simple wrapper function
-that I then bind ESC to globally in insert mode.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref evil-keybindings
 (defun +evil-normal-state-maybe ()
@@ -740,175 +750,274 @@ The keybindings are get in [[id:483821dc-9279-4372-93b3-a7f4fa65202e][the global
 
 * Meow
 
-Keymap based on [[https://github.com/meow-edit/meow/blob/master/KEYBINDING_DVORAK.org][suggested Dvorak bindings]], but with my own ideas.
-Press =SPC ?= for cheatsheet.
+[[https://github.com/meow-edit/meow/blob/master/EXPLANATION.org][Meow]] is a modal editing package. It's both like and unlike evil. If you come to it expecting it to be "just like evil, but better", you will inevitably be disappointed. If you keep an open mind and invest some time in it, it will work just as well as evil, but with much better coupling with Emacs.
 
-This block is way too long and will need to be split up.
-
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :noweb yes
 (use-package meow
   :init
-  (defun meow-setup ()
-    (setq meow-cheatsheet-layout meow-cheatsheet-layout-dvorak)
+  (require 'meow) ; <- must be present
+  <<meow-keybindings>>
+  <<meow-functions>>
+  <<meow-settings>>
+  (meow-global-mode 1))
+#+end_src
 
-    ;; Global leader under SPC,
-    ;; can be followed by any keys except {x, c, h, g, m},
-    ;; which get translated into Emacs commands.
-    ;; This is basically the C-c menu.
-    (meow-leader-define-key
-     '("SPC" . execute-extended-command)
-     '("a" . org-agenda-list)
-     '("b" . +buffer-transient)
-     ;; "c" reserved by meow
-     '("e" . ebib)
-     '("f" . +file-transient)
-     ;; "g" reserved by meow
-     ;; "h" reserved by meow, I set it elsewhere
-     ;; "m" reserved by meow
-     '("o" . +olivetti-transient)
-     '("u" . link-hint-open-link)
-     '("v" . magit) ; v for +vendetta+ version control
-     '("w" . +window-transient)
-     ;; "x" reserved by meow
-     '("," . switch-to-buffer)
-     '("." . find-file)
-     '("/" . consult-line)
-     '("?" . meow-cheatsheet))
+** Leader map bindings
 
-    (meow-motion-overwrite-define-key
-     '("<escape>" . ignore)
-     '("\\" . execute-extended-command)
-     '("h" . meow-left)
-     '("t" . meow-next)
-     '("c" . meow-prev)
-     '("n" . meow-right)
-     '("<" . beginning-of-buffer)
-     '(">" . end-of-buffer)
-     '("H" . "H-h")
-     '("T" . "H-t")
-     '("C" . "H-c")
-     '("N" . "H-n"))
+Similar to both Spacemacs and Doom, meow utilizes the Space key as its leader key. This way instead of getting RSI on your pinkies, you can get it on your [[./img/thumbs-up.jpg][thumbs]]!
 
-    (meow-normal-define-key
-     '("0" . meow-expand-0)
-     '("9" . meow-expand-9)
-     '("8" . meow-expand-8)
-     '("7" . meow-expand-7)
-     '("6" . meow-expand-6)
-     '("5" . meow-expand-5)
-     '("4" . meow-expand-4)
-     '("3" . meow-expand-3)
-     '("2" . meow-expand-2)
-     '("1" . meow-expand-1)
-     '("-" . negative-argument)
-     '("/" . meow-visit) ; superfluous?
-     '(";" . ignore)
-     '("," . meow-inner-of-thing)
-     '("." . meow-bounds-of-thing)
-     '("<" . meow-beginning-of-thing)
-     '(">" . meow-end-of-thing)
-     '("a" . meow-append)
-     '("A" . meow-open-below)
-     '("b" . meow-back-word)
-     '("B" . meow-back-symbol)
-     '("c" . meow-prev)
-     '("C" . meow-prev-expand)
-     '("d" . meow-change)
-     ;; '("D" . meow-delete) ; no longer needed
-     '("e" . meow-line)
-     '("E" . meow-goto-line)
-     '("f" . meow-find)
-     '("g" . meow-cancel-selection) ; superfluous
-     '("G" . meow-grab)
-     '("h" . meow-left)
-     '("H" . meow-left-expand)
-     '("i" . meow-insert)
-     '("I" . meow-open-above)
-     '("j" . meow-join)
-     '("k" . meow-kill)
-     '("l" . meow-till)
-     '("m" . meow-mark-word)
-     '("M" . meow-mark-symbol)
-     '("n" . meow-right)
-     '("N" . meow-right-expand)
-     '("o" . +meow-localleader)
-     '("p" . meow-yank)
-     '("q" . meow-quit)
-     '("r" . meow-replace)
-     '("R" . meow-swap-grab) ; unneeded?
-     '("s" . avy-goto-char-timer)
-     '("S" . meow-visit)
-     '("t" . meow-next)
-     '("T" . meow-next-expand)
-     '("u" . undo-fu-only-undo)
-     '("U" . undo-fu-only-redo)
-     '("v" . meow-reverse)
-     '("w" . meow-next-word)
-     '("W" . meow-next-symbol)
-     '("x" . execute-extended-command)
-     '("y" . meow-save)
-     '("z" . meow-pop-selection)
-     '("ZZ" . save-buffers-kill-terminal)
-     '("ZQ" . kill-emacs)
-     '("'" . repeat) ; not as useful as in evil
-     '("\\" . execute-extended-command)
-     '("<escape>" . meow-cancel-selection))
+The biggest difference is that meow embraces Emacs defaults. Space followed by any of =x, c, h, g, m= enters [[https://github.com/meow-edit/meow/blob/master/TUTORIAL.org#keypad][Keypad state]], which is used to enter Emacs commands without using modifiers. So these five keys are off-limits, but that still leaves us with enough room to fill with our own bindings.
 
-    (meow-define-keys 'insert
-      '("<escape>" . +meow-insert-exit-maybe)
-      '("C-w" . meow-backward-kill-symbol)
-      ;; I tend to hit C-a when typing "ea" with home row mods
-      '("C-a" . ignore)))
+Notably, keypad state bindings are also made available as regular Emacs keybindings, with =C-c= as the leader key.
 
-  ;; the default normal cursor and region selection faces
-  ;; are too similar
-  (custom-set-faces
-   '(meow-normal-cursor ((t (:background "#aab2ac")))))
-  (setq meow-cursor-type-region-cursor '(box . 2))
-  (blink-cursor-mode -1)
+In the spirit of Spacemacs and Doom, I use the Space key as a "global leader", and save it for commands that I want to be available everywhere. I have figured out a way to have local leader commands as well, with bindings based on modes: see the [[id:1e5a8fcf-39f6-41ce-a9a0-88583045fcde][meow functions]] section for that.
 
-  (require 'meow)
-  (meow-setup)
-  (meow-global-mode 1)
+Quite a few of my leader map functions are in fact [[id:1d67b9e6-b143-425a-8dec-d124f95eedc4][transients]]. These are easy to spot because I always name them as such.
 
-  (keymap-global-set "C-h" #'+helpful-transient)
-  ;; home row mod esc
-  (keymap-global-set "C-t" "<escape>")
+#+begin_src emacs-lisp :tangle no :noweb-ref meow-keybindings
+(meow-leader-define-key
+ '("SPC" . execute-extended-command)
+ '("a" . org-agenda-list)
+ '("b" . +buffer-transient)
+ ;; "c" reserved by meow
+ '("e" . ebib)
+ '("f" . +file-transient)
+ ;; "g" reserved by meow
+ ;; "h" reserved by meow, I rebind it elsewhere
+ ;; "m" reserved by meow
+ '("o" . +olivetti-transient)
+ '("u" . link-hint-open-link)
+ '("v" . magit) ; v for +vendetta+ version control
+ '("w" . +window-transient)
+ ;; "x" reserved by meow
+ '("," . switch-to-buffer)
+ '("." . find-file)
+ '("/" . consult-line)
+ '("?" . meow-cheatsheet))
+#+end_src
 
-  (defun +meow-localleader ()
-    (interactive)
-    (meow-keypad-start-with "C-c o"))
+** Normal state bindings
 
-  (defun +meow-insert-exit-maybe ()
-    (interactive)
-    (cond
-     ((and corfu-mode completion-in-region-mode) (corfu-quit))
-     (tempel--active (tempel-done))
-     (t (meow-insert-exit))))
+The normal state is the bread and butter of editing with meow, just like in vim/evil. Unlike vim/evil, meow's normal state operates on selections. Vimmers love talking about the 'grammar' of vim (verb → adjective → noun), which is flipped in meow's model (really kakoune's editing model).
 
-  ;; config
-  ;; When k is used without a selection, delete char
-  (map-put! meow-selection-command-fallback
-            #'meow-kill
-            #'meow-delete)
+I took the [[https://github.com/meow-edit/meow/blob/master/KEYBINDING_DVORAK.org][suggested Dvorak bindings]] and distorted them almost to the point of irrecognizability. I swapped things around somewhat to have a little "WASD" pyramid of movement on the right hand side (IJKL on qwerty keyboards). I replaced certain commands with packages like consult and avy. There are a few places where I have the same command bound to multiple keys. This is not an accident, instead I'm trying out various configurations and see which ones I prefer.
 
-  ;; call avy from meow's goto-line
-  (setq meow-goto-line-function #'avy-goto-line)
+One package I bind to a key is [[https://github.com/abo-abo/avy][avy]], which is great for moving around the screen in Emacs, and it replaces [[https://github.com/hlissner/evil-snipe][evil-snipe]] and evil's own motions for me. I also use it to [[id:067dfe76-a65f-44b6-ab9d-a72b875071d2][open links]] (with the link-hint package).
 
-  (setq meow-use-clipboard t)
+However, a few evil habits are reflected in this layout, not least of which being =ZZ= and =ZQ= to exit Emacs with and without saving, respectively.
 
-  (with-eval-after-load 'org-src
-    (define-key org-src-mode-map [remap save-buffers-kill-terminal] 'org-edit-src-exit)
-    (define-key org-src-mode-map [remap save-buffers-kill-terminal] 'org-edit-src-exit)
-    (define-key org-src-mode-map [remap kill-emacs]                 'org-edit-src-abort)))
+So this keymap will likely change in future, but right now it looks something like this:
+
+[[./img/meow-cheatsheet.png]]
+
+#+begin_src emacs-lisp :tangle no :noweb-ref meow-keybindings
+(meow-normal-define-key
+ '("0" . meow-expand-0)
+ '("9" . meow-expand-9)
+ '("8" . meow-expand-8)
+ '("7" . meow-expand-7)
+ '("6" . meow-expand-6)
+ '("5" . meow-expand-5)
+ '("4" . meow-expand-4)
+ '("3" . meow-expand-3)
+ '("2" . meow-expand-2)
+ '("1" . meow-expand-1)
+ '("-" . negative-argument)
+ '("/" . meow-visit) ; superfluous?
+ '(";" . ignore)
+ '("," . meow-inner-of-thing)
+ '("." . meow-bounds-of-thing)
+ '("<" . meow-beginning-of-thing)
+ '(">" . meow-end-of-thing)
+ '("a" . meow-append)
+ '("A" . meow-open-below)
+ '("b" . meow-back-word)
+ '("B" . meow-back-symbol)
+ '("c" . meow-prev)
+ '("C" . meow-prev-expand)
+ '("d" . meow-change)
+ '("e" . meow-line)
+ '("E" . meow-goto-line)
+ '("f" . meow-find)
+ '("g" . meow-cancel-selection) ; superfluous?
+ '("G" . meow-grab)
+ '("h" . meow-left)
+ '("H" . meow-left-expand)
+ '("i" . meow-insert)
+ '("I" . meow-open-above)
+ '("j" . meow-join)
+ '("k" . meow-kill)
+ '("l" . meow-till)
+ '("m" . meow-mark-word)
+ '("M" . meow-mark-symbol)
+ '("n" . meow-right)
+ '("N" . meow-right-expand)
+ '("o" . +meow-localleader)
+ '("p" . meow-yank)
+ '("q" . meow-quit)
+ '("r" . meow-replace)
+ '("R" . meow-swap-grab)
+ '("s" . avy-goto-char-timer)
+ '("S" . meow-visit)
+ '("t" . meow-next)
+ '("T" . meow-next-expand)
+ '("u" . undo-fu-only-undo)
+ '("U" . undo-fu-only-redo)
+ '("v" . meow-reverse)
+ '("w" . meow-next-word)
+ '("W" . meow-next-symbol)
+ '("x" . execute-extended-command) ; superfluous?
+ '("y" . meow-save)
+ '("z" . meow-pop-selection)
+ '("ZZ" . save-buffers-kill-terminal)
+ '("ZQ" . kill-emacs)
+ '("'" . repeat) ; not as useful as in evil
+ '("\\" . execute-extended-command)
+ '("<escape>" . meow-cancel-selection))
+#+end_src
+
+** Motion state bindings
+
+Meow's motion state in itself is not a new idea. Evil has a motion state too, used in exactly the same situations. It's triggered by default in non-text modes, such as magit, dired, org-agenda, etc. What makes meow's motion state special is two things:
+1. it has no bindings by default,
+2. it has a peculiar [[https://github.com/meow-edit/meow/blob/master/TUTORIAL.org#motion][binding overwrite]] mechanism.
+
+No bindings means this state is completely transparent and lets you use the bindings set by the mode itself, which is great if you are already familiar with those. It's also what Emacs expects, so there's a lot less friction in these modes than with evil, where you need a project like [[https://github.com/emacs-evil/evil-collection][evil-collection]] to maintain some semblance of coherence. With meow, something like =q= for quitting a mode /just works/. It's great.
+
+The binding overwrite is a really clever idea. Instead of letting you bind keys in motion mode and thus lose keybindings in all modes where it's activated, meow automatically rebinds those keys with a Hyper modifier. Naturally, most of us don't have a Hyper key---even on my mechanical keyboards I have never felt the need to include one---but the point is you can then rebind other keys to those Hyper key bindings, letting you preserve at least some of the more common commands. I do this in the code below.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref meow-keybindings
+(meow-motion-overwrite-define-key
+ '("<escape>" . ignore)
+ '("\\" . execute-extended-command)
+ '("h" . meow-left)
+ '("t" . meow-next)
+ '("c" . meow-prev)
+ '("n" . meow-right)
+ '("<" . beginning-of-buffer)
+ '(">" . end-of-buffer)
+ '("H" . "H-h")
+ '("T" . "H-t")
+ '("C" . "H-c")
+ '("N" . "H-n"))
+#+end_src
+
+** Insert state bindings
+
+The insert state is what you use for actual typing. For most users, there's probably no need to modify it (hence meow doesn't even supply a helper function for insert state, unlike normal and motion states). I do a couple of things with it.
+
+I like having =C-w= delete the previous word. I'm not sure where I picked up this keybinding, but it's all over Linux, including shell and vim. I kept hitting it, trying to delete the previous word and instead executing the =kill-region= command, which is the Emacs binding. In the end I just gave up and rebound it in insert mode.
+
+With my [[https://precondition.github.io/home-row-mods][home row modifiers]] and sausage fingers, I sometimes end up hitting a modifier + a key instead of typing a sequence like "ea", "pa", or "ga". On Dvorak, this tends to happen with a-final sequences. I disable these commands in insert mode by setting them to =ignore=.
+
+Finally, I rebind the Escape key to give it extra functionality. I discuss this in the [[id:1e5a8fcf-39f6-41ce-a9a0-88583045fcde][meow functions]] section.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref meow-keybindings
+(meow-define-keys 'insert
+  '("<escape>" . +meow-insert-exit-maybe)
+  '("C-w" . meow-backward-kill-symbol)
+  ;; I tend to hit C-a when typing "ea" with home row mods
+  '("C-a" . ignore)
+  ;; Same but for "pa" and "ga"
+  '("M-a" . ignore))
+#+end_src
+
+** Global bindings
+
+Since =h= is one of the keys that get captured in keypad state, pressing =SPC h= gets translated into =C-h= directly. Here, I bind =C-h= to my transient, because it does essentially the same thing as the default =describe-*= functions, but better.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref meow-keybindings
+(keymap-global-set "C-h" #'+helpful-transient)
+#+end_src
+
+On my mechanical keyboards with home row mods, I can do all sorts of shenanigans without moving my hands too much. The most reachable modifiers in my layout are Ctrl and Shift, bound under the middle and index fingers, respectively (on both sides, so each hand can use them). Even though I move Escape to the Home row, it's still on the Caps key, so I have to move my left hand quite a bit to reach it. =C-t= is a motion made by the two middle fingers, so it's even easier, even though it may not seem so. I bind =C-t= to Escape globally in Emacs, so I can use it everywhere (I should probably think about binding it directly in my keyboards' firmware).
+
+#+begin_src emacs-lisp :tangle no :noweb-ref meow-keybindings
+;; home row mod esc
+(keymap-global-set "C-t" "<escape>")
+#+end_src
+
+** org-src bindings
+
+I mostly use org-src when editing this config, but since I've been doing that a lot lately, I decided to make it a little more comfortable for myself. I use my =ZZ= and =ZQ= bindings to exit org-src buffers with and without saving my changes, respectively.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref meow-keybindings
+(with-eval-after-load 'org-src
+  (define-key org-src-mode-map [remap save-buffers-kill-terminal] 'org-edit-src-exit)
+  (define-key org-src-mode-map [remap save-buffers-kill-terminal] 'org-edit-src-exit)
+  (define-key org-src-mode-map [remap kill-emacs]                 'org-edit-src-abort))
+#+end_src
+
+** Meow functions
+:PROPERTIES:
+:ID:       1e5a8fcf-39f6-41ce-a9a0-88583045fcde
+:END:
+
+I loved using local leader keys in Doom. One of my favourite things about evil was being able to configure keybindings in all modes to be precisely what I wanted (although it was a bit of a pain with evil + Doom, especially at first). In fact, my biggest fear before switching to meow was not the unfamiliar editing model, but losing the ability to find keys via my local leader.
+
+A solution I found was binding keys to a longer prefix. Here I choose =C-c o= (partly because I bound it to the =o= key in normal mode). I can then have global keybindings use the keypad state and =C-c= + letter, and bind keys local to particular modes to begin with =C-c o=. In practice, if you see a binding like =C-c o o= for org-mode, I'm actually pressing =o o=.
+
+The beauty of this approach is that I can have more that one local leader if I want to, but at the same time I get to fully keep the default Emacs keybindings AND the keymap state with =C-c= (keymap using SPC is a given in meow).
+
+#+begin_src emacs-lisp :tangle no :noweb-ref meow-functions
+(defun +meow-localleader ()
+  (interactive)
+  (meow-keypad-start-with "C-c o"))
+#+end_src
+
+When I'm in insert mode and a [[id:2ca8bb84-790f-4e68-8d3d-4893ef154e43][completion]] overlay is active,
+or if I'm currently in the middle of inserting a [[id:0118536f-8f2f-4e6d-ab30-66bd3101401d][snippet]], I want ESC to quit completion or templating *while keeping me in insert mode*. In my evil config, I used a wrapper function that I modified slightly for meow. It's working as is, but I should try binding ESC in those modes directly, since I haven't done that with meow yet.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref meow-functions
+(defun +meow-insert-exit-maybe ()
+  (interactive)
+  (cond
+   ((and corfu-mode completion-in-region-mode) (corfu-quit))
+   (tempel--active (tempel-done))
+   (t (meow-insert-exit))))
+#+end_src
+
+** Meow settings
+
+I was pleasantly surprised by the amout of customization available in meow. The developers have foreseen quite a large number of possible needs and provided comfortable solutions.
+
+I still refer to the cheatsheet from time to time, so I prefer to see it with the proper layout.
+#+begin_src emacs-lisp :tangle no :noweb-ref meow-settings
+(setq meow-cheatsheet-layout meow-cheatsheet-layout-dvorak)
+#+end_src
+
+The default normal cursor and region selection faces are too similar in my layout, so I change them slightly. I like to be able to see where my cursor is when selecting, because by default it turns into a bar, making it difficult to see with an active region. I also deactivate cursor blinking, because it annoys me.
+#+begin_src emacs-lisp :tangle no :noweb-ref meow-settings
+(custom-set-faces
+ '(meow-normal-cursor ((t (:background "#aab2ac")))))
+(setq meow-cursor-type-region-cursor '(box . 2))
+(blink-cursor-mode -1)
+#+end_src
+
+The =meow-selection-command-fallback= setting is fantastic. It works like this: most operations in meow require a selection (= region). What should we do when there is no selection? There are defaults, but you can easily change them.
+
+I use =k= for the =meow-kill= command, which is 'cut' in CUA. By default, it kills to the end of the line with no selection, but that's already bound to =C-k= in Emacs, so not that far off to begin with, plus it's not a particularly common action. I instead have it delete a single character when there's no selection, which frees me from having to bind =meow-delete= to a key.
+#+begin_src emacs-lisp :tangle no :noweb-ref meow-settings
+;; When k is used without a selection, delete char
+(map-put! meow-selection-command-fallback #'meow-kill #'meow-delete)
+#+end_src
+
+Meow has a binding for goto-line, but it accepts functions other than the default. The reason to use avy here is pretty obvious, as it is strictly better than the in-built goto-line. The reason to wrap it in meow instead of just binding it directly, is that meow also selects the line which is jumped to.
+#+begin_src emacs-lisp :tangle no :noweb-ref meow-settings
+(setq meow-goto-line-function #'avy-goto-line)
+#+end_src
+
+Both vim and Emacs have their own ways of dealing with copying and pasting text. Vim has registers, and Emacs has the kill ring. I'm not interested. I use a system-wide clipboard manager, and I want all my copied text to be in one place, regardless of the program I'm using.
+#+begin_src emacs-lisp :tangle no :noweb-ref meow-settings
+(setq meow-use-clipboard t)
 #+end_src
 
 ** Meow packages and resources
 
+While I'm still getting used to meow, here are reminders for things that I used with evil but no longer have access to, and what I should replace them with.
 - [[https://github.com/juliapath/evil-numbers][evil-numbers]] for incrementing/decrementing (does not require evil)
-- Look into [[https://www.emacswiki.org/emacs/KeyboardMacros][Emacs macros]] to replace vim =q=
+- Look into [[https://www.emacswiki.org/emacs/KeyboardMacros][Emacs macros]] and [[https://github.com/meow-edit/meow/blob/master/TUTORIAL.org#beacon][beacon state]] to replace vim =q=
 - Look into [[info:emacs#Replace][replacement commands]] instead of vim =:=
-- [[https://github.com/magnars/change-inner.el][change-inner]] (like vim =ci= and =ca=)
 
 * Minibuffer keybindings
 
@@ -954,9 +1063,13 @@ and I'm still in the process of refining it.
 #+end_src
 
 * Transient commands
+:PROPERTIES:
+:ID:       1d67b9e6-b143-425a-8dec-d124f95eedc4
+:END:
 
-Right now, all my transient menus live here.
-So far they are missing descriptions.
+Transients are an amazing feature of Emacs, and really handy for people who like to over-personalize their configs. They don't run a command, but instead pop up a menu where you can choose further actions, or enter a transitory state so that you can mash one key to, e.g. increase the font size or text width. I prefer using transients to mapping every function individually, because transients are a lot easier to remap, and their functionality is strictly more powerful. Since Emacs 28, the transient package has been included in Emacs itself.
+
+Right now, all my transient menus live here. So far they are missing descriptions.
 
 ** Window resizing transient
 
@@ -1042,6 +1155,9 @@ So far they are missing descriptions.
 
 * Narrowing and completion
 ** Narrowing
+:PROPERTIES:
+:ID:       53556f3d-c05c-4d6f-a9ae-3a59785b03e3
+:END:
 
 TODO: There is a lot of functionality here, I should explore it.
 https://github.com/minad/consult
@@ -2206,6 +2322,9 @@ or move the point after the snippet.
 #+end_src
 
 ** Link hinting
+:PROPERTIES:
+:ID:       067dfe76-a65f-44b6-ab9d-a72b875071d2
+:END:
 
 #+begin_src elisp :noweb yes
 (use-package link-hint
