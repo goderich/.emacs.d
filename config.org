@@ -60,9 +60,10 @@
 
 * Introduction
 
-Welcome to my literate Emacs configuration file! I suggest you read this section first before you go on. Note that some of the links in this file are org-mode links. If you are reading this file online, they won't work.
+Welcome to my literate Emacs configuration file! I suggest you read this section first before you go on. Note that a few of the links in this file are org-mode links. If you are reading this file online and stumble across a seemingly dead link, it might simply be an org link.
 
 My config is:
+- [[https://harryrschwartz.com/2016/02/15/switching-to-a-literate-emacs-configuration][literate]],
 - centered on [[https://github.com/jwiegley/use-package][use-package]] with defers,
 - based around modal editing, currently [[https://github.com/meow-edit/meow][meow]],
 - [[https://github.com/magit/transient][transient]]- and leader-key heavy,
