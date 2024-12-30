@@ -16,7 +16,6 @@
   - [[#motion-state-bindings][Motion state bindings]]
   - [[#insert-state-bindings][Insert state bindings]]
   - [[#global-bindings][Global bindings]]
-  - [[#org-src-bindings][org-src bindings]]
   - [[#meow-functions][Meow functions]]
   - [[#meow-settings][Meow settings]]
   - [[#meow-packages-and-resources][Meow packages and resources]]
@@ -32,7 +31,8 @@
   - [[#completion-corfu][Completion (Corfu)]]
 - [[#org-mode][Org-mode]]
   - [[#org-settings][Org settings]]
-  - [[#org-keybindings][Org keybindings]]
+  - [[#org-src][Org-src]]
+  - [[#snippet-expansion-in-org][Snippet expansion in org]]
   - [[#org-agenda][Org agenda]]
   - [[#org-bling][Org bling]]
   - [[#transient-navigation][Transient navigation]]
@@ -918,7 +918,7 @@ With my [[https://precondition.github.io/home-row-mods][home row modifiers]] and
 #+end_src
 
 I do not have Tab bindings collected in any single specific place, but this bears stating somewhere. Insert mode keybindings are as good a place as any. I have the following functionality on my Tab key:
-- expand a snippet if one is available, but *only* in insert state (see [[#org-keybindings][Org keybindings]], WIP for programming modes),
+- expand a snippet if one is available, but *only* in insert state,
 - act as org-cycle in org mode, in both normal and insert states,
 - act as indent key in programming modes in both normal and insert states.
 
@@ -935,17 +935,6 @@ On my mechanical keyboards with home row mods, I can do all sorts of shenanigans
 #+begin_src emacs-lisp :tangle no :noweb-ref meow-keybindings
 ;; home row mod esc
 (keymap-global-set "C-t" "<escape>")
-#+end_src
-
-** org-src bindings
-
-I mostly use org-src when editing this config, but since I've been doing that a lot lately, I decided to make it a little more comfortable for myself. I use my =ZZ= and =ZQ= bindings to exit org-src buffers with and without saving my changes, respectively.
-
-#+begin_src emacs-lisp :tangle no :noweb-ref meow-keybindings
-(with-eval-after-load 'org-src
-  (define-key org-src-mode-map [remap save-buffers-kill-terminal] 'org-edit-src-exit)
-  (define-key org-src-mode-map [remap save-buffers-kill-terminal] 'org-edit-src-exit)
-  (define-key org-src-mode-map [remap kill-emacs]                 'org-edit-src-abort))
 #+end_src
 
 ** Meow functions
@@ -1229,24 +1218,28 @@ and I feel the convenience outweighs it.
 
 #+begin_src emacs-lisp :noweb yes
 (use-package org
+  :ensure nil
   :init <<org-init>>
   :hook <<org-hooks>>
   :bind (:map org-mode-map
+         ([remap meow-open-below] . +org-open-below)
+         ([remap meow-open-above] . +org-open-above)
          ("<return>" . +org-return)
          ("C-<return>" . +org-insert-item)
-         ;; could move to M-l instead, together with M-c and M-r
-         ("C-l" . +org-link-dwim)
+         ("C-l" . +org-link-dwim) ;; could move to M-l instead, together with M-c and M-r
+         ;; local leader bindings
          ("C-c o d d" . org-deadline)
          ("C-c o d s" . org-schedule)
          ("C-c o d t" . org-time-stamp)
          ("C-c o h" . +consult-goto-org-heading)
          ("C-c o l" . +link-transient)
          ("C-c o o" . org-ctrl-c-ctrl-c)
+         ("C-c o p" . pandoc-transient)
+         ("C-c o q" . org-set-tags-command)
+         ("C-c o Q" . +org-remove-tags)
          ("C-c o s" . org-edit-src-code)
          ("C-c o S" . org-sparse-tree)
          ("C-c o t" . org-todo)
-         ("C-c o q" . org-set-tags-command)
-         ("C-c o Q" . +org-remove-tags)
          ;; org movement
          ("M-h" . org-metaleft)
          ("M-t" . org-metadown)
@@ -1260,7 +1253,6 @@ and I feel the convenience outweighs it.
   <<org-settings>>
   <<org-src-settings>>
   <<org-functions>>
-  ;; <<org-keybindings>>
   <<org-agenda>>
   <<org-navigation-transient>>
   <<org-modules>>)
@@ -1360,79 +1352,27 @@ This bit of witchcraft, extracted from Doom and simplified, colours a file link 
                   '(warning org-link))))
 #+end_src
 
+** Org-src
+
+I don't want to see any extra indentation in my source blocks, nor be asked questions about the safety of my own code.
+
 #+begin_src emacs-lisp :tangle no :noweb-ref org-src-settings
 (setq org-edit-src-content-indentation 0)
 (setq org-confirm-babel-evaluate nil)
 #+end_src
 
-** Org keybindings
+I mostly use org-src when editing this config, but since I've been doing that a lot lately, I decided to make it a little more comfortable for myself. I use my =ZZ= and =ZQ= bindings to exit org-src buffers with and without saving my changes, respectively.
 
-Note that some keybindings are set in their respective modes.
-They still appear together in the final tangled file.
-
-#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings-evil
-(evil-define-key '(normal visual) org-mode-map
-  (kbd "<tab>") #'org-cycle
-  (kbd "<return>") #'+org-return
-  (kbd "<localleader>,") #'org-ctrl-c-ctrl-c
-  (kbd "<localleader>s") #'org-edit-src-code
-  (kbd "<localleader>t") #'org-todo
-  (kbd "<localleader>dd") #'org-deadline
-  (kbd "<localleader>ds") #'org-schedule
-  (kbd "<localleader>dt") #'org-time-stamp
-  (kbd "<localleader>S") #'org-sparse-tree
-  (kbd "<localleader>q") #'org-set-tags-command
-  (kbd "<localleader>Q") #'+org-remove-tags
-  (kbd "<localleader>.") #'+consult-goto-org-heading
-  (kbd "gh") #'+org-up-heading)
-#+end_src
-
-#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings-evil
-(evil-define-key '(normal insert) org-mode-map
-  (kbd "C-l") #'+org-link-dwim
-  (kbd "C-c") #'ebib-insert-citation)
-#+end_src
-
-#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings-evil
-(evil-define-key 'normal org-mode-map
-  (kbd "<localleader>l") #'+link-transient)
-#+end_src
-
-Some keybindings, namely ones using a modifier key,
-should be accessible in both normal and insert modes.
-#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings-evil
-(evil-define-key '(normal insert) org-mode-map
-  (kbd "M-h") #'org-metaleft
-  (kbd "M-j") #'org-metadown
-  (kbd "M-k") #'org-metaup
-  (kbd "M-l") #'org-metaright
-  (kbd "M-H") #'org-shiftmetaleft
-  (kbd "M-J") #'org-shiftmetadown
-  (kbd "M-K") #'org-shiftmetaup
-  (kbd "M-L") #'org-shiftmetaright
-  (kbd "C-<return>") #'+org-insert-item)
-#+end_src
-
-From evil-org, use evil bindings in source and table editing modes:
-#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings-evil
+#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
 (with-eval-after-load 'org-src
-  (define-key org-src-mode-map [remap evil-save-and-close]          'org-edit-src-exit)
-  (define-key org-src-mode-map [remap evil-save-modified-and-close] 'org-edit-src-exit)
-  (define-key org-src-mode-map [remap evil-quit]                    'org-edit-src-abort))
+  (keymap-set org-src-mode-map "<remap> <save-buffers-kill-terminal>" 'org-edit-src-exit)
+  (keymap-set org-src-mode-map "<remap> <save-buffers-kill-terminal>" 'org-edit-src-exit)
+  (keymap-set org-src-mode-map "<remap> <kill-emacs>" #'org-edit-src-abort))
 #+end_src
 
-Binding to =org-cycle= (usually TAB)
-or =org-ctrl-c-ctrl-c= (mine is =,,= instead)
-does not follow the usual procedure.
-Because these keys are context-dependent to begin with,
-it's generally not a good idea to rebind them completely,
-since you might screw up additional contexts
-you didn't even realize were there before rebinding.
-Instead, additional functionality is added via hooks
-which are run before the main body of the function.
-If any of the functions returns a non-nil value,
-the main body is run instead.
-It's the next best thing to a =cond= in the function itself.
+** Snippet expansion in org
+
+Binding to =org-cycle= (usually TAB) or =org-ctrl-c-ctrl-c= does not follow the usual procedure. Because these keys are context-dependent to begin with, it's generally not a good idea to rebind them completely, since you might screw up additional contexts you didn't even realize were there before rebinding. Instead, additional functionality is added via hooks which are run before the main body of the function. If any of the functions returns a non-nil value, the main body is run instead. It's the next best thing to a =cond= in the function itself.
 
 Trying to bind tempel's expansion to TAB was a tad involved. The expansion function returns a non-nil value even when it fails, and the =tempel-expand= function by itself does not expand when run programmatically. I ended up writing a small wrapper function that returns =nil= if an expansion fails, so that the hook can successfully fall through.
 
@@ -1441,7 +1381,7 @@ Trying to bind tempel's expansion to TAB was a tad involved. The expansion funct
   "Try to expand a snippet with tempel.
 If expansion fails, return nil.
 This function is specifically for use with org-cycle."
-  (ignore-errors ; <- return nil instead of error
+  (ignore-errors ; <- returns nil instead of error
     (when meow-insert-mode
       (tempel-expand t))))
 #+end_src
@@ -1486,26 +1426,6 @@ I then add the function to the hook run before =org-cycle=.
 (map-put! org-fold-show-context-detail 'agenda 'tree)
 ;; shold this be in agenda settings?
 (map-put! org-fold-show-context-detail 'default 'tree)
-#+end_src
-
-There are no bindings for agenda in evil-collection,
-so I had a choice between pulling another package and rolling my own.
-I went with the DIY option, but took some inspiration from [[https://github.com/Somelauw/evil-org-mode/blob/master/evil-org-agenda.el][evil-org]] in setting up mine.
-
-#+begin_src emacs-lisp :tangle no
-(evil-set-initial-state 'org-agenda-mode 'motion)
-
-(evil-define-key 'motion org-agenda-mode-map
-  "b" #'org-agenda-earlier
-  "f" #'org-agenda-later
-  "(" #'org-agenda-earlier
-  ")" #'org-agenda-later
-  "u" #'link-hint-open-link
-  ;; :prefix ("v" . "switch view...")
-  "vw" #'org-agenda-week-view
-  "vm" #'org-agenda-month-view
-  ;; bit different behaviour from link-hint
-  (kbd "<return>") #'org-agenda-goto)
 #+end_src
 
 ** Org bling
@@ -1674,7 +1594,7 @@ Here we load the file.
 #+end_src
 
 The only keybinding required is for the transient entry point.
-#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
+#+begin_src emacs-lisp :tangle no
 (evil-define-key 'normal org-mode-map
   (kbd "<localleader>p") #'pandoc-transient)
 #+end_src
@@ -1737,7 +1657,7 @@ However, my approach is more flexible, and I might want to come back to it.
 
 I should think about an insert mode keybinding, too.
 
-#+begin_src emacs-lisp :tangle no :noweb-ref org-keybindings
+#+begin_src emacs-lisp :tangle no
 (evil-define-key 'normal org-mode-map
   (kbd "<localleader>r") #'+ref-transient)
 #+end_src
@@ -1897,6 +1817,33 @@ For use inside `cond'."
             (regexp-opt '("http://" "https://" "doi:") t)
             thing-at-point-url-path-regexp)
     "Basically a simplified version of `goto-address-url-regxp'"))
+#+end_src
+
+*** Org table row insertion
+
+An idea I stole from [[https://github.com/Somelauw/evil-org-mode/blob/b1f309726b1326e1a103742524ec331789f2bf94/evil-org.el#L86-L91][evil-org]] that goes something like this: instead of regular newline insertion above/below the current line, insert a new table row if the point is inside a table. Since in regular text this enters insert state, I do the same in tables.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref test
+(defun +org-table-insert-row (&optional below?)
+  "Create a new table row and enter insert state in it in the same column."
+  (when (region-active-p)
+    (meow-cancel-selection))
+  (let ((col (org-table-current-column)))
+    (org-table-insert-row below?)
+    (org-table-goto-column col)
+    (meow-insert)))
+
+(defun +org-open-below ()
+  (interactive)
+  (if (org-at-table-p)
+      (+org-table-insert-row 'below)
+    (meow-open-below)))
+
+(defun +org-open-above ()
+  (interactive)
+  (if (org-at-table-p)
+      (+org-table-insert-row)
+    (meow-open-above)))
 #+end_src
 
 ** Org-refile
