@@ -902,7 +902,7 @@ The binding overwrite is a really clever idea. Instead of letting you bind keys 
  '("N" . "H-n"))
 #+end_src
 
-** TODO Insert state bindings
+** Insert state bindings
 
 The insert state is what you use for actual typing. For most users, there's probably no need to modify it (hence meow doesn't even supply a helper function for insert state, unlike normal and motion states). I do a couple of things with it.
 
@@ -910,20 +910,17 @@ I like having =C-w= delete the previous word. I'm not sure where I picked up thi
 
 With my [[https://precondition.github.io/home-row-mods][home row modifiers]] and sausage fingers, I sometimes end up hitting a modifier + a key instead of typing a sequence like "ea", "pa", or "ga". On Dvorak, this tends to happen with a-final sequences. I disable these commands in insert mode by setting them to =ignore=.
 
-I've temporarily bound =tempel-expand= to Tab in insert mode, but that's not great: it interferes with indentation and org-cycle bindings. My previous binding of Tab through an org hook wouldn't work in other modes either. I need a better solution. Basically, I want Tab to:
-- expand a snippet if one is available, but *only* in insert state
-- complete a selection in corfu (that's working already)
-- act as org-cycle in org mode, in both normal and insert states
-- act as indent key in programming modes in both normal and insert states
-I think it would be better to bind it through regular Emacs bindings and not meow
-
 #+begin_src emacs-lisp :tangle no :noweb-ref meow-keybindings
 (meow-define-keys 'insert
-  '("TAB" . tempel-expand)
   '("C-w" . meow-backward-kill-symbol)
   '("C-a" . ignore)
   '("M-a" . ignore))
 #+end_src
+
+I do not have Tab bindings collected in any single specific place, but this bears stating somewhere. Insert mode keybindings are as good a place as any. I have the following functionality on my Tab key:
+- expand a snippet if one is available, but *only* in insert state (see [[#org-keybindings][Org keybindings]], WIP for programming modes),
+- act as org-cycle in org mode, in both normal and insert states,
+- act as indent key in programming modes in both normal and insert states.
 
 ** Global bindings
 
@@ -1215,9 +1212,9 @@ When I'm in insert mode and a [[id:2ca8bb84-790f-4e68-8d3d-4893ef154e43][complet
   (corfu-auto t)
   (corfu-quit-no-match t)
   :bind (:map corfu-map
-              ("TAB" . corfu-expand)
-              ("SPC" . corfu-insert-separator)
-              ("<escape>" . corfu-quit)))
+         ("TAB" . corfu-expand)
+         ("SPC" . corfu-insert-separator)
+         ("<escape>" . corfu-quit)))
 #+end_src
 
 * Org-mode
@@ -1437,17 +1434,22 @@ If any of the functions returns a non-nil value,
 the main body is run instead.
 It's the next best thing to a =cond= in the function itself.
 
-Trying to bind tempel's expansion to TAB was a tad involved.
-The expansion function returns a non-nil value even when it fails,
-and the =tempel-expand= function by itself does not expand
-when run programmatically.
-I ended up writing a small wrapper function that returns nil
-if an expansion fails, so that the hook can successfully fall through.
-(See [[Org functions][Org functions]].)
-Here I just add the function to the hook run before =org-cycle=.
+Trying to bind tempel's expansion to TAB was a tad involved. The expansion function returns a non-nil value even when it fails, and the =tempel-expand= function by itself does not expand when run programmatically. I ended up writing a small wrapper function that returns =nil= if an expansion fails, so that the hook can successfully fall through.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-functions
+(defun +tempel-expand-maybe ()
+  "Try to expand a snippet with tempel.
+If expansion fails, return nil.
+This function is specifically for use with org-cycle."
+  (ignore-errors ; <- return nil instead of error
+    (when meow-insert-mode
+      (tempel-expand t))))
+#+end_src
+
+I then add the function to the hook run before =org-cycle=.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref org-hooks
-(org-cycle-tab-first . +tempel-expand-interactively)
+(org-cycle-tab-first . +tempel-expand-maybe)
 #+end_src
 
 ** Org agenda
@@ -1809,15 +1811,6 @@ Respects current indentation and checkbox."
       (newline)))
    ;; fall back to heading insertion
    (t (org-insert-heading-respect-content))))
-
-(defun +tempel-expand-interactively ()
-  "Try to expand a snippet with tempel.
-If expansion fails, return nil.
-This function is specifically for use with org-cycle."
-  (ignore-errors
-    ;; (when (evil-insert-state-p)
-    (when meow-insert-mode
-      (tempel--interactive #'tempel-expand))))
 #+end_src
 
 *** My version of org-return
