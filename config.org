@@ -1754,11 +1754,12 @@ If on a...
 "
   (interactive)
   (cond
-   (meow-insert-mode (newline-and-indent))
+   ;; table, including in insert state
+   ((org-at-table-p) (org-table-next-row))
+   ;; insert state everywhere else
+   ((meow-insert-mode-p) (newline-and-indent))
    ;; list with checkbox
    ((org-at-item-checkbox-p) (org-toggle-checkbox))
-   ;; table
-   ((org-at-table-p) (org-table-next-row))
    ;; image
    ((when-cond ((bounds (org-in-regexp *org-image-regexp)))
       (*org-toggle-image (car bounds) (cdr bounds))))
