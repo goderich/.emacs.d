@@ -289,9 +289,12 @@ Having said that, I found myself missing a few of the colours in Doom's version 
 
 #+begin_src emacs-lisp
 (use-package solarized-theme
-  :config
+  :init
+  (setq solarized-scale-org-headlines nil)
   (load-theme 'solarized-light t)
 
+  :config
+  ;; should be using #'set-face-attribute instead
   (face-spec-set 'default
                  '((t :background "#fdf6e3")))
   ;; org headlines
@@ -355,7 +358,10 @@ Having said that, I found myself missing a few of the colours in Doom's version 
   (face-spec-set 'link
                  '((t :foreground "#268bd2"
                       :weight bold
-                      :underline t))))
+                      :underline t)))
+  ;; info
+  (face-spec-set 'Info-quoted
+                 '((t :inherit font-lock-keyword-face))))
 #+end_src
 
 ** Fonts
@@ -1824,7 +1830,7 @@ For use inside `cond'."
 
 An idea I stole from [[https://github.com/Somelauw/evil-org-mode/blob/b1f309726b1326e1a103742524ec331789f2bf94/evil-org.el#L86-L91][evil-org]] that goes something like this: instead of regular newline insertion above/below the current line, insert a new table row if the point is inside a table. Since in regular text this enters insert state, I do the same in tables.
 
-#+begin_src emacs-lisp :tangle no :noweb-ref test
+#+begin_src emacs-lisp :tangle no :noweb-ref org-functions
 (defun +org-table-insert-row (&optional below?)
   "Create a new table row and enter insert state in it in the same column."
   (when (region-active-p)
