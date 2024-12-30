@@ -6,9 +6,9 @@
   - [[#early-loading][Early loading]]
   - [[#package-management][Package management]]
   - [[#in-built-packages][In-built packages]]
+  - [[#vars][Vars]]
   - [[#theming][Theming]]
   - [[#fonts][Fonts]]
-  - [[#vars][Vars]]
   - [[#utility-functions][Utility functions]]
 - [[#meow][Meow]]
   - [[#leader-map-bindings][Leader map bindings]]
@@ -2078,6 +2078,13 @@ Examples can be found in the [[https://github.com/Fuco1/smartparens/wiki][wiki]]
 (use-package eldoc
   :config
   (setq eldoc-idle-delay 0))
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package elisp-demos
+  :after helpful
+  :config
+  (advice-add 'helpful-update :after #'elisp-demos-advice-helpful-update))
 #+end_src
 
 #+begin_src emacs-lisp
