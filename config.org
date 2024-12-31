@@ -38,11 +38,9 @@
   - [[#transient-navigation][Transient navigation]]
   - [[#pandoc-integration][Pandoc integration]]
   - [[#links][Links]]
-  - [[#link-path-tooltip][Link path tooltip]]
   - [[#cross-referencing][Cross-referencing]]
   - [[#org-cite][Org cite]]
   - [[#org-functions][Org functions]]
-  - [[#org-refile][Org-refile]]
   - [[#toc-org][Toc-org]]
 - [[#bibliography-and-citations][Bibliography and citations]]
   - [[#ebib][Ebib]]
@@ -428,20 +426,6 @@ Also [[https://coldnew.github.io/d5011be2/][this article]] deals with CJK alignm
 Some functions I use in my config. They are placed here temporarily, and I should move them under more appropriate headings.
 
 #+begin_src emacs-lisp
-(defun +consult-goto-org-heading ()
-    "Find an org heading in the current buffer, and open it.
-`consult-org-heading' doesn't do this automatically for some reason."
-    (interactive)
-    (consult-org-heading)
-    (org-fold-show-context)
-    (org-fold-show-entry)
-    (org-fold-show-children))
-
-(defun +scroll-line-to-top ()
-  ;; Taken from `evil-scroll-line-to-top'
-  (interactive)
-  (recenter (1- (max 1 scroll-margin))))
-
 (defun +open-config ()
   (interactive)
   (find-file "~/.emacs.d/config.org"))
@@ -1261,63 +1245,74 @@ and I feel the convenience outweighs it.
 
 ** Org settings
 
-Enable indentation in org-mode.
+I like having indentation in my org files (but not when using olivetti). Right now I turn it on during startup.
 #+begin_src emacs-lisp :tangle no :noweb-ref org-init
 (setq org-startup-indented t)
 #+end_src
 
+By default, org right-adjusts tags to column 80. I'm used to them following the title, just in a less conspicuous face.
 #+begin_src emacs-lisp :tangle no :noweb-ref org-settings
 (setq org-tags-column 0)
 #+end_src
 
-One of the many things I liked about Doom was the TODO settings.
-Fast TODO selection was on by default, which I think is a great idea
-if you are using more keywords than just TODO and DONE.
+One of the many things I liked about Doom was the TODO settings. Fast TODO selection was on by default, which I think is a great idea if you are using more keywords than just TODO and DONE.
 #+begin_src emacs-lisp :tangle no :noweb-ref org-settings
 (setq org-use-fast-todo-selection t)
 #+end_src
 
+A little breathing space between org headings is alright. One problem with keeping them too tight is that it can sometimes confuse Emacs faces (i.e. if there is a =*= on a line directly preceding a heading, everything after the asterisk with be boldfaced).
 #+begin_src emacs-lisp :tangle no :noweb-ref org-settings
-;; Set org file associations
+(setq org-blank-before-new-entry
+      '((heading . t)
+        (plain-list-item . nil)))
+#+end_src
+
+However, when my headings are collapsed into a list, I don't want to see gaps.
+#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
+(setq org-cycle-separator-lines 0)
+#+end_src
+
+By default, I want org to show me the ancestry of a node when I'm dropping to it from somewhere else.
+#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
+(map-put! org-fold-show-context-detail 'default 'tree)
+#+end_src
+
+Here I set the org file associations, i.e. how org opens file links. I don't like reading PDFs inside Emacs. Dedicated readers are a lot faster and have better commands (although I do use Emacs to comment PDFs). With zathura, and probably other PDF readers too, it's possible to open a file on a particular page. Emacs will do this when the file link ends in, e.g. ".pdf::123", as defined in the regex below.
+#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
 (setq org-file-apps
       `((auto-mode . emacs)
         (,(rx ".pdf::" (group (one-or-more digit)) string-end) . "zathura %s -P %1")
         (,(rx ".pdf" string-end) . "zathura %s")
         (directory . emacs)))
+#+end_src
 
-;; browser needs to be set with a separate function
+The URL opener has to be set separately (although it works everywhere, not just in org). There are a few in-built options, such as Firefox, but if you're using something less popular, like I am, you can still set it here.
+#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
 (setq browse-url-browser-function 'browse-url-generic
       browse-url-generic-program "qutebrowser")
+#+end_src
 
-;; Don't use blank lines between text and the following heading
-(setq org-blank-before-new-entry
-      '((heading . t) (plain-list-item . nil)))
-
-;; Don't show empty lines between collapsed headings
-(setq org-cycle-separator-lines 0)
-
-;; Show tooltips.
-;; I am using this for displaying org link paths.
-;; This may not be the best use of the fns though,
-;; and I have an alternative implementation.
+Show tooltips. I am using this for displaying org link paths when the pointer is on a link. This may not be the best use of this functionality, and I do have an alternative implementation.
+#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
 (setq help-at-pt-display-when-idle t
       help-at-pt-timer-delay 0.1)
 (help-at-pt-set-timer)
+#+end_src
 
-;; Org todo keywords and colours
+I use several additional TODO keywords of my own choosing. I got the idea from Doom, but changed the keywords themselves.
+#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
 (setq org-todo-keywords
       '((sequence "TODO(t)" "|" "DONE(d)")
         (sequence "NEXT(n)" "WAITING(w)" "LATER(l)" "LOOP(p)" "|" "CANCELLED(c)")))
+#+end_src
 
-;; Use LOOP keyword for repeating tasks
-;; (after marking them as done)
+I saw the LOOP keyword somewhere in a blog post, I think, and though it was a great name for a constantly repeating task, which is how I'm using it here.
+#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
 (setq org-todo-repeat-to-state "LOOP")
+#+end_src
 
-;; Archive everything from org files in one directory
-;; into a single hidden file.
-(setq org-archive-location ".archive.org::")
-
-;; My custom faces for todo items.
+Another idea inspired by Doom's config (and my Doom config): new faces for custom TODO keywords. I don't need every face to have its own colour though, just something that tells me at a glance if I should be paying attention. (The =org-done= face is changed in my Theming settings to a grey colour.)
+#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
 (defface +org-todo-important
   '((t :inherit org-todo
        :foreground "#dc322f"))
@@ -1335,17 +1330,20 @@ if you are using more keywords than just TODO and DONE.
         ("WAITING"   +org-todo-unimportant)
         ("LOOP"      +org-todo-unimportant)
         ("CANCELLED" org-done)))
+#+end_src
 
-;; In the datetime prompt, if entering a time that has already
-;; passed today, interpret it as a time for tomorrow.
+I use the org archiving functionality often when I think there is the slightest possibility I will need the information later (if not, I just delete it). However, I don't need separate archives for each file, as is the default. I set it to a file with a relative path, but that's okay, because I only ever archive entries from my org-dir.
+#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
+(setq org-archive-location ".archive.org::")
+#+end_src
+
+I rarely have to enter dates or times that have already passed, since my primary use of the date functionality is scheduling. This setting lets me input future dates and times with fewer keystrokes.
+#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
 (setq org-read-date-prefer-future 'time)
 #+end_src
 
-This bit of witchcraft, extracted from Doom and simplified, colours a file link with a different colour (from the current theme's warning face) if Emacs can't find the file it refers to. Very simple idea, but brilliant in its simplicity, and wonderfully executed.
-
+This bit of witchcraft, [[https://github.com/doomemacs/doomemacs/blob/ba1dca322f9a07bc2b7bec6a98f2c3c55c0bbd77/modules/lang/org/config.el#L503-L517][extracted from Doom]] and simplified, colours a file link with a different colour (from the current theme's warning face) if Emacs can't find the file it refers to. Very simple idea, but brilliant in its simplicity, and wonderfully executed.
 #+begin_src emacs-lisp :tangle no :noweb-ref org-settings
-;; Source: https://github.com/doomemacs/doomemacs/blob/ba1dca322f9a07bc2b7bec6a98f2c3c55c0bbd77/modules/lang/org/config.el#L503-L517
-;; Modify default file: links to colorize broken file links red
 (org-link-set-parameters
  "file" :face (lambda (path)
                 (if (file-exists-p path)
@@ -1413,27 +1411,35 @@ I then add the function to the hook run before =org-cycle=.
    ("<return>" . org-agenda-goto)))
 #+end_src
 
+*** Org agenda settings
+
+I prefer the agenda to always open in fullscreen mode.
 #+begin_src emacs-lisp :tangle no :noweb-ref org-agenda
-(setq org-agenda-files (list org-directory))
-
 (setq org-agenda-window-setup 'only-window)
+#+end_src
 
-;; Display one week, always starting from Monday.
+I like to see the agenda for the current calendar week, but with the point on today's date (it also has a different face in my theme).
+
+Weeks start on Mondays. Fite me.
+#+begin_src emacs-lisp :tangle no :noweb-ref org-agenda
 (setq org-agenda-span 'week
       org-agenda-start-on-weekday 1
       org-agenda-start-day ".")
+#+end_src
 
-;; Show full context after switching to an item from agenda
+When I jump to an org headline from agenda, I want to see its full ancestry and the entry text itself.
+#+begin_src emacs-lisp :tangle no :noweb-ref org-agenda
 (map-put! org-fold-show-context-detail 'agenda 'tree)
-;; shold this be in agenda settings?
-(map-put! org-fold-show-context-detail 'default 'tree)
+#+end_src
+
+I use my whole org directory as my agenda list. If something gets an active timestamp, I want to see it in my agenda (and there is always =org-time-stamp-inactive=).
+#+begin_src emacs-lisp :tangle no :noweb-ref org-agenda
+(setq org-agenda-files (list org-directory))
 #+end_src
 
 ** Org bling
 
 Org-mode is amazing, but doesn't look it out of the box. Some light eye candy makes it an even bigger pleasure to use.
-
-I could also consider pimping my [[https://pank.eu/blog/pretty-babel-src-blocks.html][source blocks]]. Some of this functionality can be achieved through org-modern.
 
 *** Org-modern
 
@@ -1467,6 +1473,10 @@ Yet another fantastic idea from Doom: a special face for list items with a check
 
 - [ ] unchecked
 - [X] checked
+
+Which in my Emacs looks like this:
+
+[[./img/checkbox.png]]
 
 Headings with DONE have a special face that's in-built and can be customized, but the same does not exist for checked list items. Doom had its own workaround, which I was unable to find after a couple days' searching, but I did find [[https://fuco1.github.io/2017-05-25-Fontify-done-checkbox-items-in-org-mode.html][this blog post]], which referenced hlissner's config from 2017 (aka proto-Doom). Based on the code therein and on the [[info:elisp#Search-based Fontification][info node]], I wrote my own version. I use a simpler regex than what I've seen online, because I don't use =[X/Y]= in checkboxes.
 
@@ -1508,13 +1518,14 @@ Now the emphasis markers may safely be hidden.
 
 ** Transient navigation
 
-Instead of pressing key combinations or chords repeatedly to navigate,
-we can define a transient state and use simple keys while in it.
-I got the idea from [[https://github.com/Somelauw/evil-org-mode/blob/master/doc/example_config.el][this evil-org example]] that uses hydra,
-but I'm using transient because I'm more used to it,
-and because it's now built into Emacs (as of 28).
+Instead of pressing key combinations or chords repeatedly to navigate, we can define a transient state and use simple keys while in it. I got the idea from [[https://github.com/Somelauw/evil-org-mode/blob/master/doc/example_config.el][this evil-org example]] that uses hydra, but I'm using transient because I'm more used to it, and because it's now built into Emacs (as of 28).
 
 #+begin_src emacs-lisp :tangle no :noweb-ref org-navigation-transient
+(defun +scroll-line-to-top ()
+  ;; Taken from `evil-scroll-line-to-top'
+  (interactive)
+  (recenter (1- (max 1 scroll-margin))))
+
 (defmacro with-org-show (&rest body)
   `(progn
      ,@body
@@ -1540,9 +1551,6 @@ makes sense to me to combine into a single keybinding."
    ((not (org-at-heading-p)) (org-back-to-heading))
    ((= 1 (org-current-level)) (ignore))
    (t (org-up-element))))
-
-  ;; (with-org-show
-  ;;  (org-up-heading-safe)))
 
 (defun +org-down-and-show ()
   (interactive)
@@ -1577,34 +1585,29 @@ makes sense to me to combine into a single keybinding."
 
 ** Pandoc integration
 
-My personal interface to pandoc from Emacs
-is written in a [[./pandoc.el][separate file]] as a module.
-There is a single entry point: a transient function
-(aptly named =pandoc-transient=),
-which allows the user to interactively
-construct a pandoc call, and then executes it.
+My personal interface to pandoc from Emacs is written in a [[./pandoc.el][separate file]] as a module. There is a single entry point: a transient function (aptly named =pandoc-transient=), which allows the user to interactively construct a pandoc call, and then executes it.
 
-I might make it into its own package later,
-but there is currently no shortage of pandoc APIs for Emacs,
-and my version is very much tailored to my personal needs
-and those alone.
+I might make it into its own package later, but there is currently no shortage of pandoc APIs for Emacs, and my version is very much tailored to my personal needs and those alone.
 
 Here we load the file.
 #+begin_src emacs-lisp :tangle no :noweb-ref org-modules
 (load-file (concat user-emacs-directory "pandoc.el"))
 #+end_src
 
-The only keybinding required is for the transient entry point.
-#+begin_src emacs-lisp :tangle no
-(evil-define-key 'normal org-mode-map
-  (kbd "<localleader>p") #'pandoc-transient)
-#+end_src
+The only keybinding required is for the transient entry point, which I set together with my other org bindings.
 
 ** Links
+
+This is another personal package of mine, whose purpose is to insert all kinds of links in org:
+- to org headings in the current file,
+- to files on the system,
+- links from the system clipboard.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref org-modules
 (load-file (concat user-emacs-directory "links.el"))
 #+end_src
+
+As with other commands, I like having it all in one big transient menu.
 
 #+begin_src emacs-lisp
 (transient-define-prefix +link-transient ()
@@ -1620,53 +1623,15 @@ The only keybinding required is for the transient entry point.
     ("<escape>" "quit" transient-quit-all)]])
 #+end_src
 
-** Link path tooltip
-
-Usually, we hide link URLs and display just the description.
-Doom Emacs shows a link URL tooltip in the echo area,
-similar to how eldoc shows the documentation for the function at point.
-That's pretty neat functionality, but it was surprisingly difficult to search for online.
-I found no discussions or questions about this sort of feature.
-
-This is a relatively simple implementation.
-The function itself checks if the point is in a link regex, and if it is,
-displays the first group (the URL) as a message.
-I then hook it up to =post-command-hook= *locally*,
-so that it only works in org-mode.
-
-I currently have it *turned off* because I'm using =help-at-pt-set-timer=
-(NB: check source of the fn, see also [[info:elisp#Idle Timers][info node]]).
-However, my approach is more flexible, and I might want to come back to it.
-
-#+begin_src emacs-lisp :tangle no
-(defun +org-link-tooltip ()
-  "Display the URL of the link at point in the echo area."
-  (interactive) ; for testing purposes only
-  (when (org-in-regexp org-link-bracket-re)
-    (message "Link: %s" (match-string 1))))
-
-(add-hook 'org-mode-hook
-          (lambda ()
-            (add-hook 'post-command-hook #'+org-link-tooltip 0 'local)))
-#+end_src
-
 ** Cross-referencing
+
+This is a package to simplify inserting cross-references in org for later compilation with pandoc, and is in a way a sister package to my =pandoc.el=.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref org-modules
 (load-file (concat user-emacs-directory "refs.el"))
 #+end_src
 
-I should think about an insert mode keybinding, too.
-
-#+begin_src emacs-lisp :tangle no
-(evil-define-key 'normal org-mode-map
-  (kbd "<localleader>r") #'+ref-transient)
-#+end_src
-
-Again, a transient.
-Since I'm using transients instead of regular evil keybindings,
-I could make capitalization an infix instead of having separate bindings.
-Although it's not like I'm running out of keys. Something to ponder.
+Again, a transient. Since I'm using transients instead of regular evil keybindings, I could make capitalization an infix instead of having separate bindings. Although it's not like I'm running out of keys. Something to ponder.
 
 #+begin_src emacs-lisp
 (transient-define-prefix +ref-transient ()
@@ -1681,7 +1646,19 @@ Although it's not like I'm running out of keys. Something to ponder.
 
 ** Org cite
 
-#+begin_src emacs-lisp :tangle no :noweb-ref org-cite
+It's pretty awesome that org-mode now has in-built citation capabilities. I write my papers in org-mode, and having a stable citation API gives me confidence that my config won't need constant package and workflow changes (even though I started writing academic papers in org-mode even before org-cite).
+
+#+begin_src emacs-lisp
+(use-package org-cite
+  :ensure nil
+  :after org)
+#+end_src
+
+However, the org-cite API itself is quite opaque. It appears to rely heavily on objects from Emacs' EIEIO library, which I'm not familiar with. I did manage to write a citation processor to open my citations in ebib on the corresponding paper, but the process was unnecessarily complicated and not very well documented. In the end I opted for my own handwritten code (see the [[id:60496f16-000c-4e9f-8522-848f300523a9][org-return]] and [[id:067dfe76-a65f-44b6-ab9d-a72b875071d2][link hinting]] sections) because that's easier to understand, maintain, and improve.
+
+As such, the code below is *disabled*, but preserved for posterity.
+
+#+begin_src emacs-lisp :tangle no
 (defun +ebib-open-on-citation (citation _)
   (let ((key (map-elt (cadr citation) :key)))
     (ebib)
@@ -1700,46 +1677,34 @@ Although it's not like I'm running out of keys. Something to ponder.
 
 ** Org functions
 
+Searching by heading is my primary means of navigating org files. Consult does this admirably. Problem is, when I'm jumping to an org heading, chances are I want to see what's inside it. I don't want to mash Tab repeatedly every time I jump to a a heading.
+
+Unfortunately, =consult-org-heading= doesn't have a hook. Maybe I should ask the dev nicely?
+#+begin_src emacs-lisp :tangle no :noweb-ref org-functions
+(defun +consult-goto-org-heading ()
+    "Find an org heading in the current buffer, and open it.
+`consult-org-heading' doesn't do this automatically for some reason."
+    (interactive)
+    (consult-org-heading)
+    (org-fold-show-context)
+    (org-fold-show-entry)
+    (org-fold-show-children))
+#+end_src
+
+Adding tags is very easy is org, but removing them is not. I don't normally have a bunch of tags on every heading in org---usually just one. I like being able to remove all tags with a quick keystroke. For finer edits, I can always resort to more manual methods.
 #+begin_src emacs-lisp :tangle no :noweb-ref org-functions
 (defun +org-remove-tags ()
   "Remove all tags from current heading."
   (interactive)
   (org-set-tags nil))
-
-(defun +org-list-insert-and-indent (&optional checkbox?)
-  "Insert a new row in a list.
-Respects current indentation and checkbox."
-  (let ((indentation (current-indentation)))
-    (end-of-line)
-    (org-insert-item checkbox?)
-    (indent-line-to indentation)
-    (end-of-line)
-    (evil-insert-state)))
-
-(defun +org-insert-item ()
-  "Insert an item determined from context."
-  (interactive)
-  (cond
-   ;; list with checkboxes
-   ((org-at-item-checkbox-p) (+org-list-insert-and-indent 'checkbox))
-   ;; list without checkboxes
-   ((org-at-item-p) (+org-list-insert-and-indent))
-   ;; if in a table, break the table at that row
-   ;; (since RET jumps to next row, adding one if needed)
-   ((org-at-table-p)
-    (progn
-      (end-of-line)
-      (newline)))
-   ;; fall back to heading insertion
-   (t (org-insert-heading-respect-content))))
 #+end_src
 
 *** My version of org-return
+:PROPERTIES:
+:ID:       60496f16-000c-4e9f-8522-848f300523a9
+:END:
 
-I believe org-mode first started the fashion of
-contextually dependent actions in Emacs (aka "dwim").
-Then Doom took it and expanded it further.
-The idea is great, and here I put my own spin on it.
+I believe org-mode first started the fashion of contextually dependent actions in Emacs (aka "dwim"). Then Doom took it and expanded it further. The idea is great, and here I put my own spin on it. This function is bound to =<return>=, of course.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref org-functions
 (defun +org-return ()
@@ -1821,6 +1786,49 @@ For use inside `cond'."
     "Basically a simplified version of `goto-address-url-regxp'"))
 #+end_src
 
+*** Org item insertion
+
+'Item' can mean a bullet point in a list, or a heading. This is a contextually determined function that I prefer to bind to =C-<return>=.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-functions
+(defun +org-list-insert-and-indent (&optional checkbox?)
+  "Insert a new row in a list.
+Respects current indentation and checkbox.
+Helper function for `+org-insert-item'."
+  (let ((indentation (current-indentation)))
+    (end-of-line)
+    (org-insert-item checkbox?)
+    (indent-line-to indentation)
+    (end-of-line)
+    (evil-insert-state)))
+
+(defun +org-insert-item ()
+  "Insert an item determined from context.
+When point is on a...
+- list item with a checkbox: insert a new list item with a checkbox,
+- list item without a checkbox: insert a new list item without a checkbox,
+- table: break the table after that row,
+- elsewhere: insert a heading.
+
+I use it to break tables because I have other functions that
+take care of inserting new rows (both on Return and on my
+line insertion functions), so instead I need some way of
+jumping out or splitting a table.
+"
+  (interactive)
+  (cond
+   ;; list item with checkbox
+   ((org-at-item-checkbox-p) (+org-list-insert-and-indent 'checkbox))
+   ;; list item without checkbox
+   ((org-at-item-p) (+org-list-insert-and-indent))
+   ;; table
+   ((org-at-table-p)
+    (end-of-line)
+    (newline))
+   ;; elsewhere
+   (t (org-insert-heading-respect-content))))
+#+end_src
+
 *** Org table row insertion
 
 An idea I stole from [[https://github.com/Somelauw/evil-org-mode/blob/b1f309726b1326e1a103742524ec331789f2bf94/evil-org.el#L86-L91][evil-org]] that goes something like this: instead of regular newline insertion above/below the current line, insert a new table row if the point is inside a table. Since in regular text this enters insert state, I do the same in tables.
@@ -1848,11 +1856,9 @@ An idea I stole from [[https://github.com/Somelauw/evil-org-mode/blob/b1f309726b
     (meow-open-above)))
 #+end_src
 
-** Org-refile
+*** Org-refile
 
-This bit of code works. I should test it more.
-Right now it does not move the pointer after refiling.
-Do I want to move to the new position? Depends.
+When refiling subtrees, I rarely move them outside the current file. Having incremental completion for the target makes refiling functions much more useful, and it's easy to achive with a simple function wrapping consult.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref org-functions
 (defun +org-refile-to-this-file ()
@@ -1867,7 +1873,29 @@ Do I want to move to the new position? Depends.
                 (list heading (buffer-file-name) nil location))))
 #+end_src
 
+*** Link path tooltip
+
+Usually, we hide link URLs and display just the description. Doom Emacs shows a link URL tooltip in the echo area, similar to how eldoc shows the documentation for the function at point. That's pretty neat functionality, but it was surprisingly difficult to search for online. I found no discussions or questions about this sort of feature.
+
+This is a relatively simple implementation. The function itself checks if the point is in a link regex, and if it is, displays the first group (the URL) as a message. I then hook it up to =post-command-hook= *locally*, so that it only works in org-mode.
+
+I currently have it *turned off* because I'm using =help-at-pt-set-timer= (NB: check source of the fn, see also [[info:elisp#Idle Timers][info node]]). However, my approach is more flexible, and I might want to come back to it.
+
+#+begin_src emacs-lisp :tangle no
+(defun +org-link-tooltip ()
+  "Display the URL of the link at point in the echo area."
+  (interactive) ; for testing purposes only
+  (when (org-in-regexp org-link-bracket-re)
+    (message "Link: %s" (match-string 1))))
+
+(add-hook 'org-mode-hook
+          (lambda ()
+            (add-hook 'post-command-hook #'+org-link-tooltip 0 'local)))
+#+end_src
+
 ** Toc-org
+
+The sole purpose of this package is to make it easier to read this config online by generating a browser-friendly table of contents. You're welcome.
 
 #+begin_src emacs-lisp
 (use-package toc-org
@@ -1879,8 +1907,9 @@ Do I want to move to the new position? Depends.
 
 ** Ebib
 
-TODOs:
-- disabled notes for now, figure out later
+[[https://github.com/joostkremers/ebib][Ebib]] is a bibliography/reference manager written in Elisp, so that it runs inside Emacs. For normal people that in itself is a losing proposition, but since we use Emacs, it's worth looking into. I'm not of the opinion that anything and everything should be run inside Emacs, but Ebib is great! It provides all the functionality I need while staying out of my way. It integrates excellently with Emacs, provides referencing capability, and gives me full control of all of its aspects.
+
+Sure, it doesn't have the bells and whistles of [[https://www.zotero.org/][other bibliography managers]], but I don't need those. I need to be able to cite papers while writing, and to quickly open PDFs whenever I feel like it. Ebib does that, and more.
 
 #+begin_src emacs-lisp :noweb yes
 (use-package ebib
@@ -2013,7 +2042,9 @@ Meow-agnostic keybindings for ebib. I should unbind or rebind "h" and "n" though
       ("N" . nil)
       ("/" . ebib-jump-to-entry)
       ("<tab>" . ebib-edit-entry)
-      ;; ("of" . +ebib-import-file-from-index)
+      ("O" . ebib-open-bibtex-file)
+      ("o" . nil)
+      ("of" . +ebib-import-file-from-index)
  :map ebib-entry-mode-map
       ("q" . ebib-quit)
       ("z" . ebib-leave-ebib-windows)
@@ -2022,31 +2053,9 @@ Meow-agnostic keybindings for ebib. I should unbind or rebind "h" and "n" though
       ("S" . ebib-save-all-databases)
       ("D" . ebib-delete-current-field-contents)
       ("<tab>" . ebib-quit-entry-buffer)
-      ;; ("of" . ebib-import-file)
-      )
-#+end_src
-
-#+begin_src emacs-lisp :tangle no :noweb-ref ebib-keybindings-evil
-(evil-define-key 'normal ebib-index-mode-map
-  "q" #'ebib-quit
-  "s" #'ebib-save-current-database
-  "S" #'ebib-save-all-databases
-  "/" #'ebib-jump-to-entry
-  (kbd "<tab>") #'ebib-edit-entry
-  (kbd "<localleader>f") #'+ebib-import-file-from-index)
-
-;; Unset N while I'm figuring out what to do with notes.
-(keymap-unset ebib-index-mode-map "N")
-
-(evil-define-key 'normal ebib-entry-mode-map
-  "q" #'ebib-quit
-  "z" #'ebib-leave-ebib-windows
-  "E" #'+ebib-edit-as-string
-  "s" #'ebib-save-current-database
-  "S" #'ebib-save-all-databases
-  "D" #'ebib-delete-current-field-contents
-  (kbd "<tab>") #'ebib-quit-entry-buffer
-  (kbd "<localleader>f") #'ebib-import-file)
+      ("O" . ebib-open-bibtex-file)
+      ("o" . nil)
+      ("of" . ebib-import-file))
 #+end_src
 
 * Programming languages
@@ -2265,12 +2274,7 @@ Once I'm inside a snippet, chances are I no longer need to expand more snippets.
   <<link-hint-org-cite>>)
 #+end_src
 
-Here I add a new link type for org citations.
-(Some of the relevant code, e.g. =+org-follow-cite=, is defined elsewhere in the config.)
-The =:next= and =:at-point-p= keywords are required by link-hint,
-and =:open= is the functionality that I want.
-This lets me call link-hint the way I normally do,
-and through it open citations with my custom function.
+Here I add a new link type for org citations. (Some of the relevant code, e.g. =+org-follow-cite=, is defined elsewhere in the config.) The =:next= and =:at-point-p= keywords are required by link-hint, and =:open= is the functionality that I want. This lets me call link-hint the way I normally do, and through it open citations with my custom function.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref link-hint-org-cite
 (link-hint-define-type 'org-cite
