@@ -1371,9 +1371,9 @@ I mostly use org-src when editing this config, but since I've been doing that a 
 
 ** Snippet expansion in org
 
-Binding to =org-cycle= (usually TAB) or =org-ctrl-c-ctrl-c= does not follow the usual procedure. Because these keys are context-dependent to begin with, it's generally not a good idea to rebind them completely, since you might screw up additional contexts you didn't even realize were there before rebinding. Instead, additional functionality is added via hooks which are run before the main body of the function. If any of the functions returns a non-nil value, the main body is run instead. It's the next best thing to a =cond= in the function itself.
+Binding to =org-cycle= (usually TAB) or =org-ctrl-c-ctrl-c= does not follow the usual procedure. Because these keys are context-dependent to begin with, it's generally not a good idea to rebind them completely, since you might screw up additional contexts you didn't even realize were there before rebinding. Instead, additional functionality is added via hooks which are run before the main body of the function. If any of the functions returns a non-nil value, then the main body isn't run. It's the next best thing to a =cond= in the function itself.
 
-Trying to bind tempel's expansion to TAB was a tad involved. The expansion function returns a non-nil value even when it fails, and the =tempel-expand= function by itself does not expand when run programmatically. I ended up writing a small wrapper function that returns =nil= if an expansion fails, so that the hook can successfully fall through.
+Trying to bind tempel's expansion to TAB was a tad involved. The expansion function returns a non-nil value even when it fails, so I ended up writing a small wrapper function that returns =nil= on failure. This way the hook can successfully fall through.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref org-functions
 (defun +tempel-expand-maybe ()
@@ -1443,11 +1443,11 @@ Org-mode is amazing, but doesn't look it out of the box. Some light eye candy ma
 
 *** Org-modern
 
-When using Doom, I bounced on one of its org beautification settings, which slowed down my Emacs quite noticeably. Right now I am using [[https://github.com/minad/org-modern][org-modern]] on a Surface Go 2, and it isn't slow at all.
+When using Doom, I bounced off one of its org beautification settings, which slowed down my Emacs quite noticeably. Right now I am using [[https://github.com/minad/org-modern][org-modern]] on a Surface Go 2, and it isn't slow at all.
 
 I don't use all of the defaults though. I prefer my own faces for todos, and I'm not yet sure what to do with the tables.
 
-With org-lists, I use "-" everywhere, because it's easily reachable on Dvorak. The defaults replacement for "-" is a longer dash, but I like nice fat dots instead.
+With org-lists, I use "-" everywhere, because it's easily reachable on Dvorak. The default replacement for "-" is a longer dash, but I like nice fat dots instead.
 
 #+begin_src emacs-lisp
 (use-package org-modern
