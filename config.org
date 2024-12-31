@@ -1042,7 +1042,7 @@ and I'm still in the process of refining it.
 
 Transients are an amazing feature of Emacs, and really handy for people who like to over-personalize their configs. They don't run a command, but instead pop up a menu where you can choose further actions, or enter a transitory state so that you can mash one key to, e.g. increase the font size or text width. I prefer using transients to mapping every function individually, because transients are a lot easier to remap, and their functionality is strictly more powerful. Since Emacs 28, the transient package has been included in Emacs itself.
 
-Right now, all my transient menus live here. So far they are missing descriptions.
+Right now, all my transient menus live here. Since many of my packages are deferred, it's simpler to define the transients outside their =use-package= calls. The packages then get loaded when I call their respective transients.
 
 ** Window resizing transient
 
@@ -1114,15 +1114,25 @@ Right now, all my transient menus live here. So far they are missing description
 
 ** Olivetti transient
 
+I use olivetti with org a lot, and when I do, I prefer to keep my text relatively narrow. That does not play well with =org-indent-mode=, so I keep the two separate with this transient that takes care of disabling and enabling =org-indent-mode= when called.
+
 #+begin_src emacs-lisp
+(defun +turn-off-olivetti-mode ()
+  (interactive)
+  (olivetti-mode -1)
+  (when (derived-mode-p 'org-mode)
+    (org-indent-mode +1)))
+
 (transient-define-prefix +olivetti-transient ()
   ["Change text column width..."
    [("w" "wider" olivetti-expand :transient t)
     ("n" "narrower" olivetti-shrink :transient t)]
-   [("f" "turn off olivetti" turn-off-olivetti-mode)
+   [("f" "turn off olivetti" +turn-off-olivetti-mode)
     ("q" "quit" transient-quit-all)]]
   (interactive)
   (olivetti-mode +1)
+  (when (derived-mode-p 'org-mode)
+    (org-indent-mode -1))
   (transient-setup '+olivetti-transient))
 #+end_src
 
@@ -2318,15 +2328,14 @@ and then it's indispensable.
 
 ** Olivetti
 
+Olivetti is a great mode for prose writing and reading. All it does is increase the width of the margins to make the text width more comfortable. Another great mode with similar functionality is [[https://github.com/joostkremers/writeroom-mode][writeroom-mode]], but the latter also modifies the modeline.
+
 #+begin_src emacs-lisp
 (use-package olivetti
   :commands (olivetti-mode)
   :hook (Info-mode . olivetti-mode)
   :config
-  (setq-default olivetti-body-width 60)
-  (defun turn-off-olivetti-mode ()
-    (interactive)
-    (olivetti-mode -1)))
+  (setq-default olivetti-body-width 40))
 #+end_src
 
 ** ws-butler
