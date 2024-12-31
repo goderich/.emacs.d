@@ -1308,22 +1308,22 @@ if you are using more keywords than just TODO and DONE.
 (setq org-archive-location ".archive.org::")
 
 ;; My custom faces for todo items.
-(defface *org-todo-important
+(defface +org-todo-important
   '((t :inherit org-todo
        :foreground "#dc322f"))
   "For very important todo items.")
 
 ;; Colour taken from hl-todo.
-(defface *org-todo-unimportant
+(defface +org-todo-unimportant
   '((t :inherit org-todo
        :foreground "#d0bf8f"))
   "For less urgent todo items.")
 
 (setq org-todo-keyword-faces
-      '(("LATER"     *org-todo-unimportant)
-        ("NEXT"      *org-todo-important)
-        ("WAITING"   *org-todo-unimportant)
-        ("LOOP"      *org-todo-unimportant)
+      '(("LATER"     +org-todo-unimportant)
+        ("NEXT"      +org-todo-important)
+        ("WAITING"   +org-todo-unimportant)
+        ("LOOP"      +org-todo-unimportant)
         ("CANCELLED" org-done)))
 
 ;; In the datetime prompt, if entering a time that has already
@@ -1461,7 +1461,7 @@ Yet another fantastic idea from Doom: a special face for list items with a check
 Headings with DONE have a special face that's in-built and can be customized, but the same does not exist for checked list items. Doom had its own workaround, which I was unable to find after a couple days' searching, but I did find [[https://fuco1.github.io/2017-05-25-Fontify-done-checkbox-items-in-org-mode.html][this blog post]], which referenced hlissner's config from 2017 (aka proto-Doom). Based on the code therein and on the [[info:elisp#Search-based Fontification][info node]], I wrote my own version. I use a simpler regex than what I've seen online, because I don't use =[X/Y]= in checkboxes.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref org-functions
-(defun *org-add-checked-font-lock ()
+(defun +org-add-checked-font-lock ()
   (font-lock-add-keywords
    nil
    ;; (rx (seq line-start (* space) "- [X] " (+ not-newline)))
@@ -1472,7 +1472,7 @@ Headings with DONE have a special face that's in-built and can be customized, bu
 Using a hook appears to be more reliable than just a bare =font-lock-add-keywords= setting, though. I'm not sure why, since other people's configs use it without a hook. Some part of my config must be interfering with it.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref org-hooks
-(org-mode . *org-add-checked-font-lock)
+(org-mode . +org-add-checked-font-lock)
 #+end_src
 
 *** Org-appear
@@ -1696,7 +1696,7 @@ Although it's not like I'm running out of keys. Something to ponder.
   (interactive)
   (org-set-tags nil))
 
-(defun *org-list-insert-and-indent (&optional checkbox?)
+(defun +org-list-insert-and-indent (&optional checkbox?)
   "Insert a new row in a list.
 Respects current indentation and checkbox."
   (let ((indentation (current-indentation)))
@@ -1711,9 +1711,9 @@ Respects current indentation and checkbox."
   (interactive)
   (cond
    ;; list with checkboxes
-   ((org-at-item-checkbox-p) (*org-list-insert-and-indent 'checkbox))
+   ((org-at-item-checkbox-p) (+org-list-insert-and-indent 'checkbox))
    ;; list without checkboxes
-   ((org-at-item-p) (*org-list-insert-and-indent))
+   ((org-at-item-p) (+org-list-insert-and-indent))
    ;; if in a table, break the table at that row
    ;; (since RET jumps to next row, adding one if needed)
    ((org-at-table-p)
@@ -1741,7 +1741,7 @@ If on a...
 - citation: open in ebib.
 - URL: open it.
 - org link: follow it.
-- source block: edit it (run block with =,,=).
+- source block: edit it.
 "
   (interactive)
   (cond
@@ -1752,13 +1752,13 @@ If on a...
    ;; list with checkbox
    ((org-at-item-checkbox-p) (org-toggle-checkbox))
    ;; image
-   ((when-cond ((bounds (org-in-regexp *org-image-regexp)))
-      (*org-toggle-image (car bounds) (cdr bounds))))
+   ((when-cond ((bounds (org-in-regexp +org-image-regexp)))
+      (+org-toggle-image (car bounds) (cdr bounds))))
    ;; citation
-   ((when-cond ((bounds (org-in-regexp *org-cite-regexp)))
-      (*org-follow-cite (car bounds) (cdr bounds))))
+   ((when-cond ((bounds (org-in-regexp +org-cite-regexp)))
+      (+org-follow-cite (car bounds) (cdr bounds))))
    ;; a regular URL string with no description
-   ((when-cond ((bounds (org-in-regexp *url-regexp))
+   ((when-cond ((bounds (org-in-regexp +url-regexp))
                 (url (buffer-substring-no-properties (car bounds) (cdr bounds))))
       (browse-url url)))
    ;; an org link of any kind, including URLs with descriptions
@@ -1774,9 +1774,9 @@ For use inside `cond'."
   (declare (indent 1) (debug if-let))
   `(if-let ,spec ,(macroexp-progn (append body (list t)))))
 
-(defun *org-follow-cite (beg end)
+(defun +org-follow-cite (beg end)
   (let* ((keys (->> (buffer-substring-no-properties beg end)
-                    (s-match-strings-all *org-cite-key-regexp)
+                    (s-match-strings-all +org-cite-key-regexp)
                     (-map #'-second-item))))
     (pcase (length keys)
       (0 (user-error "No keys found!"))
@@ -1784,12 +1784,12 @@ For use inside `cond'."
       (_ (let ((key (completing-read "Choose key to open: " keys)))
            (+ebib-open-on-key key))))))
 
-(defvar *org-cite-regexp
+(defvar +org-cite-regexp
   (rx (seq "[cite"
            (opt ?/ (one-or-more (any alnum ?/ ?_ ?-)))
            ":" (zero-or-more (not (any ?\[ ?\]))) "]")))
 
-(defvar *org-cite-key-regexp
+(defvar +org-cite-key-regexp
   (rx (seq "@" (group (one-or-more (or alnum ?- ?_))))))
 
 (defun +ebib-open-on-key (key)
@@ -1797,14 +1797,14 @@ For use inside `cond'."
   (ebib-db-set-current-entry-key key ebib--cur-db)
   (ebib--update-buffers 'no-refresh))
 
-(defun *org-toggle-image (beg end)
+(defun +org-toggle-image (beg end)
   (org-toggle-inline-images nil beg end))
 
-(defvar *org-image-regexp
+(defvar +org-image-regexp
   (rx (seq "[[./" (+? anything) "." (or "png" "jpg" "jpeg" "svg") "]]")))
 
 (with-eval-after-load 'thingatpt
-  (defvar *url-regexp
+  (defvar +url-regexp
     (concat "\\<"
             (regexp-opt '("http://" "https://" "doi:") t)
             thing-at-point-url-path-regexp)
@@ -1933,7 +1933,7 @@ TODOs:
 *** Functions
 
 #+begin_src emacs-lisp :tangle no :noweb-ref ebib-functions
-(defun *ebib-get-author-names (key)
+(defun +ebib-get-author-names (key)
   (let ((names
          (->>
           (ebib-get-field-value "author" key ebib--cur-db "default" 'unbraced)
@@ -1943,7 +1943,7 @@ TODOs:
         (concat (car names) " et al")
       (s-join " and " names))))
 
-(defun *ebib-get-year (key)
+(defun +ebib-get-year (key)
   (let ((date
          (or
           (ebib-get-field-value "date" key ebib--cur-db 'noerror 'unbraced)
@@ -1952,7 +1952,7 @@ TODOs:
          (s-split "-")
          (-first-item))))
 
-(defun *ebib-get-title (key)
+(defun +ebib-get-title (key)
   (let ((title
          (->> (ebib-get-field-value "title" key ebib--cur-db "default" 'unbraced)
               (s-split ":")
@@ -1962,9 +1962,9 @@ TODOs:
     (s-truncate 100 title "")))
 
 (defun +ebib-generate-filename (key)
-  (let ((names (*ebib-get-author-names key))
-        (year (*ebib-get-year key))
-        (title (*ebib-get-title key)))
+  (let ((names (+ebib-get-author-names key))
+        (year (+ebib-get-year key))
+        (title (+ebib-get-title key)))
     (->> (list names year title)
          (-non-nil)
          (s-join " ")
@@ -2213,7 +2213,6 @@ Once I'm inside a snippet, chances are I no longer need to expand more snippets.
           ((or (mood-line-segment-buffer-status) " ") . " ")
           ((mood-line-segment-buffer-name) . " ")
           ((mood-line-segment-anzu) . " ")
-          ;; ((*count-selected-lines) . " ")
           ((mood-line-segment-cursor-position) . " ")
           ((mood-line-segment-scroll) . " "))
          :right
@@ -2221,16 +2220,7 @@ Once I'm inside a snippet, chances are I no longer need to expand more snippets.
           ((mood-line-segment-major-mode) . "  ")
           ((mood-line-segment-misc-info) . "  ")
           ((mood-line-segment-checker) . "  ")
-          ((mood-line-segment-process) . "  "))))
-
-  (defun *count-selected-lines ()
-    (when (evil-visual-state-p)
-      (let ((numlines
-             (-
-              (line-number-at-pos evil-visual-end)
-              (line-number-at-pos evil-visual-beginning))))
-        (format #("-%d-" 0 4 (face mood-line-status-error))
-                numlines)))))
+          ((mood-line-segment-process) . "  ")))))
 #+end_src
 
 ** Crux
@@ -2266,7 +2256,7 @@ Once I'm inside a snippet, chances are I no longer need to expand more snippets.
 #+end_src
 
 Here I add a new link type for org citations.
-(Some of the relevant code, e.g. =*org-follow-cite=, is defined elsewhere in the config.)
+(Some of the relevant code, e.g. =+org-follow-cite=, is defined elsewhere in the config.)
 The =:next= and =:at-point-p= keywords are required by link-hint,
 and =:open= is the functionality that I want.
 This lets me call link-hint the way I normally do,
@@ -2275,15 +2265,15 @@ and through it open citations with my custom function.
 #+begin_src emacs-lisp :tangle no :noweb-ref link-hint-org-cite
 (link-hint-define-type 'org-cite
   :next #'link-hint--next-org-cite
-  :at-point-p #'*org-at-cite-p
-  :open #'*org-follow-cite)
+  :at-point-p #'+org-at-cite-p
+  :open #'+org-follow-cite)
 
 (push 'link-hint-org-cite link-hint-types)
 
-(defun *org-at-cite-p ()
+(defun +org-at-cite-p ()
   "If the point is on an org citation, return its bounds.
-The bounds are returned as a list, to be passed to `*org-follow-cite'."
-  (flatten-tree (org-in-regexp *org-cite-regexp)))
+The bounds are returned as a list, to be passed to `+org-follow-cite'."
+  (flatten-tree (org-in-regexp +org-cite-regexp)))
 
 (defun link-hint--find-org-cite (start-bound end-bound)
   "Find the first file link.
@@ -2291,7 +2281,7 @@ Only search the range between just after START-BOUND and END-BOUND."
   (save-excursion
     (let (org-cite-pos)
       (goto-char start-bound)
-      (link-hint--find-regexp *org-cite-regexp
+      (link-hint--find-regexp +org-cite-regexp
                               (point) end-bound))))
 
 (defun link-hint--next-org-cite (bound)
