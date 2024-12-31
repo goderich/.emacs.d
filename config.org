@@ -271,27 +271,27 @@ I use the same Emacs config on three machines at the moment. Most things do not 
 (pcase (system-name)
   ;; Laptop
   ("iwaka-thinkpad"
-   (setq my/org-directory "~/org"
-         my/default-bibliography "~/files/academic/bib/bibliography.bib"
-         my/ebib-file-search-dir "~/files/syncthing/papers/ebib"
-         my/ebib-import-directory "~/files/syncthing/papers/papers/articles"
-         my/fontsize 200))
+   (setq +org-directory "~/org"
+         +default-bibliography "~/files/academic/bib/bibliography.bib"
+         +ebib-file-search-dir "~/files/syncthing/papers/ebib"
+         +ebib-import-directory "~/files/syncthing/papers/papers/articles"
+         +fontsize 200))
 
   ;; Office PC
   ("goderich-ncue"
-   (setq my/org-directory "~/org"
-         my/default-bibliography "~/files/academic/bib/bibliography.bib"
-         my/ebib-file-search-dir "~/files/papers/ebib"
-         my/ebib-import-directory "~/files/papers/papers/articles"
-         my/fontsize 200))
+   (setq +org-directory "~/org"
+         +default-bibliography "~/files/academic/bib/bibliography.bib"
+         +ebib-file-search-dir "~/files/papers/ebib"
+         +ebib-import-directory "~/files/papers/papers/articles"
+         +fontsize 200))
 
   ;; Tablet
   ("goderich-surface"
-   (setq my/org-directory "~/org"
-         my/default-bibliography "~/academic/bib/bibliography.bib"
-         my/ebib-file-search-dir "~/papers/ebib"
-         my/ebib-import-directory "~/papers/papers/articles"
-         my/fontsize 180)))
+   (setq +org-directory "~/org"
+         +default-bibliography "~/academic/bib/bibliography.bib"
+         +ebib-file-search-dir "~/papers/ebib"
+         +ebib-import-directory "~/papers/papers/articles"
+         +fontsize 180)))
 #+end_src
 
 ** Theming
@@ -410,7 +410,7 @@ With variable width fonts, it's not always just a matter of liking a typeface, b
       (variable-font "Crimson Pro"))
   (set-face-attribute 'default nil
                       :family monospace-font
-                      :height my/fontsize)
+                      :height +fontsize)
   (set-face-attribute 'fixed-pitch nil
                       :family monospace-font
                       :height 1.0)
@@ -1684,7 +1684,7 @@ Although it's not like I'm running out of keys. Something to ponder.
   ;; See `org-cite-register-processor' documentation for details.
   :follow #'+ebib-open-on-citation)
 
-(setq org-cite-global-bibliography (list my/default-bibliography))
+(setq org-cite-global-bibliography (list +default-bibliography))
 (setq org-cite-follow-processor '+org-cite-follow-processor)
 #+end_src
 
@@ -1885,10 +1885,10 @@ TODOs:
 *** Settings
 
 #+begin_src emacs-lisp :tangle no :noweb-ref ebib-settings
-(setq ebib-preload-bib-files (list my/default-bibliography))
-;; (setq ebib-notes-directory my/ebib-notes)
-(setq ebib-file-search-dirs (list my/ebib-file-search-dir))
-(setq ebib-import-directory my/ebib-import-directory)
+(setq ebib-preload-bib-files (list +default-bibliography))
+;; (setq ebib-notes-directory +ebib-notes)
+(setq ebib-file-search-dirs (list +ebib-file-search-dir))
+(setq ebib-import-directory +ebib-import-directory)
 (setq ebib-file-associations '(("pdf" . "zathura") ("ps" . "gv")))
 (setq ebib-bibtex-dialect 'biblatex)
 (setq ebib-citation-insert-multiple t)
