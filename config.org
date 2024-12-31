@@ -917,7 +917,7 @@ On my mechanical keyboards with home row mods, I can do all sorts of shenanigans
 :ID:       1e5a8fcf-39f6-41ce-a9a0-88583045fcde
 :END:
 
-I loved using local leader keys in Doom. One of my favourite things about evil was being able to configure keybindings in all modes to be precisely what I wanted (although it was a bit of a pain with evil + Doom, especially at first). In fact, my biggest fear before switching to meow was not the unfamiliar editing model, but losing the ability to find keys via my local leader.
+I loved using local leader keys in Doom. One of my favourite things about evil was being able to configure keybindings in all modes to be precisely what I wanted (although it was a bit of a pain with evil + Doom, especially at first). In fact, my biggest fear before switching to meow was not the unfamiliar editing model, but losing the ability to bind keys via my local leader.
 
 A solution I found was binding keys to a longer prefix. Here I choose =C-c o= (partly because I bound it to the =o= key in normal mode). I can then have global keybindings use the keypad state and =C-c= + letter, and bind keys local to particular modes to begin with =C-c o=. In practice, if you see a binding like =C-c o o= for org-mode, I'm actually pressing =o o=.
 
