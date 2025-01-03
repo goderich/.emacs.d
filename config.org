@@ -959,8 +959,11 @@ and I feel the convenience outweighs it.
          ([remap meow-open-above] . +org-open-above)
          ("<return>" . +org-return)
          ("C-<return>" . +org-insert-item)
-         ("C-l" . +org-link-dwim) ;; could move to M-l instead, together with M-c and M-r
+         ;; citation command in insert mode?
+         ("M-l" . +org-link-dwim)
+         ("M-r" . +ref-transient)
          ;; local leader bindings
+         ("C-c o c" . ebib-insert-citation)
          ("C-c o d d" . org-deadline)
          ("C-c o d s" . org-schedule)
          ("C-c o d t" . org-time-stamp)
