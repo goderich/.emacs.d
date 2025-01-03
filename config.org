@@ -360,16 +360,19 @@ Having said that, I found myself missing a few of the colours in Doom's version 
                  '((t :box unspecified)))
   ;; org agenda
   (face-spec-set 'org-agenda-date
-                 '((t :foreground "#657b83" ; same as default
+                 '((t :foreground nil
                       :weight bold)))
   (face-spec-set 'org-scheduled-previously
-                 '((t :foreground "#657b83"))) ; same as default
+                 '((t :foreground nil)))
   (face-spec-set 'org-agenda-done
                  '((t :slant normal)))
   (face-spec-set 'link
                  '((t :foreground "#268bd2"
                       :weight bold
                       :underline t)))
+  (face-spec-set 'org-agenda-date-weekend
+                 '((t :foreground nil
+                      :underline nil)))
   ;; info
   (face-spec-set 'Info-quoted
                  '((t :inherit font-lock-keyword-face))))
