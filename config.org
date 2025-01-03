@@ -569,8 +569,8 @@ So this keymap will likely change in future, but right now it looks something li
  '("z" . meow-pop-selection)
  '("ZZ" . save-buffers-kill-terminal)
  '("ZQ" . kill-emacs)
- '("'" . repeat) ; not as useful as in evil
- '("\\" . execute-extended-command)
+ '("<prior>" . +meow-scroll-down)
+ '("<next>" . +meow-scroll-up)
  '("<escape>" . meow-cancel-selection))
 #+end_src
 
@@ -659,6 +659,8 @@ The beauty of this approach is that I can have more that one local leader if I w
   (meow-keypad-start-with "C-c o"))
 #+end_src
 
+Meow does not support movement by visual lines out of the box. Shame, because I now prefer to write paragraphs without line breaks in org. I took meow's line functions and rewrote them to move visually instead.
+
 #+begin_src emacs-lisp :tangle no :noweb-ref meow-functions
 (defun +meow-next-visual (arg)
   (interactive "P")
@@ -677,6 +679,24 @@ The beauty of this approach is that I can have more that one local leader if I w
    ((meow--with-universal-argument-p arg)
     (goto-char (point-min)))
    (t (line-move-visual -1))))
+#+end_src
+
+Scrolling with PageUp and PageDown does not automatically cancel selection in meow, which I find annoying. I wrote two wrapper functions to take care of this for me.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref meow-functions
+(defun +meow-scroll-up ()
+  "PageDown command that cancels meow selection."
+  (interactive)
+  (when (and (meow-normal-mode-p) (region-active-p))
+    (meow--cancel-selection))
+  (scroll-up-command))
+
+(defun +meow-scroll-down ()
+  "PageUp command that cancels meow selection."
+  (interactive)
+  (when (and (meow-normal-mode-p) (region-active-p))
+    (meow--cancel-selection))
+  (scroll-down-command))
 #+end_src
 
 ** Meow settings
