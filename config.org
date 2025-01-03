@@ -529,14 +529,14 @@ So this keymap will likely change in future, but right now it looks something li
  '("A" . meow-open-below)
  '("b" . meow-back-word)
  '("B" . meow-back-symbol)
- '("c" . meow-prev)
+ '("c" . +meow-prev-visual)
  '("C" . meow-prev-expand)
  '("d" . meow-change)
  '("e" . meow-line)
  '("E" . meow-goto-line)
  '("f" . meow-find)
  '("g" . meow-cancel-selection) ; superfluous?
- '("G" . meow-grab)
+ '("G" . meow-grab) ; not using this
  '("h" . meow-left)
  '("H" . meow-left-expand)
  '("i" . meow-insert)
@@ -551,11 +551,11 @@ So this keymap will likely change in future, but right now it looks something li
  '("o" . +meow-localleader)
  '("p" . meow-yank)
  '("q" . meow-quit)
- '("r" . meow-replace)
- '("R" . meow-swap-grab)
+ '("r" . meow-replace) ; not using this
+ '("R" . meow-swap-grab) ; not using this
  '("s" . avy-goto-char-timer)
- '("S" . meow-visit)
- '("t" . meow-next)
+ '("S" . meow-visit) ; superfluous?
+ '("t" . +meow-next-visual)
  '("T" . meow-next-expand)
  '("u" . undo-fu-only-undo)
  '("U" . undo-fu-only-redo)
@@ -655,6 +655,26 @@ The beauty of this approach is that I can have more that one local leader if I w
 (defun +meow-localleader ()
   (interactive)
   (meow-keypad-start-with "C-c o"))
+#+end_src
+
+#+begin_src emacs-lisp :tangle no :noweb-ref meow-functions
+(defun +meow-next-visual (arg)
+  (interactive "P")
+  (unless (equal (meow--selection-type) '(expand . char))
+    (meow--cancel-selection))
+  (cond
+   ((meow--with-universal-argument-p arg)
+    (goto-char (point-max)))
+   (t (line-move-visual 1))))
+
+(defun +meow-prev-visual (arg)
+  (interactive "P")
+  (unless (equal (meow--selection-type) '(expand . char))
+    (meow--cancel-selection))
+  (cond
+   ((meow--with-universal-argument-p arg)
+    (goto-char (point-min)))
+   (t (line-move-visual -1))))
 #+end_src
 
 ** Meow settings
