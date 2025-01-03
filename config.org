@@ -1547,11 +1547,13 @@ For use inside `cond'."
 Respects current indentation and checkbox.
 Helper function for `+org-insert-item'."
   (let ((indentation (current-indentation)))
+    (when (region-active-p)
+      (meow-cancel-selection))
     (end-of-line)
     (org-insert-item checkbox?)
     (indent-line-to indentation)
     (end-of-line)
-    (evil-insert-state)))
+    (meow-insert)))
 
 (defun +org-insert-item ()
   "Insert an item determined from context.
