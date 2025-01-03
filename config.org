@@ -60,6 +60,7 @@
   - [[#olivetti][Olivetti]]
   - [[#ws-butler][ws-butler]]
   - [[#help][Help]]
+  - [[#tldr][Tldr]]
   - [[#undo][Undo]]
   - [[#evil-numbers][Evil-numbers]]
 - [[#finalize][Finalize]]
@@ -2108,6 +2109,31 @@ https://github.com/Wilfred/helpful
 #+begin_src emacs-lisp
 (use-package helpful
   :commands (+helpful-transient))
+#+end_src
+
+** Tldr
+
+[[https://tldr.sh/][Tldr pages]] are a fantastic resource, and Emacs is a great environment to read them. The only problem is that tldr.el's default colour scheme is a war crime, so I disabled all colouring.
+
+#+begin_src emacs-lisp
+(use-package tldr
+  :custom-face
+  (tldr-title
+   ((t :foreground nil)))
+  (tldr-introduction
+   ((t :foreground nil
+       :italic nil)))
+  (tldr-description
+   ((t :foreground nil)))
+  (tldr-command-itself
+   ((t :foreground nil
+       :background nil)))
+  (tldr-command-argument
+   ((t :foreground nil
+       :background nil)))
+  (tldr-code-block
+   ((t :foreground nil
+       :background nil))))
 #+end_src
 
 ** TODO Undo
