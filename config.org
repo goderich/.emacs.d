@@ -1490,9 +1490,7 @@ If on a...
    ;; an org link of any kind, including URLs with descriptions
    ((org-in-regexp org-link-bracket-re) (link-hint-open-link-at-point))
    ;; org-src block
-   ((org-in-src-block-p) (org-edit-src-code))
-   ;; Default action
-   (t nil)))
+   ((org-in-src-block-p) (org-edit-src-code))))
 
 (defmacro when-cond (spec &rest body)
   "Like `when-let', but returns true on successful binding.
