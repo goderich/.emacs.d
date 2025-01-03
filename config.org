@@ -162,7 +162,7 @@ Some of these settings were taken from the [[https://github.com/hrs/sensible-def
   ;; do not create backups
   (make-backup-files nil)
   ;; use regular spacing with sentences.
-  ;; this is important because it directly impacts sentence motions in evil.
+  ;; this is important because it directly impacts sentence motions.
   (sentence-end-double-space nil)
   ;; do not pollute this file with custom variables
   (custom-file "~/.emacs.d/custom.el")
@@ -419,6 +419,7 @@ With variable width fonts, it's not always just a matter of liking a typeface, b
   (set-face-attribute 'variable-pitch nil
                       :family variable-font
                       :height 1.3))
+(set-fontset-font t nil (font-spec :height 1.2 :name "Gentium Plus"))
 #+end_src
 
 For CJK fonts specifically, check [[https://www.shimmy1996.com/en/posts/2018-06-24-fun-with-fonts-in-emacs/][this]], or [[https://www.reddit.com/r/emacs/comments/8tz1r0/how_to_set_font_according_to_languages_that_i/e1bjce6/][this snippet]].
@@ -692,6 +693,7 @@ The default normal cursor and region selection faces are too similar in my layou
 (custom-set-faces
  '(meow-normal-cursor ((t (:background "#aab2ac")))))
 (setq meow-cursor-type-region-cursor '(box . 2))
+(setq meow-cursor-type-motion 'hollow)
 (blink-cursor-mode -1)
 #+end_src
 
@@ -724,6 +726,8 @@ While I'm still getting used to meow, here are reminders for things that I used 
 - [[https://github.com/juliapath/evil-numbers][evil-numbers]] for incrementing/decrementing (does not require evil)
 - Look into [[https://www.emacswiki.org/emacs/KeyboardMacros][Emacs macros]] and [[https://github.com/meow-edit/meow/blob/master/TUTORIAL.org#beacon][beacon state]] to replace vim =q=
 - Look into [[info:emacs#Replace][replacement commands]] instead of vim =:=
+- [[info:emacs#Mark Ring][Marks]] (pop/unpop) and [[info:emacs#Position Registers][registers]] for movements similar to =gi=
+- Smartparens instead of evil-surround
 
 * Minibuffer keybindings
 
@@ -1944,12 +1948,6 @@ I stole the insert and delete shades from Doom, because they look really good.
  '(diff-hl-delete ((t (:background "#dc322f" :foreground "#dc322f")))))
 #+end_src
 
-#+begin_src emacs-lisp :tangle no :noweb-ref diff-hl-keybindings
-(evil-define-key 'normal 'global
-  (kbd "]h") #'diff-hl-next-hunk
-  (kbd "[h") #'diff-hl-previous-hunk)
-#+end_src
-
 ** Tempel snippets
 :PROPERTIES:
 :ID:       0118536f-8f2f-4e6d-ab30-66bd3101401d
@@ -2007,11 +2005,13 @@ Once I'm inside a snippet, chances are I no longer need to expand more snippets.
 
 ** Avy
 
+Avy is an amazing package for all kinds of on-screen navigation. I use it to jump around and to open links and citations with link-hint. The one thing I modify in my avy config is the =avy-keys= variable: I map it to the Dvorak home row keys. However, it is not advisable to enumerate the home row left to right, since avy takes the keys in order. I go by finger ordering: index, middle, ring, index curved downwards; alternating right and left hands.
+
 #+begin_src emacs-lisp
 (use-package avy
   :config
   ;; use Dvorak home row hints
-  (setq avy-keys '(?a ?o ?e ?u ?i ?d ?h ?t ?n ?s)))
+  (setq avy-keys '(?h ?u ?t ?e ?o ?n ?m ?k)))
 #+end_src
 
 ** Link hinting
@@ -2181,9 +2181,7 @@ Here are some packages I should consider trying out:
 - https://github.com/alphapapa/org-super-agenda
 - https://github.com/jacktasia/dumb-jump for jumping to definition
 - https://github.com/jamescherti/inhibit-mouse.el <- completely disable the mouse
-- What's the Doom package that shows usage examples in the help menu? I think it's [[https://github.com/xuchunyang/elisp-demos][elisp-demos]]
 - https://github.com/emacsorphanage/macrostep
-- https://github.com/snosov1/toc-org
 - https://github.com/wwwjfy/emacs-fish
 - https://github.com/yoshiki/yaml-mode
 - https://github.com/emacsorphanage/quickrun
@@ -2203,8 +2201,7 @@ Here are some packages I should consider trying out:
 - https://github.com/vedang/pdf-tools
 - Mail? Consider.
 - https://github.com/progfolio/elpaca consider
-
-A few useful packages are mentioned [[https://blog.d46.us/advanced-emacs-startup/][here]] as well.
+- Packages for writing prose in [[https://github.com/jacmoe/.doom.d][this config]]
 
 For more packages see here:
 https://github.com/emacs-tw/awesome-emacs
