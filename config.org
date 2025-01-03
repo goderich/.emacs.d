@@ -562,7 +562,7 @@ So this keymap will likely change in future, but right now it looks something li
  '("v" . meow-reverse)
  '("w" . meow-next-word)
  '("W" . meow-next-symbol)
- '("x" . execute-extended-command) ; superfluous?
+ '("x" . meow-keypad-start)
  '("y" . meow-save)
  '("z" . meow-pop-selection)
  '("ZZ" . save-buffers-kill-terminal)
@@ -631,6 +631,13 @@ On my mechanical keyboards with home row mods, I can do all sorts of shenanigans
 #+begin_src emacs-lisp :tangle no :noweb-ref meow-keybindings
 ;; home row mod esc
 (keymap-global-set "C-t" "<escape>")
+#+end_src
+
+With =x= switching to keypad state, bindings beginning with =C-x C-= can be entered with two keypresses. E.g., =switch-to-buffer= for me is now =x b=, whereas =list-buffers= becomes =x SPC b=. It makes more sense to bind the more common commands this way.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref meow-keybindings
+(keymap-global-set "C-x C-b" #'switch-to-buffer)
+(keymap-global-set "C-x b" #'list-buffers)
 #+end_src
 
 ** Meow functions
