@@ -520,7 +520,7 @@ So this keymap will likely change in future, but right now it looks something li
  '("2" . meow-expand-2)
  '("1" . meow-expand-1)
  '("-" . negative-argument)
- '("/" . meow-visit) ; superfluous?
+ '("/" . consult-line) ; superfluous?
  '(";" . ignore)
  '("," . meow-inner-of-thing)
  '("." . meow-bounds-of-thing)
