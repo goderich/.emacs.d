@@ -1032,14 +1032,14 @@ and I feel the convenience outweighs it.
          ;; ("C-c o s" . org-edit-src-code)
          ;; ("C-c o S" . org-sparse-tree)
          ;; org movement
-         ("M-h" . org-metaleft)
-         ("M-t" . org-metadown)
-         ("M-c" . org-metaup)
-         ("M-n" . org-metaright)
-         ("M-H" . org-shiftmetaleft)
-         ("M-T" . org-shiftmetadown)
-         ("M-C" . org-shiftmetaup)
-         ("M-N" . org-shiftmetaright))
+         ("M-n" . org-metaleft)
+         ("M-e" . org-metadown)
+         ("M-u" . org-metaup)
+         ("M-i" . org-metaright)
+         ("M-N" . org-shiftmetaleft)
+         ("M-E" . org-shiftmetadown)
+         ("M-U" . org-shiftmetaup)
+         ("M-I" . org-shiftmetaright))
   :config
   <<org-settings>>
   <<org-src-settings>>
@@ -2055,13 +2055,13 @@ Once I'm inside a snippet, chances are I no longer need to expand more snippets.
 
 ** Avy
 
-Avy is an amazing package for all kinds of on-screen navigation. I use it to jump around and to open links and citations with link-hint. The one thing I modify in my avy config is the =avy-keys= variable: I map it to the Dvorak home row keys. However, it is not advisable to enumerate the home row left to right, since avy takes the keys in order. I go by finger ordering: index, middle, ring, index curved downwards; alternating right and left hands.
+Avy is an amazing package for all kinds of on-screen navigation. I use it to jump around and to open links and citations with link-hint. The one thing I modify in my avy config is the =avy-keys= variable: I map it to the Colemak home row keys. However, it is not advisable to enumerate the home row left to right, since avy takes the keys in order. I go by finger ordering: index, middle, ring, index curved downwards; alternating right and left hands.
 
 #+begin_src emacs-lisp
 (use-package avy
   :config
-  ;; use Dvorak home row hints
-  (setq avy-keys '(?h ?u ?t ?e ?o ?n ?m ?k)))
+  ;; use Colemak (DH matrix) home row hints
+  (setq avy-keys '(?n ?t ?e ?s ?i ?r ?h ?d)))
 #+end_src
 
 ** Link hinting
