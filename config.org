@@ -10,7 +10,7 @@
   - [[#theming][Theming]]
   - [[#fonts][Fonts]]
   - [[#utility-functions][Utility functions]]
-- [[#meow][Meow]]
+- [[#meow-disabled][Meow (DISABLED)]]
   - [[#leader-map-bindings][Leader map bindings]]
   - [[#normal-state-bindings][Normal state bindings]]
   - [[#motion-state-bindings][Motion state bindings]]
@@ -19,6 +19,7 @@
   - [[#meow-functions][Meow functions]]
   - [[#meow-settings][Meow settings]]
   - [[#meow-packages-and-resources][Meow packages and resources]]
+- [[#boon][Boon]]
 - [[#minibuffer-keybindings][Minibuffer keybindings]]
 - [[#transient-commands][Transient commands]]
   - [[#window-resizing-transient][Window resizing transient]]
@@ -72,7 +73,7 @@ Welcome to my literate Emacs configuration file! I suggest you read this section
 My config is:
 - [[https://harryrschwartz.com/2016/02/15/switching-to-a-literate-emacs-configuration][literate]],
 - centered on [[https://github.com/jwiegley/use-package][use-package]] with defers,
-- based around modal editing, currently [[https://github.com/meow-edit/meow][meow]],
+- based around modal editing, currently +meow+ [[https://github.com/jyp/boon][boon]],
 - [[https://github.com/magit/transient][transient]]- and leader-key heavy,
 - full of my personal functions and quirks,
 - still very much in flux.
@@ -446,11 +447,11 @@ Some functions I use in my config. They are placed here temporarily, and I shoul
   (toggle-truncate-lines 1))
 #+end_src
 
-* Meow
+* Meow (DISABLED)
 
 [[https://github.com/meow-edit/meow/blob/master/EXPLANATION.org][Meow]] is a modal editing package. It's both like and unlike evil. If you come to it expecting it to be "just like evil, but better", you will inevitably be disappointed. If you keep an open mind and invest some time in it, it will work just as well as evil, but with much better coupling with Emacs.
 
-#+begin_src emacs-lisp :noweb yes
+#+begin_src emacs-lisp :noweb yes :tangle no
 (use-package meow
   :init
   (require 'meow) ; <- must be present
@@ -749,6 +750,42 @@ While I'm still getting used to meow, here are reminders for things that I used 
 - [[info:emacs#Mark Ring][Marks]] (pop/unpop) and [[info:emacs#Position Registers][registers]] for movements similar to =gi=
 - Smartparens instead of evil-surround
 
+* Boon
+
+#+begin_src emacs-lisp
+(use-package boon
+  :init
+  (require 'boon-colemak)
+  (boon-mode)
+  (turn-on-boon-mode)
+  :bind
+  (:map boon-command-map
+        ("ZZ" . save-buffers-kill-terminal)
+        ("ZQ" . kill-emacs)
+        ("<return>" . nil)
+        ("/" . consult-line)
+        ;; change movement keys to a pyramid
+        ("e" . 'next-line)
+        ("E" . 'forward-paragraph)
+        ("n" . 'backward-char)
+        ("N" . 'boon-smarter-upward)
+        ("m" . 'boon-smarter-backward)
+        ("L" . 'beginning-of-visual-line)
+        ("y" . 'end-of-line)
+        ("Y" . 'end-of-visual-line)
+        ("h" . 'avy-goto-word-1)
+        ("H" . 'avy-goto-char-timer)
+   :map goto-map
+        ("g" . 'avy-goto-line)
+        ("h" . 'consult-org-heading)
+   :map boon-x-map
+        ("e" . eval-last-sexp)
+        ("f" . '+file-transient)
+        ("s" . 'save-buffer)
+        (";" . 'comment-line)
+        ))
+#+end_src
+
 * Minibuffer keybindings
 
 Keybindings in the minibuffer have to be set differently.
@@ -967,6 +1004,7 @@ When I'm in insert mode and a [[id:2ca8bb84-790f-4e68-8d3d-4893ef154e43][complet
 * Org-mode
 
 - Sacha Chua also has an [[https://sachachua.com/blog/2024/01/using-consult-and-org-ql-to-search-my-org-mode-agenda-files-and-sort-the-results-to-prioritize-heading-matches/][interesting use]] of org-ql.
+- See [[https://stackoverflow.com/questions/5500035/set-custom-keybinding-for-specific-emacs-mode][this]] and maybe [[https://stackoverflow.com/questions/13102494/buffer-locally-overriding-minor-mode-key-bindings-in-emacs/13102821#13102821][this]] for binding minor mode keys in specific major modes.
 
 Note that since I am using a literate config
 and loading it with org-babel from my =init.el=,
@@ -980,27 +1018,19 @@ and I feel the convenience outweighs it.
   :init <<org-init>>
   :hook <<org-hooks>>
   :bind (:map org-mode-map
-         ([remap meow-open-below] . +org-open-below)
-         ([remap meow-open-above] . +org-open-above)
          ("<return>" . +org-return)
          ("C-<return>" . +org-insert-item)
-         ;; citation command in insert mode?
-         ("M-l" . +org-link-dwim)
-         ("M-r" . +ref-transient)
+         ("C-c c" . ebib-insert-citation)
+         ("C-c l" . +org-link-dwim)
+         ("C-c r" . +ref-transient)
          ;; local leader bindings
          ("C-c o c" . ebib-insert-citation)
-         ("C-c o d d" . org-deadline)
-         ("C-c o d s" . org-schedule)
-         ("C-c o d t" . org-time-stamp)
          ("C-c o h" . +consult-goto-org-heading)
          ("C-c o l" . +link-transient)
-         ("C-c o o" . org-ctrl-c-ctrl-c)
          ("C-c o p" . pandoc-transient)
-         ("C-c o q" . org-set-tags-command)
-         ("C-c o Q" . +org-remove-tags)
-         ("C-c o s" . org-edit-src-code)
-         ("C-c o S" . org-sparse-tree)
-         ("C-c o t" . org-todo)
+         ("C-c C-Q" . +org-remove-tags)
+         ;; ("C-c o s" . org-edit-src-code)
+         ;; ("C-c o S" . org-sparse-tree)
          ;; org movement
          ("M-h" . org-metaleft)
          ("M-t" . org-metadown)
@@ -1499,7 +1529,7 @@ If on a...
    ;; table, including in insert state
    ((org-at-table-p) (org-table-next-row))
    ;; insert state everywhere else
-   ((meow-insert-mode-p) (newline-and-indent))
+   ;((meow-insert-mode-p) (newline-and-indent))
    ;; list with checkbox
    ((org-at-item-checkbox-p) (org-toggle-checkbox))
    ;; image
