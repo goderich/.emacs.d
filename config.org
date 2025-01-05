@@ -761,33 +761,39 @@ While I'm still getting used to meow, here are reminders for things that I used 
   :init
   (require 'boon-colemak)
   (boon-mode)
-  (turn-on-boon-mode)
   :bind
   (:map boon-command-map
-        ("ZZ" . save-buffers-kill-terminal)
-        ("ZQ" . kill-emacs)
-        ("<return>" . nil)
-        ("/" . consult-line)
-        ;; change movement keys to a pyramid
         ("e" . 'next-line)
         ("E" . 'forward-paragraph)
-        ("n" . 'backward-char)
-        ("N" . 'boon-smarter-upward)
-        ("m" . 'boon-smarter-backward)
-        ("L" . 'beginning-of-visual-line)
-        ("y" . 'end-of-line)
-        ("Y" . 'end-of-visual-line)
         ("h" . 'avy-goto-word-1)
         ("H" . 'avy-goto-char-timer)
+        ("j" . 'crux-top-join-line)
+        ("J" . 'join-line)
+        ("L" . 'beginning-of-visual-line)
+        ("m" . 'boon-smarter-backward)
+        ("M" . 'backward-sentence)
+        ("n" . 'backward-char)
+        ("N" . 'boon-smarter-upward)
+        ("O" . 'forward-sentence)
+        ("y" . 'end-of-line)
+        ("Y" . 'end-of-visual-line)
+        ("ZZ" . 'save-buffers-kill-terminal)
+        ("/" . 'consult-line)
+        ("-" . 'undo-fu-only-undo)
+        ("_" . 'undo-fu-only-redo)
+        ("<return>" . nil)
    :map goto-map
         ("g" . 'avy-goto-line)
         ("h" . 'consult-org-heading)
    :map boon-x-map
         ("e" . eval-last-sexp)
         ("f" . '+file-transient)
+        ("h" . '+helpful-transient)
+        ("p" . 'pandoc-transient)
         ("s" . 'save-buffer)
         (";" . 'comment-line)
-        ))
+        ("." . 'find-file)
+        ("," . 'switch-to-buffer)))
 #+end_src
 
 * Minibuffer keybindings
@@ -1533,7 +1539,7 @@ If on a...
    ;; table, including in insert state
    ((org-at-table-p) (org-table-next-row))
    ;; insert state everywhere else
-   ;((meow-insert-mode-p) (newline-and-indent))
+   (boon-insert-state (newline-and-indent))
    ;; list with checkbox
    ((org-at-item-checkbox-p) (org-toggle-checkbox))
    ;; image
@@ -2054,6 +2060,7 @@ Once I'm inside a snippet, chances are I no longer need to expand more snippets.
              crux-rename-file-and-buffer
              crux-sudo-edit
              crux-move-beginning-of-line
+             crux-top-join-line
              crux-eval-and-replace))
 #+end_src
 
