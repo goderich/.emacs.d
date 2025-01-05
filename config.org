@@ -2043,13 +2043,23 @@ Once I'm inside a snippet, chances are I no longer need to expand more snippets.
           ((mood-line-segment-buffer-name) . " ")
           ((mood-line-segment-anzu) . " ")
           ((mood-line-segment-cursor-position) . " ")
+          ((+count-selected-lines) . " ")
           ((mood-line-segment-scroll) . " "))
          :right
          (((mood-line-segment-vc) . "  ")
           ((mood-line-segment-major-mode) . "  ")
           ((mood-line-segment-misc-info) . "  ")
           ((mood-line-segment-checker) . "  ")
-          ((mood-line-segment-process) . "  ")))))
+          ((mood-line-segment-process) . "  "))))
+
+  (defun +count-selected-lines ()
+    (when (region-active-p)
+      (let ((numlines
+             (1+
+              (- (line-number-at-pos (region-end))
+                 (line-number-at-pos (region-beginning))))))
+        (format #("-%d-" 0 4 (face mood-line-status-error))
+                numlines)))))
 #+end_src
 
 ** Crux
