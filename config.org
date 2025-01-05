@@ -357,6 +357,10 @@ Having said that, I found myself missing a few of the colours in Doom's version 
                  '((t :background "#faf1d9"
                       :slant normal
                       :extend t)))
+  ;; org cite
+  (face-spec-set 'org-cite
+                 '((t :foreground nil
+                      :inherit link)))
   ;; org checkbox
   (face-spec-set 'org-checkbox
                  '((t :box unspecified)))
