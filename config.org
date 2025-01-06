@@ -639,11 +639,6 @@ With my [[https://precondition.github.io/home-row-mods][home row modifiers]] and
   '("M-a" . ignore))
 #+end_src
 
-I do not have Tab bindings collected in any single specific place, but this bears stating somewhere. Insert mode keybindings are as good a place as any. I have the following functionality on my Tab key:
-- expand a snippet if one is available, but *only* in insert state,
-- act as org-cycle in org mode, in both normal and insert states,
-- act as indent key in programming modes in both normal and insert states.
-
 ** Global bindings
 
 Since =h= is one of the keys that get captured in keypad state, pressing =SPC h= gets translated into =C-h= directly. Here, I bind =C-h= to my transient, because it does essentially the same thing as the default =describe-*= functions, but better.
@@ -775,6 +770,8 @@ While I'm still getting used to meow, here are reminders for things that I used 
 
 * Boon
 
+- NB. See boon's "special state"
+
 #+begin_src emacs-lisp
 (use-package boon
   :init
@@ -801,6 +798,8 @@ While I'm still getting used to meow, here are reminders for things that I used 
         ("-" . 'undo-fu-only-undo)
         ("_" . 'undo-fu-only-redo)
         ("<return>" . nil)
+   :map boon-insert-map
+        ("<escape>" . '+boon-command-state-maybe)
    :map goto-map
         ("g" . 'avy-goto-line)
         ("h" . 'consult-org-heading)
@@ -812,8 +811,25 @@ While I'm still getting used to meow, here are reminders for things that I used 
         ("s" . 'save-buffer)
         (";" . 'comment-line)
         ("." . 'find-file)
-        ("," . 'switch-to-buffer)))
+        ("," . 'switch-to-buffer))
+  :config
+  (remove-hook 'minibuffer-setup-hook #'boon-minibuf-hook)
+  (setq boon-default-cursor-type 'box)
+  (blink-cursor-mode -1)
+  (defun +boon-command-state-maybe ()
+  (interactive)
+  (cond
+   ((and corfu-mode completion-in-region-mode) (corfu-quit))
+   ((ignore-errors tempel--active) (tempel-done))
+   (t (boon-set-command-state)))))
 #+end_src
+
+I do not have Tab bindings collected in any single specific place, but this bears stating somewhere. Here is as good a place as any. I have the following functionality on my Tab key:
+- expand a snippet if one is available, but *only* in insert state,
+- act as org-cycle in org mode, in both normal and insert states,
+- act as indent key in programming modes in both normal and insert states.
+
+When I'm in insert mode and a [[id:2ca8bb84-790f-4e68-8d3d-4893ef154e43][completion]] overlay is active, I want ESC to quit completion or templating *while keeping me in insert mode*. In my evil config, I used a wrapper function, which I replicated with boon.
 
 * Minibuffer keybindings
 
@@ -853,7 +869,9 @@ and I'm still in the process of refining it.
 (defun +minibuffer-setup ()
   (keymap-set minibuffer-local-map "<backspace>" #'+delete-char-or-directory)
   (keymap-set minibuffer-local-map "C-w" #'backward-kill-word)
-  (keymap-set minibuffer-local-map "C-<return>" #'vertico-exit-input))
+  (keymap-set minibuffer-local-map "C-<return>" #'vertico-exit-input)
+  (keymap-set minibuffer-local-map "<escape>" #'keyboard-escape-quit)
+  (setq-local cursor-type 'box))
 
 (add-hook 'minibuffer-setup-hook #'+minibuffer-setup)
 #+end_src
@@ -995,11 +1013,11 @@ https://github.com/minad/consult
   :init (marginalia-mode))
 
 ;; Do not delay which-key (delay has to be above zero)
-;; (use-package which-key
-;;   :init (which-key-mode)
-;;   :config
-;;   (setq which-key-idle-delay 1)
-;;   (setq which-key-idle-secondary-delay 0.05))
+(use-package which-key
+  :init (which-key-mode)
+  :config
+  (setq which-key-idle-delay 1)
+  (setq which-key-idle-secondary-delay 0.05))
 #+end_src
 
 There is also https://github.com/oantolin/embark/,
@@ -1016,8 +1034,6 @@ I do NOT normally want completion on in org, because that's distracting. I do wa
 
 I'm using SPC as separator: pressing space does not exit completion, but instead begins a second chunk. This makes corfu work a lot like consult et al, where a search string can be entered using space-separated pieces.
 
-When I'm in insert mode and a [[id:2ca8bb84-790f-4e68-8d3d-4893ef154e43][completion]] overlay is active, I want ESC to quit completion or templating *while keeping me in insert mode*. In my evil config, I used a wrapper function. With meow, I can just bind the keys directly in the respective modes.
-
 #+begin_src emacs-lisp
 (use-package corfu
   :hook ((prog-mode . corfu-mode))
@@ -1026,8 +1042,7 @@ When I'm in insert mode and a [[id:2ca8bb84-790f-4e68-8d3d-4893ef154e43][complet
   (corfu-quit-no-match t)
   :bind (:map corfu-map
          ("TAB" . corfu-expand)
-         ("SPC" . corfu-insert-separator)
-         ("<escape>" . corfu-quit)))
+         ("SPC" . corfu-insert-separator)))
 #+end_src
 
 * Org-mode
@@ -1216,7 +1231,7 @@ Trying to bind tempel's expansion to TAB was a tad involved. The expansion funct
 If expansion fails, return nil.
 This function is specifically for use with org-cycle."
   (ignore-errors ; <- returns nil instead of error
-    (when meow-insert-mode
+    (when boon-insert-state
       (tempel-expand t))))
 #+end_src
 
