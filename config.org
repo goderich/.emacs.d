@@ -9,6 +9,7 @@
   - [[#vars][Vars]]
   - [[#theming][Theming]]
   - [[#fonts][Fonts]]
+  - [[#dashboard][Dashboard]]
   - [[#utility-functions][Utility functions]]
 - [[#meow-disabled][Meow (DISABLED)]]
   - [[#leader-map-bindings][Leader map bindings]]
@@ -430,6 +431,24 @@ With variable width fonts, it's not always just a matter of liking a typeface, b
 For CJK fonts specifically, check [[https://www.shimmy1996.com/en/posts/2018-06-24-fun-with-fonts-in-emacs/][this]], or [[https://www.reddit.com/r/emacs/comments/8tz1r0/how_to_set_font_according_to_languages_that_i/e1bjce6/][this snippet]].
 [[https://github.com/be5invis/Sarasa-Gothic][Sarasa]] is a CJK font affiliated with Iosevka.
 Also [[https://coldnew.github.io/d5011be2/][this article]] deals with CJK alignment in org tables. However, I already have valign-mode, so that might be moot.
+
+** Dashboard
+
+The default Emacs startup screen isn't particularly useful. It's rendered even less so by the fact that Boon does not turn on there, since it isn't an editing mode. Of course, there's an Emacs package for just that.
+
+#+begin_src emacs-lisp
+(use-package dashboard
+  :bind
+  (:map dashboard-mode-map
+        ("u" . 'dashboard-previous-line)
+        ("e" . 'dashboard-next-line))
+  :config
+  (dashboard-setup-startup-hook)
+  (setq dashboard-startup-banner (file-name-concat user-emacs-directory "img/emacs-e.svg"))
+  (setq dashboard-center-content t)
+  (setq dashboard-items '((recents . 5)
+                          (agenda . 5))))
+#+end_src
 
 ** TODO Utility functions
 
