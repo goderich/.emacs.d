@@ -171,6 +171,8 @@ Some of these settings were taken from the [[https://github.com/hrs/sensible-def
   :config
   (load custom-file)
   (setq warning-minimum-level :emergency)
+  ;; don't beep or flash, display a message instead
+  (setq ring-bell-function (lambda () (message "Oops!")))
   ;; do not use tabs for indentation
   (setq-default indent-tabs-mode nil)
   ;; scrolling settings
