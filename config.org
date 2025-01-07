@@ -384,7 +384,18 @@ Having said that, I found myself missing a few of the colours in Doom's version 
                       :underline nil)))
   ;; info
   (face-spec-set 'Info-quoted
-                 '((t :inherit font-lock-keyword-face))))
+                 '((t :inherit font-lock-keyword-face)))
+
+  (defun +info-add-fn-font-lock ()
+    (interactive)
+    (font-lock-add-keywords
+     nil
+     ;; (rx (seq line-start " -- " (group (+ (or alpha space)) ":") (group (+ not-newline))))
+     `(("^ -- \\(\\(?:[[:alpha:]]\\|[[:space:]]\\)+:\\)\\(.+\\)"
+        (1 'fixed-pitch t)
+        (2 'Info-quoted)))))
+
+  )
 #+end_src
 
 ** Fonts
@@ -1346,7 +1357,7 @@ Headings with DONE have a special face that's in-built and can be customized, bu
   (font-lock-add-keywords
    nil
    ;; (rx (seq line-start (* space) "- [X] " (+ not-newline)))
-   `(("^[[:space:]]*- \\[X] .+" 0 'org-headline-done prepend))
+   `(("^[[:space:]]*- \\[X] .+" (0 'org-headline-done prepend)))
    'append))
 #+end_src
 
