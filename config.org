@@ -446,8 +446,7 @@ The default Emacs startup screen isn't particularly useful. It's rendered even l
   (dashboard-setup-startup-hook)
   (setq dashboard-startup-banner (file-name-concat user-emacs-directory "img/emacs-e.svg"))
   (setq dashboard-center-content t)
-  (setq dashboard-items '((recents . 5)
-                          (agenda . 5))))
+  (setq dashboard-items '((recents . 5))))
 #+end_src
 
 ** TODO Utility functions
