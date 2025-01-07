@@ -2088,7 +2088,7 @@ Once I'm inside a snippet, chances are I no longer need to expand more snippets.
   (setq mood-line-format
         (mood-line-defformat
          :left
-         (((mood-line-segment-modal) . " ")
+         (((+boon-state-string) . " ")
           ((or (mood-line-segment-buffer-status) " ") . " ")
           ((mood-line-segment-buffer-name) . " ")
           ((mood-line-segment-anzu) . " ")
@@ -2109,7 +2109,15 @@ Once I'm inside a snippet, chances are I no longer need to expand more snippets.
               (- (line-number-at-pos (region-end))
                  (line-number-at-pos (region-beginning))))))
         (format #("-%d-" 0 4 (face mood-line-status-error))
-                numlines)))))
+                numlines))))
+
+  (defun +boon-state-string ()
+    "Return a string describing the current state."
+    (cond
+     (boon-command-state "<C>")
+     (boon-insert-state  (propertize "<I>" 'face '(:foreground "indian red")))
+     (boon-special-state (propertize "<S>" 'face '(:foreground "dodger blue")))
+     (t "???"))))
 #+end_src
 
 ** Crux
