@@ -284,7 +284,7 @@ I use the same Emacs config on three machines at the moment. Most things do not 
          +default-bibliography "~/files/academic/bib/bibliography.bib"
          +ebib-file-search-dir "~/files/papers/ebib"
          +ebib-import-directory "~/files/papers/papers/articles"
-         +fontsize 200))
+         +fontsize 180))
 
   ;; Tablet
   ("goderich-surface"
