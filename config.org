@@ -806,6 +806,7 @@ While I'm still getting used to meow, here are reminders for things that I used 
         ("e" . eval-last-sexp)
         ("f" . '+file-transient)
         ("h" . '+helpful-transient)
+        ("m" . 'magit)
         ("p" . 'pandoc-transient)
         ("s" . 'save-buffer)
         (";" . 'comment-line)
