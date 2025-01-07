@@ -174,7 +174,7 @@ Some of these settings were taken from the [[https://github.com/hrs/sensible-def
   ;; do not use tabs for indentation
   (setq-default indent-tabs-mode nil)
   ;; scrolling settings
-  (setq scroll-conservatively 200
+  (setq scroll-conservatively 0
         scroll-preserve-screen-position 1))
 #+end_src
 
