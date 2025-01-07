@@ -803,7 +803,7 @@ While I'm still getting used to meow, here are reminders for things that I used 
         ("<escape>" . '+boon-command-state-maybe)
    :map goto-map
         ("g" . 'avy-goto-line)
-        ("h" . '+consult-org-heading)
+        ("h" . '+consult-goto-org-heading)
    :map boon-x-map
         ("e" . eval-last-sexp)
         ("f" . '+file-transient)
