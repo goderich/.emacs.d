@@ -2218,9 +2218,14 @@ Olivetti is a great mode for prose writing and reading. All it does is increase 
 #+begin_src emacs-lisp
 (use-package olivetti
   :commands (olivetti-mode)
-  :hook (Info-mode . olivetti-mode)
+  :hook ((Info-mode . +olivetti-info-setup)
+         (org-mode . +olivetti-transient))
   :config
-  (setq-default olivetti-body-width 40))
+  (setq-default olivetti-body-width 48))
+
+(defun +olivetti-info-setup ()
+  (olivetti-mode)
+  (olivetti-set-width 50))
 #+end_src
 
 ** ws-butler
