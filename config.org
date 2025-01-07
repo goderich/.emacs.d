@@ -2029,7 +2029,7 @@ Consider also [[https://github.com/alphapapa/magit-todos][magit-todos]].
   :config
   (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
   (setq git-commit-summary-max-length 50)
-  (add-hook 'git-commit-setup-hook #'meow-insert 90)
+  (add-hook 'git-commit-setup-hook #'boon-set-insert-state 90)
   (with-eval-after-load 'magit
     (define-key git-commit-mode-map [remap save-buffers-kill-terminal] 'with-editor-finish)
     (define-key git-commit-mode-map [remap kill-emacs]                 'with-editor-cancel)))
