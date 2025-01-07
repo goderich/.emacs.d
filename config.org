@@ -820,6 +820,7 @@ While I'm still getting used to meow, here are reminders for things that I used 
         ("f" . #'+file-transient)
         ("h" . #'+helpful-transient)
         ("k" . #'kill-this-buffer)
+        ("l" . #'link-hint-open-link)
         ("m" . #'magit)
         ("p" . #'pandoc-transient)
         ("s" . #'save-buffer)
@@ -2229,8 +2230,7 @@ Olivetti is a great mode for prose writing and reading. All it does is increase 
 #+begin_src emacs-lisp
 (use-package olivetti
   :commands (olivetti-mode)
-  :hook ((Info-mode . +olivetti-info-setup)
-         (org-mode . +olivetti-transient))
+  :hook ((Info-mode . +olivetti-info-setup))
   :config
   (setq-default olivetti-body-width 48))
 
