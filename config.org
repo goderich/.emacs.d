@@ -816,6 +816,10 @@ While I'm still getting used to meow, here are reminders for things that I used 
   (remove-hook 'minibuffer-setup-hook #'boon-minibuf-hook)
   (setq boon-default-cursor-type 'box)
   (blink-cursor-mode -1)
+
+  (dolist (mode '(ebib-index-mode ebib-entry-mode))
+    (add-to-list 'boon-special-mode-list mode))
+
   (defun +boon-command-state-maybe ()
   (interactive)
   (cond
@@ -1886,17 +1890,22 @@ Meow-agnostic keybindings for ebib. I should unbind or rebind "h" and "n" though
 #+begin_src emacs-lisp :tangle no :noweb-ref ebib-keybindings
 (:map ebib-index-mode-map
       ("q" . ebib-quit)
+      ("u" . 'ebib-prev-entry)
+      ("e" . 'ebib-next-entry)
       ("s" . ebib-save-current-database)
       ("S" . ebib-save-all-databases)
       ;; Unset N while I'm figuring out what to do with notes.
       ("N" . nil)
       ("/" . ebib-jump-to-entry)
       ("<tab>" . ebib-edit-entry)
+      ("f" . 'ebib-view-file)
       ("O" . ebib-open-bibtex-file)
       ("o" . nil)
       ("of" . +ebib-import-file-from-index)
  :map ebib-entry-mode-map
       ("q" . ebib-quit)
+      ("u" . 'ebib-prev-field)
+      ("e" . 'ebib-next-field)
       ("z" . ebib-leave-ebib-windows)
       ("E" . +ebib-edit-as-string)
       ("s" . ebib-save-current-database)
