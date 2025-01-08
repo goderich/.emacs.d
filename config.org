@@ -759,7 +759,6 @@ I'm using SPC as separator: pressing space does not exit completion, but instead
 * Org-mode
 
 - Sacha Chua also has an [[https://sachachua.com/blog/2024/01/using-consult-and-org-ql-to-search-my-org-mode-agenda-files-and-sort-the-results-to-prioritize-heading-matches/][interesting use]] of org-ql.
-- See [[https://stackoverflow.com/questions/5500035/set-custom-keybinding-for-specific-emacs-mode][this]] and maybe [[https://stackoverflow.com/questions/13102494/buffer-locally-overriding-minor-mode-key-bindings-in-emacs/13102821#13102821][this]] for binding minor mode keys in specific major modes.
 
 Note that since I am using a literate config
 and loading it with org-babel from my =init.el=,
@@ -772,29 +771,30 @@ and I feel the convenience outweighs it.
   :ensure nil
   :init <<org-init>>
   :hook <<org-hooks>>
-  :bind (:map org-mode-map
-         ("<return>" . +org-return)
-         ("C-<return>" . +org-insert-item)
-         ("C-c c" . ebib-insert-citation)
-         ("C-c l" . +org-link-dwim)
-         ("C-c r" . +ref-transient)
-         ;; local leader bindings
-         ("C-c o c" . ebib-insert-citation)
-         ("C-c o h" . +consult-goto-org-heading)
-         ("C-c o l" . +link-transient)
-         ("C-c o p" . pandoc-transient)
-         ("C-c C-Q" . +org-remove-tags)
-         ;; ("C-c o s" . org-edit-src-code)
-         ;; ("C-c o S" . org-sparse-tree)
-         ;; org movement
-         ("M-n" . org-metaleft)
-         ("M-e" . org-metadown)
-         ("M-u" . org-metaup)
-         ("M-i" . org-metaright)
-         ("M-N" . org-shiftmetaleft)
-         ("M-E" . org-shiftmetadown)
-         ("M-U" . org-shiftmetaup)
-         ("M-I" . org-shiftmetaright))
+  :bind
+  (:map org-mode-map
+         ;; insert mode bindings
+        ([remap boon-open-line-and-insert] . #'+org-open-above)
+        ([remap boon-open-next-line-and-insert] . #'+org-open-below)
+        ("<return>" . +org-return)
+        ("C-<return>" . +org-insert-item)
+        ("C-c c" . ebib-insert-citation)
+        ("C-c l" . +org-link-dwim)
+        ("C-c r" . +ref-transient)
+        ;; org movement
+        ("M-n" . org-metaleft)
+        ("M-e" . org-metadown)
+        ("M-u" . org-metaup)
+        ("M-i" . org-metaright)
+        ("M-N" . org-shiftmetaleft)
+        ("M-E" . org-shiftmetadown)
+        ("M-U" . org-shiftmetaup)
+        ("M-I" . org-shiftmetaright)
+        ;; god mode bindings
+        ("C-c C-l" . #'+link-transient)
+        ("C-c C-Q" . +org-remove-tags)
+   :map org-src-mode-map
+        ("C-c C-c" . #'org-edit-src-exit))
   :config
   <<org-settings>>
   <<org-src-settings>>
@@ -919,15 +919,6 @@ I don't want to see any extra indentation in my source blocks, nor be asked ques
 #+begin_src emacs-lisp :tangle no :noweb-ref org-src-settings
 (setq org-edit-src-content-indentation 0)
 (setq org-confirm-babel-evaluate nil)
-#+end_src
-
-I mostly use org-src when editing this config, but since I've been doing that a lot lately, I decided to make it a little more comfortable for myself. I use my =ZZ= and =ZQ= bindings to exit org-src buffers with and without saving my changes, respectively.
-
-#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
-(with-eval-after-load 'org-src
-  (keymap-set org-src-mode-map "<remap> <save-buffers-kill-terminal>" 'org-edit-src-exit)
-  (keymap-set org-src-mode-map "<remap> <save-buffers-kill-terminal>" 'org-edit-src-exit)
-  (keymap-set org-src-mode-map "<remap> <kill-emacs>" #'org-edit-src-abort))
 #+end_src
 
 ** Snippet expansion in org
@@ -1359,13 +1350,11 @@ For use inside `cond'."
 Respects current indentation and checkbox.
 Helper function for `+org-insert-item'."
   (let ((indentation (current-indentation)))
-    (when (region-active-p)
-      (meow-cancel-selection))
     (end-of-line)
     (org-insert-item checkbox?)
     (indent-line-to indentation)
     (end-of-line)
-    (meow-insert)))
+    (boon-set-insert-state)))
 
 (defun +org-insert-item ()
   "Insert an item determined from context.
@@ -1401,24 +1390,22 @@ An idea I stole from [[https://github.com/Somelauw/evil-org-mode/blob/b1f309726b
 #+begin_src emacs-lisp :tangle no :noweb-ref org-functions
 (defun +org-table-insert-row (&optional below?)
   "Create a new table row and enter insert state in it in the same column."
-  (when (region-active-p)
-    (meow-cancel-selection))
   (let ((col (org-table-current-column)))
     (org-table-insert-row below?)
     (org-table-goto-column col)
-    (meow-insert)))
+    (boon-set-insert-state)))
 
 (defun +org-open-below ()
   (interactive)
   (if (org-at-table-p)
       (+org-table-insert-row 'below)
-    (meow-open-below)))
+    (boon-open-next-line-and-insert)))
 
 (defun +org-open-above ()
   (interactive)
   (if (org-at-table-p)
       (+org-table-insert-row)
-    (meow-open-above)))
+    (boon-open-line-and-insert)))
 #+end_src
 
 *** Org-refile
@@ -1596,7 +1583,7 @@ Used from the ebib index."
 
 *** Keybindings
 
-Meow-agnostic keybindings for ebib. I should unbind or rebind "h" and "n" though, since lateral movement doesn't figure in ebib.
+Largely mode and  input method agnostic keybindings for ebib.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref ebib-keybindings
 (:map ebib-index-mode-map
@@ -1638,8 +1625,13 @@ Smartparens is THE package for lisp code editing.
   :config
   ;; load default config
   (require 'smartparens-config)
-  ;; <<smartparens-keybindings>>
-  )
+  :bind
+  (:map emacs-lisp-mode-map
+        ("C-c C-e" . +elisp-eval-transient)
+        ("C-(" . sp-backward-slurp-sexp)
+        ("C-)" . sp-forward-slurp-sexp)
+        ("C-," . sp-backward-barf-sexp)
+        ("C-." . sp-forward-barf-sexp)))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -1653,14 +1645,7 @@ Examples can be found in the [[https://github.com/Fuco1/smartparens/wiki][wiki]]
 
 #+begin_src emacs-lisp
 (use-package elisp-mode
-  :ensure nil
-  :bind (:map emacs-lisp-mode-map
-              ("C-c o e" . +elisp-eval-transient)
-              ("C-c o w" . sp-wrap-round)
-              ("C-c o (" . sp-backward-slurp-sexp)
-              ("C-c o )" . sp-forward-slurp-sexp)
-              ("C-c o <" . sp-backward-barf-sexp)
-              ("C-c o >" . sp-forward-barf-sexp)))
+  :ensure nil)
 #+end_src
 
 #+begin_src emacs-lisp
@@ -1679,9 +1664,11 @@ Examples can be found in the [[https://github.com/Fuco1/smartparens/wiki][wiki]]
 #+begin_src emacs-lisp
 (transient-define-prefix +elisp-eval-transient ()
   ["Eval..."
-   ("e" "last sexp" eval-last-sexp)
+   ("e" "last sexp" eros-eval-last-sexp)
+   ("d" "defun" eros-eval-defun)
    ("r" "and replace" crux-eval-and-replace)
-   ("b" "buffer" eval-buffer)])
+   ("b" "buffer" eval-buffer)]
+  [("<escape>" "quit" transient-quit-all)])
 #+end_src
 
 ** Clojure
@@ -1727,16 +1714,11 @@ Consider also [[https://github.com/alphapapa/magit-todos][magit-todos]].
   :commands (magit)
   :bind (:map magit-mode-map
          ("p" . magit-push)
-         ("f" . magit-pull)
-         :map magit-diff-section-map
-         ("C" . magit-commit))
+         ("f" . magit-pull))
   :config
   (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
   (setq git-commit-summary-max-length 50)
-  (add-hook 'git-commit-setup-hook #'boon-set-insert-state 90)
-  (with-eval-after-load 'magit
-    (define-key git-commit-mode-map [remap save-buffers-kill-terminal] 'with-editor-finish)
-    (define-key git-commit-mode-map [remap kill-emacs]                 'with-editor-cancel)))
+  (add-hook 'git-commit-setup-hook #'boon-set-insert-state 90))
 #+end_src
 
 *** Git diff highlighting
