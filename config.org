@@ -57,6 +57,7 @@
   - [[#crux][Crux]]
   - [[#avy][Avy]]
   - [[#link-hinting][Link hinting]]
+  - [[#dumb-jump][Dumb jump]]
   - [[#anzu][Anzu]]
   - [[#hl-todo][hl-todo]]
   - [[#olivetti][Olivetti]]
@@ -2195,6 +2196,17 @@ Only search the range between just after START-BOUND and END-BOUND."
   "Find the next org citation.
 Only search the range between just after the point and BOUND."
   (link-hint--find-org-cite (point) bound))
+#+end_src
+
+** Dumb jump
+
+#+begin_src emacs-lisp
+(use-package dumb-jump
+  :init
+  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+  :bind
+  (:map goto-map
+        ("d" . #'xref-find-definitions)))
 #+end_src
 
 ** Anzu
