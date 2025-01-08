@@ -521,6 +521,8 @@ Some functions I use in my config. They are placed here temporarily, and I shoul
         ("," . #'switch-to-buffer))
   :config
   (remove-hook 'minibuffer-setup-hook #'boon-minibuf-hook)
+  (remove-hook 'window-selection-change-functions #'boon-reset-state-for-switchw)
+
   (setq boon-default-cursor-type 'box)
   (blink-cursor-mode -1)
 
