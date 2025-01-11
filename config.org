@@ -1794,13 +1794,14 @@ I stole the insert and delete shades from Doom, because they look really good.
 :END:
 Trying https://github.com/minad/tempel.
 
-Once I'm inside a snippet, chances are I no longer need to expand more snippets. Instead, I want to be able to use TAB to jump to next placeholder, or move the point after the snippet.
+Once I'm inside a snippet, I want to be able to use Tab to jump to next placeholder (or move the point after the snippet if there are no more placeholders). However, very rarely, I have had need to expand another snippet whilst expanding a snippet. In this very uncommon case, I can use Shift+Tab to expand.
 
 #+begin_src elisp :noweb yes
 (use-package tempel
   :commands (tempel-expand)
   :bind (:map tempel-map
           ("TAB" . tempel-next)
+          ("<backtab>" . tempel-expand)
           ("<escape>" . tempel-done)))
 #+end_src
 
