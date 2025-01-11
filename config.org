@@ -10,15 +10,17 @@
   - [[#theming][Theming]]
   - [[#fonts][Fonts]]
   - [[#dashboard][Dashboard]]
-  - [[#utility-functions][Utility functions]]
 - [[#boon][Boon]]
 - [[#minibuffer-keybindings][Minibuffer keybindings]]
 - [[#transient-commands][Transient commands]]
+  - [[#goto-transient][Goto transient]]
+  - [[#narrowing-transient][Narrowing transient]]
   - [[#window-resizing-transient][Window resizing transient]]
   - [[#file-transient][File transient]]
   - [[#buffer-transient][Buffer transient]]
   - [[#helpful-transient][Helpful transient]]
   - [[#olivetti-transient][Olivetti transient]]
+  - [[#org-navigation-transient][Org navigation transient]]
 - [[#narrowing-and-completion][Narrowing and completion]]
   - [[#narrowing][Narrowing]]
   - [[#completion-corfu][Completion (Corfu)]]
@@ -28,7 +30,6 @@
   - [[#snippet-expansion-in-org][Snippet expansion in org]]
   - [[#org-agenda][Org agenda]]
   - [[#org-bling][Org bling]]
-  - [[#transient-navigation][Transient navigation]]
   - [[#pandoc-integration][Pandoc integration]]
   - [[#links][Links]]
   - [[#cross-referencing][Cross-referencing]]
@@ -67,7 +68,7 @@ My config is:
 - [[https://harryrschwartz.com/2016/02/15/switching-to-a-literate-emacs-configuration][literate]],
 - centered on [[https://github.com/jwiegley/use-package][use-package]] with defers,
 - based around modal editing, currently +meow+ [[https://github.com/jyp/boon][boon]],
-- [[https://github.com/magit/transient][transient]]- and leader-key heavy,
+- [[https://github.com/magit/transient][transient]]-heavy,
 - full of my personal functions and quirks,
 - still very much in flux.
 
@@ -454,26 +455,6 @@ The default Emacs startup screen isn't particularly useful. It's rendered even l
   (setq dashboard-items '((recents . 5))))
 #+end_src
 
-** TODO Utility functions
-
-Some functions I use in my config. They are placed here temporarily, and I should move them under more appropriate headings.
-
-#+begin_src emacs-lisp
-(defun +open-config ()
-  (interactive)
-  (find-file "~/.emacs.d/config.org"))
-
-(defun +open-org-dir ()
-  (interactive)
-  (ido-find-file-in-dir "~/org/"))
-
-(defun turn-off-visual-line-mode ()
-  (visual-line-mode -1))
-
-(defun turn-on-truncate-lines ()
-  (toggle-truncate-lines 1))
-#+end_src
-
 * Boon
 
 #+begin_src emacs-lisp
@@ -483,12 +464,19 @@ Some functions I use in my config. They are placed here temporarily, and I shoul
   (boon-mode)
   :bind
   (:map boon-command-map
-        ("e" . #'next-line)
-        ("E" . #'forward-paragraph)
+        ("g" . #'+goto-transient)
         ("h" . #'avy-goto-word-1)
         ("H" . #'avy-goto-char-timer)
         ("j" . #'crux-top-join-line)
         ("J" . #'join-line)
+        (";" . nil)
+        ("/" . #'consult-line)
+        ("-" . #'undo-fu-only-undo)
+        ("_" . #'undo-fu-only-redo)
+        ("<return>" . nil)
+   :map boon-moves-map
+        ("e" . #'next-line)
+        ("E" . #'forward-paragraph)
         ("l" . #'boon-smarter-backward)
         ("L" . #'backward-sentence)
         ("m" . #'beginning-of-line)
@@ -499,30 +487,23 @@ Some functions I use in my config. They are placed here temporarily, and I shoul
         ("O" . #'end-of-visual-line)
         ("y" . #'boon-smarter-forward)
         ("Y" . #'forward-sentence)
-        ("ZZ" . #'save-buffers-kill-terminal)
-        (";" . nil)
-        ("/" . #'consult-line)
-        ("-" . #'undo-fu-only-undo)
-        ("_" . #'undo-fu-only-redo)
-        ("<return>" . nil)
    :map boon-insert-map
         ("<escape>" . #'+boon-command-state-maybe)
    :map boon-special-map
         ("<escape>" . #'ignore)
-   :map goto-map
-        ("g" . #'avy-goto-line)
-        ("h" . #'+consult-goto-org-heading)
    :map boon-x-map
+        ("a" . #'org-agenda-list)
         ("f" . #'+file-transient)
         ("h" . #'+helpful-transient)
         ("k" . #'kill-this-buffer)
         ("l" . #'link-hint-open-link)
         ("m" . #'magit)
+        ("n" . #'+narrow-dwim)
         ("p" . #'pandoc-transient)
         ("s" . #'save-buffer)
         (";" . #'comment-line)
         ("." . #'find-file)
-        ("," . #'switch-to-buffer))
+        ("," . #'consult-buffer))
   :config
   (remove-hook 'minibuffer-setup-hook #'boon-minibuf-hook)
   (remove-hook 'window-selection-change-functions #'boon-reset-state-for-switchw)
@@ -598,9 +579,50 @@ and I'm still in the process of refining it.
 :ID:       1d67b9e6-b143-425a-8dec-d124f95eedc4
 :END:
 
-Transients are an amazing feature of Emacs, and really handy for people who like to over-personalize their configs. They don't run a command, but instead pop up a menu where you can choose further actions, or enter a transitory state so that you can mash one key to, e.g. increase the font size or text width. I prefer using transients to mapping every function individually, because transients are a lot easier to remap, and their functionality is strictly more powerful. Since Emacs 28, the transient package has been included in Emacs itself.
+Transients are an amazing feature of Emacs, and really handy for people who like to over-personalize their configs. They don't immediately run a command, but instead pop up a menu where you can choose further actions, or enter a transitory state so that you can mash one key to, e.g. increase the font size or text width. I prefer using transients to mapping every function individually, because transients are a lot easier to remap, and their functionality is strictly more powerful. Since Emacs 28, the transient package has been included in Emacs itself.
 
 Right now, all my transient menus live here. Since many of my packages are deferred, it's simpler to define the transients outside their =use-package= calls. The packages then get loaded when I call their respective transients.
+
+** Goto transient
+
+#+begin_src emacs-lisp
+(transient-define-prefix +goto-transient ()
+  ["Go to..."
+   [("g" "line" avy-goto-line)]
+   [:if-derived org-mode
+    ("h" "find heading" +consult-goto-org-heading)
+    ("u" "prev heading" +org-up-heading)]
+   [:if-derived prog-mode
+    ("d" "definition" xref-find-definitions)]
+   [("q" "quit" transient-quit-all)
+    ("<escape>" "quit" transient-quit-all)]])
+#+end_src
+
+** Narrowing transient
+
+#+begin_src emacs-lisp
+(defun +narrow-dwim ()
+  (interactive)
+  (if (and (region-active-p) (not (buffer-narrowed-p)))
+      (narrow-to-region (region-beginning) (region-end))
+    (+narrowing-transient)))
+
+(transient-define-prefix +narrowing-transient ()
+  ["Narrow to..."
+   [""
+    ("p" "page" narrow-to-page)
+    ("d" "defun" narrow-to-defun)]
+   ["Org"
+    :if-derived org-mode
+    ("t" "subtree" org-narrow-to-subtree)
+    ("e" "element" org-narrow-to-element)
+    ("b" "block" org-narrow-to-block)]
+   [""
+    ("w" "widen" widen)]
+   [""
+    ("q" "quit" transient-quit-all)
+    ("<escape>" "quit" transient-quit-all)]])
+#+end_src
 
 ** Window resizing transient
 
@@ -635,6 +657,14 @@ Right now, all my transient menus live here. Since many of my packages are defer
     ("c" "config.org" +open-config)]
    [("q" "quit" transient-quit-all)
     ("<escape>" "quit" transient-quit-all)]])
+
+(defun +open-config ()
+  (interactive)
+  (find-file "~/.emacs.d/config.org"))
+
+(defun +open-org-dir ()
+  (interactive)
+  (ido-find-file-in-dir "~/org/"))
 #+end_src
 
 ** Buffer transient
@@ -694,11 +724,80 @@ I use olivetti with org a lot, and when I do, I prefer to keep my text relativel
   (transient-setup '+olivetti-transient))
 #+end_src
 
+** Org navigation transient
+
+Instead of pressing key combinations or chords repeatedly to navigate, we can define a transient state and use simple keys while in it. I got the idea from [[https://github.com/Somelauw/evil-org-mode/blob/master/doc/example_config.el][this evil-org example]] that uses hydra, but I'm using transient because I'm more used to it, and because it's now built into Emacs (as of 28).
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-navigation-transient
+(defun +scroll-line-to-top ()
+  ;; Taken from `evil-scroll-line-to-top'
+  (interactive)
+  (recenter (1- (max 1 scroll-margin))))
+
+(defmacro with-org-show (&rest body)
+  `(progn
+     ,@body
+     (+scroll-line-to-top)
+     (org-fold-show-entry)
+     (org-fold-show-children)))
+
+;; This is not in the transient, move out
+(defun +org-up-heading ()
+  "Go up to the nearest heading, or to a higher level heading.
+If not on a heading, finds the next heading backwards.
+If already on a heading, goes higher up in the tree. This
+makes sense to me to combine into a single keybinding."
+  (interactive)
+  (if (org-at-heading-p)
+      (with-org-show
+       (org-previous-visible-heading 1))
+    (org-back-to-heading)))
+
+(defun +org-up-level-and-show ()
+  (interactive)
+  (cond
+   ((not (org-at-heading-p)) (org-back-to-heading))
+   ((= 1 (org-current-level)) (ignore))
+   (t (org-up-element))))
+
+(defun +org-down-and-show ()
+  (interactive)
+  (when (org-at-heading-p)
+    (with-org-show
+     (org-next-visible-heading 1))))
+
+(defun +org-up-same-level ()
+  (interactive)
+  (with-org-show
+   (org-fold-hide-subtree)
+   (org-backward-heading-same-level 1 t)))
+
+(defun +org-down-same-level ()
+  (interactive)
+  (with-org-show
+   (org-fold-hide-subtree)
+   (org-forward-heading-same-level 1 t)))
+
+;; add link-hint on u?
+(transient-define-prefix +org-movement-transient ()
+  ["Moving around in org"
+   [("h" "up level" +org-up-level-and-show :transient t)
+    ("c" "up (same level)" +org-up-heading :transient t)
+    ("t" "down (same level)" +org-down-same-level :transient t)
+    ("n" "down level" +org-down-and-show :transient t)]
+   [("<tab>" "cycle" org-cycle :transient t)
+    ("<backtab>" "cycle all" org-shifttab :transient t)
+    ("<SPC>" "scroll down" scroll-up :transient t)]
+   [("q" "quit" transient-quit-all)]])
+#+end_src
+
 * Narrowing and completion
 ** Narrowing
 :PROPERTIES:
 :ID:       53556f3d-c05c-4d6f-a9ae-3a59785b03e3
 :END:
+
+Here I mean incremental narrowing of searches in the minibuffer, and not the kind where Emacs [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Narrowing.html][hides part of the buffer temporarily]].
 
 TODO: There is a lot of functionality here, I should explore it.
 https://github.com/minad/consult
@@ -798,7 +897,7 @@ and I feel the convenience outweighs it.
         ("M-I" . org-shiftmetaright)
         ;; god mode bindings
         ("C-c C-l" . #'+link-transient)
-        ("C-c C-Q" . +org-remove-tags)
+        ("C-c C-S-q" . +org-remove-tags)
    :map org-src-mode-map
         ("C-c C-c" . #'org-edit-src-exit))
   :config
@@ -1076,73 +1175,6 @@ Now the emphasis markers may safely be hidden.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref org-settings
 (setq org-hide-emphasis-markers t)
-#+end_src
-
-** Transient navigation
-
-Instead of pressing key combinations or chords repeatedly to navigate, we can define a transient state and use simple keys while in it. I got the idea from [[https://github.com/Somelauw/evil-org-mode/blob/master/doc/example_config.el][this evil-org example]] that uses hydra, but I'm using transient because I'm more used to it, and because it's now built into Emacs (as of 28).
-
-#+begin_src emacs-lisp :tangle no :noweb-ref org-navigation-transient
-(defun +scroll-line-to-top ()
-  ;; Taken from `evil-scroll-line-to-top'
-  (interactive)
-  (recenter (1- (max 1 scroll-margin))))
-
-(defmacro with-org-show (&rest body)
-  `(progn
-     ,@body
-     (+scroll-line-to-top)
-     (org-fold-show-entry)
-     (org-fold-show-children)))
-
-;; This is not in the transient, move out
-(defun +org-up-heading ()
-  "Go up to the nearest heading, or to a higher level heading.
-If not on a heading, finds the next heading backwards.
-If already on a heading, goes higher up in the tree. This
-makes sense to me to combine into a single keybinding."
-  (interactive)
-  (if (org-at-heading-p)
-      (with-org-show
-       (org-previous-visible-heading 1))
-    (org-back-to-heading)))
-
-(defun +org-up-level-and-show ()
-  (interactive)
-  (cond
-   ((not (org-at-heading-p)) (org-back-to-heading))
-   ((= 1 (org-current-level)) (ignore))
-   (t (org-up-element))))
-
-(defun +org-down-and-show ()
-  (interactive)
-  (when (org-at-heading-p)
-    (with-org-show
-     (org-next-visible-heading 1))))
-
-(defun +org-up-same-level ()
-  (interactive)
-  (with-org-show
-   (org-fold-hide-subtree)
-   (org-backward-heading-same-level 1 t)))
-
-(defun +org-down-same-level ()
-  (interactive)
-  (with-org-show
-   (org-fold-hide-subtree)
-   (org-forward-heading-same-level 1 t)))
-
-;; add link-hint on u?
-(transient-define-prefix +org-movement-transient ()
-  ["Moving around in org"
-   [("h" "up level" +org-up-level-and-show :transient t)
-    ("c" "up (same level)" +org-up-heading :transient t)
-    ("t" "down (same level)" +org-down-same-level :transient t)
-    ("n" "down level" +org-down-and-show :transient t)]
-   [("<tab>" "cycle" org-cycle :transient t)
-    ("<backtab>" "cycle all" org-shifttab :transient t)
-    ("<SPC>" "scroll down" scroll-up :transient t)]
-   [("q" "quit" transient-quit-all)]])
 #+end_src
 
 ** Pandoc integration
@@ -1523,6 +1555,12 @@ Sure, it doesn't have the bells and whistles of [[https://www.zotero.org/][other
 #+end_src
 
 #+begin_src emacs-lisp :tangle no :noweb-ref ebib-settings
+(defun turn-off-visual-line-mode ()
+  (visual-line-mode -1))
+
+(defun turn-on-truncate-lines ()
+  (toggle-truncate-lines 1))
+
 (add-hook 'ebib-index-mode-hook #'turn-on-truncate-lines)
 (add-hook 'ebib-index-mode-hook #'turn-off-visual-line-mode)
 #+end_src
@@ -2010,21 +2048,16 @@ when I'm actually using Emacs.
 * More packages :noexport:
 
 Here are some packages I should consider trying out:
-- Startup screen
-  - https://github.com/emacs-dashboard/emacs-dashboard
-  - https://github.com/ichernyshovvv/enlight
-  - I could also go straight into org-agenda on startup
 - https://github.com/alphapapa/org-super-agenda
-- https://github.com/jacktasia/dumb-jump for jumping to definition
 - https://github.com/jamescherti/inhibit-mouse.el <- completely disable the mouse
 - https://github.com/emacsorphanage/macrostep
 - https://github.com/wwwjfy/emacs-fish
 - https://github.com/yoshiki/yaml-mode
+- https://github.com/jdtsmith/ultra-scroll for ridiculously smooth scrolling
 - https://github.com/emacsorphanage/quickrun
 - https://github.com/radian-software/apheleia/
 - https://github.com/jorgenschaefer/emacs-buttercup
 - https://github.com/hlissner/emacs-solaire-mode (necessary? I don't use splits that much)
-- https://github.com/kuanyui/tldr.el
 - https://github.com/manateelazycat/lsp-bridge <- eglot alternative, advertised as blazingly fast
 - https://github.com/flycheck/flycheck
 - https://github.com/minad/jinx for spelling
