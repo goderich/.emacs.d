@@ -67,7 +67,7 @@ Welcome to my literate Emacs configuration file! I suggest you read this section
 My config is:
 - [[https://harryrschwartz.com/2016/02/15/switching-to-a-literate-emacs-configuration][literate]],
 - centered on [[https://github.com/jwiegley/use-package][use-package]] with defers,
-- based around modal editing, currently +meow+ [[https://github.com/jyp/boon][boon]],
+- based around modal editing with [[https://github.com/jyp/boon][boon]],
 - [[https://github.com/magit/transient][transient]]-heavy,
 - full of my personal functions and quirks,
 - still very much in flux.
@@ -80,9 +80,9 @@ Crucially, =use-package= also supports lazy loading (i.e. delayed evaluation), w
 
 One more thing I'm doing with my literate config is splitting the source blocks with [[https://orgmode.org/manual/Noweb-Reference-Syntax.html][noweb]]. It goes like this: all the configuration and customization associated with a single package goes into one =use-package= block. That's simple and it makes sense. However, sometimes there is too much configuration, and the blocks get too long. I could add comments directly inside the source code (and I do that in a few places), but that seems to run counter to the core tenets of literate programming. Noweb allows me to separate blocks in the literate file to structure my text around them as I please, but still string them together when [[https://orgmode.org/manual/Extracting-Source-Code.html][tangling]] the resulting Elisp source file.
 
-I am currently using the =meow= package for modal editing. However, my keybindings are somewhat idiosyncratic if not outright esoteric. This is partly to do with me using the [[https://en.wikipedia.org/wiki/Dvorak_layout][Dvorak]] layout on all my keyboards, and partly with the kind of configs I used before (see the [[History][history section]] below for details). Not only that, but I also use [[https://precondition.github.io/home-row-mods][home row modifiers]] on my mechanical keyboards, and on my laptop I [[https://gist.github.com/tanyuan/55bca522bf50363ae4573d4bdcf06e2e][bind the CapsLock key to both Escape and Ctrl]] (Escape if pressed and released, Ctrl if held down). I try to keep my bindings ergonomic and mnemonic: the most common commands should be easy to type, and the less common ones easy to remember. What's ergonomic for me may not be ergonomic for you; adjust to your own setup.
+I am currently using the =boon= package for modal editing. However, although I started with the recommended Colemak keybindings, I modified them quite a bit (especially the movement keys). I try to keep my bindings ergonomic and mnemonic: the most common commands should be easy to type, and the less common ones easy to remember. What's ergonomic for me may not be ergonomic for you; adjust to your own setup.
 
-For reasons of both ergonomics and mnemonics, I tend to eschew commands that require modifiers (Ctrl and Alt, or =C= and =M= in Emacs parlance), and instead opt for key combinations. That's the whole premise of a modal editing system like the one I'm using, of course. But I take this further by using (and sometimes abusing) leader keys, including transient commands, to build my own mini-menus for all kinds of tasks from window management to export via pandoc.
+For reasons of both ergonomics and mnemonics, I tend to eschew commands that require modifiers (Ctrl and Alt, or =C= and =M= in Emacs parlance), and instead opt for key combinations. That's the whole premise of a modal editing system like the one I'm using, of course. But I take this further by using (and sometimes abusing) transient commands to build my own mini-menus for all kinds of tasks from window management to export via pandoc.
 
 I use quite a lot of my own functions in this config. As seems to be a convention with many users, I add a =+= to the beginning of my own functions to serve as a kind of namespace.
 
@@ -122,7 +122,17 @@ I couldn't, of course. Not to move to the default keybindings. Why would I ever 
 
 It was not hard to find other modal editing schemes for Emacs. In fact, Emacs has plenty of those. The difference is, people arriving to Emacs from vim tend to miss the comfort of that editing model, and evil exists to fill that niche. Other modal editing packages mostly exist for people coming from the default Emacs keybindings, when they decide they want to keep the use of their hands a little longer. Evil stands apart from the pack in that it is, essentially, vim. It implements pretty much all of vim's functionality in Emacs; anything different is considered a bug. Other packages, by choice and by necessity, play nice with Emacs internals. This makes them a lot more lightweight, at the cost of having to know more about the default Emacs editing experience.
 
-In for a penny, in for a pound, I decided. I had had my eyes on =meow= for some time. It's a lightweight package that respects Emacs conventions, yet at the same time provides a full-fledged modal editing experience. Its editing mentality is not that of vim, but rather of [[https://kakoune.org/][kakoune]]: the normal and visual modes are combined, so that you select the text first before performing an action on it. To my surprise, it didn't take me particularly long to acclimatize. I took a few liberties with the suggested [[https://github.com/meow-edit/meow/blob/master/KEYBINDING_DVORAK.org][bindings for Dvorak]], based on my vim/evil experiences, and also my personal ideas. And that's okay! Unlike vim land, where almost any rebinding is frowned upon, and online discussions frequently devolve into games of one-upmanship about whose config is the shortest, meow doesn't even have a default layout, and encourages its users to create their own bindings.
+In for a penny, in for a pound, I decided. I had had my eyes on =meow= for some time. It's a lightweight package that respects Emacs conventions, yet at the same time provides a full-fledged modal editing experience. Its editing mentality is not that of vim, but rather of [[https://kakoune.org/][kakoune]]: the normal and visual modes are combined, so that you select the text first before performing an action on it. I used meow for a few weeks, but during that period I found myself trying to modify its default settings and overwrite its keybindings more and more. I couldn't understand the proper usage of [[https://github.com/meow-edit/meow/blob/master/TUTORIAL.org#beacon][beacon state]] (or maybe it was a bit buggy, I couldn't tell). The constant visual selections actually annoyed me quite a bit to my surprise: I thought I'd be able to ignore them as the other meow users apparently do, but they really got on my nerves.
+
+Which led me to [[https://github.com/jyp/boon][boon]]. Boon uses a more vim-like editing model (so no constant selections), but is even closer to Emacs defaults than meow. It doesn't appear to have much momentum right now---no users shilling for it, not much new development going on (ironically, I found out about boon from the meow readme). But that's because it's pretty much done. It's a very simple package, much less code than even meow, but it packs a ton of functionality. Everything I missed from evil is included, or can be trivially added. It lacks a great onboarding experience though: just a simple text tutorial, no flashy GIFs or videos, no huge wiki full of examples and customization options. Instead, you're kind of forced to read the code, which is wonderfully written by the way, but still an offputting experience for many, I imagine.
+
+So in short, I went through the following stages:
+1. vim
+2. Spacemacs
+3. Doom Emacs
+4. evil (custom config)
+5. meow
+6. boon
 
 This is where I am right now. Ten years of vim/evil, most of them spent using Doom. Suddenly, I'm in territory that's at once familiar and not. I've learned a lot about Emacs using Doom, and I've learned a lot more about Emacs after leaving Doom for my own config. I'm really grateful for Spacemacs, Doom, and evil, because without these projects I likely would not have started using Emacs. Now though, I'm ready for something new.
 
@@ -456,6 +466,13 @@ The default Emacs startup screen isn't particularly useful. It's rendered even l
 #+end_src
 
 * Boon
+
+While I'm still getting used to boon, here are reminders for things that I used with evil but no longer have access to, and what I should replace them with.
+- [[https://github.com/juliapath/evil-numbers][evil-numbers]] for incrementing/decrementing (does not require evil)
+- Look into [[https://www.emacswiki.org/emacs/KeyboardMacros][Emacs macros]] to replace vim =q=
+- Look into [[info:emacs#Replace][replacement commands]] instead of vim =:=
+- [[info:emacs#Mark Ring][Marks]] (pop/unpop) and [[info:emacs#Position Registers][registers]] for movements similar to =gi=
+- Smartparens instead of evil-surround
 
 #+begin_src emacs-lisp
 (use-package boon
@@ -1108,7 +1125,7 @@ When using Doom, I bounced off one of its org beautification settings, which slo
 
 I don't use all of the defaults though. I prefer my own faces for todos, and I'm not yet sure what to do with the tables.
 
-With org-lists, I use "-" everywhere, because it's easily reachable on Dvorak. The default replacement for "-" is a longer dash, but I like nice fat dots instead.
+With org-lists, I use "-" everywhere, because it can be typed without holding down the Shift key. The default replacement for "-" is a longer dash, but I like nice fat dots instead.
 
 #+begin_src emacs-lisp
 (use-package org-modern
