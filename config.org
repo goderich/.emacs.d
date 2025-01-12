@@ -331,7 +331,6 @@ Having said that, I found myself missing a few of the colours in Doom's version 
   (load-theme 'solarized-light t)
 
   :config
-  ;; should be using #'set-face-attribute instead
   (face-spec-set 'default
                  '((t :background "#fdf6e3")))
   ;; org headlines
@@ -388,17 +387,27 @@ Having said that, I found myself missing a few of the colours in Doom's version 
   ;; info
   (face-spec-set 'Info-quoted
                  '((t :inherit font-lock-keyword-face)))
+  (face-spec-set 'Info-code-block
+                 '((t :inherit default
+                      :inherit org-block)))
+
+  (defvar +info-code-regexp
+    (rx (seq "\n\n"
+             (group (>= 4 " ") (or "(" "-" ";" "|") (+? anychar) "\n")
+             "\n")))
 
   (defun +info-add-fn-font-lock ()
     (interactive)
     (font-lock-add-keywords
      nil
-     ;; (rx (seq line-start " -- " (group (+ (or alpha space)) ":") (group (+ not-newline))))
-     `(("^ -- \\(\\(?:[[:alpha:]]\\|[[:space:]]\\)+:\\)\\(.+\\)"
-        (1 'fixed-pitch t)
-        (2 'Info-quoted)))))
+     `(;; (rx (seq line-start " -- " (group (+ (or alpha space)) ":") (group (+ not-newline))))
+       ("^ -- \\(\\(?:[[:alpha:]]\\|[[:space:]]\\)+:\\)\\(.+\\)"
+        (1 'default t)
+        (2 'Info-quoted))
+       (,+info-code-regexp
+        (1 'Info-code-block t)))))
 
-  )
+  (add-hook 'Info-mode-hook #'+info-add-fn-font-lock))
 #+end_src
 
 ** Fonts
