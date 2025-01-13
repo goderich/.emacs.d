@@ -11,6 +11,10 @@
   - [[#fonts][Fonts]]
   - [[#dashboard][Dashboard]]
 - [[#boon][Boon]]
+  - [[#boon-command-state][Boon command state]]
+  - [[#boon-insert-state][Boon insert state]]
+  - [[#boon-special-state][Boon special state]]
+  - [[#boon-x-map][Boon x map]]
 - [[#minibuffer-keybindings][Minibuffer keybindings]]
 - [[#transient-commands][Transient commands]]
   - [[#goto-transient][Goto transient]]
@@ -144,6 +148,7 @@ Here are some of the resources I have consulted while writing my own config:
 - [[https://github.com/zzamboni/dot-emacs/blob/master/init.org][Zzamboni's evil-based config]] prior to his migration to Doom. Lots of org gems there.
 - [[https://zzamboni.org/post/my-doom-emacs-configuration-with-commentary/][Zzamboni's Doom config]]
 - [[https://github.com/rougier/dotemacs/blob/master/dotemacs.org][Nicholas Rougier's literate config]]
+- [[https://github.com/yantar92/emacs-config/blob/master/config.org][Ihor Radchenko's config]]
 - See [[https://github.com/jschaf/dotfiles/blob/master/emacs/core/abn-core-emacs-settings.el][this config]] (including other files) for some obscure settings and startup hacks.
 - [[https://sophiebos.io/posts/prettifying-emacs-org-mode/][org prettifying]]
 - See [[https://www.reddit.com/r/emacs/comments/9zad13/managing_personal_packages_with_usepackage/][here]] for instructions on how to load local files with =use-package= (so that they can be deferred, of course).
@@ -476,6 +481,10 @@ The default Emacs startup screen isn't particularly useful. It's rendered even l
 
 * Boon
 
+[[https://github.com/jyp/boon][Boon]] is a fantastic modal editing package for Emacs. It's tiny, but packs a ton of functiotality.
+
+I like boon's idea of ergonomics before mnemonics---basically, for the most common commands, it doesn't matter what's on the keycap, what matters is where it is on the keyboard. I feel this deeply, having used Dvorak for a number of years before switching to Colemak.
+
 While I'm still getting used to boon, here are reminders for things that I used with evil but no longer have access to, and what I should replace them with.
 - [[https://github.com/juliapath/evil-numbers][evil-numbers]] for incrementing/decrementing (does not require evil)
 - Look into [[https://www.emacswiki.org/emacs/KeyboardMacros][Emacs macros]] to replace vim =q=
@@ -483,44 +492,155 @@ While I'm still getting used to boon, here are reminders for things that I used 
 - [[info:emacs#Mark Ring][Marks]] (pop/unpop) and [[info:emacs#Position Registers][registers]] for movements similar to =gi=
 - Smartparens instead of evil-surround
 
+TODO: explain settings
+
 #+begin_src emacs-lisp
 (use-package boon
   :init
   (require 'boon-colemak)
   (boon-mode)
+  :config
+  (remove-hook 'minibuffer-setup-hook #'boon-minibuf-hook)
+  (remove-hook 'window-selection-change-functions #'boon-reset-state-for-switchw)
+
+  (setq boon-default-cursor-type 'box)
+  (blink-cursor-mode -1))
+#+end_src
+
+I do not have Tab bindings collected in any single specific place, but this bears stating somewhere. Here is as good a place as any. I have the following functionality on my Tab key:
+- expand a snippet if one is available, but *only* in insert state,
+- act as org-cycle in org mode, in both normal and insert states,
+- act as indent key in programming modes in both normal and insert states.
+
+** Boon command state
+
+Boon's command mode is actually composed of two keymaps: =boon-moves-map= and =boon-command-map= (plus a few special keys that act like transients). A division of labour between the two hands is baked into boon's design: the right hand keys mainly concern movements, while the left hand keys call various commands. (Recall that I am using the Colemak layout.)
+
+Instead of trying to keep my fingers on the home row as much as possible, I use both the top row and the home row for the most common movements. I have the following modifications:
+- I prefer having a WASD-like pyramid for up, left, down, and right, respectively, but it's on my right hand instead (UNEI on Colemak).
+- I put the =boon-smarter-backward= and =boon-smarter-forward= commands next to the "up" key on the top row (=l= and =y=). In prose, these function like word movements. In code, they move by sexps. So far I'm happy with how they work. I use these more than line movements, so I like them to be more reachable.
+- Because the above keys are undefined in uppercase, I bind =L= and =Y= to sentence movements, which in prose are very useful.
+- The line movements go to the left of "left" and to the right of "right". On Colemak DH Matrix, that's =m= and =o=. I also bind visual line movements on =M= and =O=, for prose.
+- If I'm on a heavily indented line and want to move to the point to the first char, boon doesn't seem to have a convenient function out of the box for this eventuality. Usually that's where I want to go though. So my =m= key is actually bound to =crux-move-beginning-of-line=. If I need to go to the first column, I just press it again. In case I ever need to move directly to the first column (say, when recording a macro), I bound it to =^=: this time a mnemonic of sorts, for the regex symbol.
+- Because Colemak DH Matrix mod swaps the "M" and "H" keys, I can still keep avy searches on "H", which is right below my "N" (= left) key. These are set in =boon-command-map=.
+- I like the idea of using =(= and =)= for single character searches. With my [[https://docs.qmk.fm/features/space_cadet][Space Cadet Shift]], they are very conveniently positioned. My only gripe with boon's functions is that if you search for X (for any given value of X) and your point is already on X, boon will just say, "Hey, look, there's one right where I'm standing!" and not move the point. Thanks boon, but I was looking for the *next* occurrence. Also, I want these searches to always be case sensitive. I modified these functions accordingly.
+
+#+begin_src emacs-lisp
+(use-package boon
+  :bind
+  (:map boon-moves-map
+   ("e" . #'next-line)
+   ("E" . #'forward-paragraph)
+   ("l" . #'boon-smarter-backward)
+   ("L" . #'backward-sentence)
+   ("m" . #'crux-move-beginning-of-line)
+   ("M" . #'beginning-of-visual-line)
+   ("n" . #'backward-char)
+   ("N" . #'boon-smarter-upward)
+   ("o" . #'end-of-line)
+   ("O" . #'end-of-visual-line)
+   ("y" . #'boon-smarter-forward)
+   ("Y" . #'forward-sentence)
+   ("(" . #'+boon-find-char-backward)
+   (")" . #'+boon-find-char-forward)
+   ("^" . #'beginning-of-line))
+
+  :config
+  (defun +boon-find-char-backward (char)
+    "Find the previous occurrence of CHAR, not including the char at point."
+    (interactive "cType the character to find")
+    (backward-char 1)
+    (let ((case-fold-search nil))
+      (search-backward (make-string 1 char))))
+
+  (defun +boon-find-char-forward (char)
+    "Find the next occurrence of CHAR, not including the char at point."
+    (interactive "cType the character to find")
+    (forward-char 1)
+    (let ((case-fold-search nil))
+      (search-forward (make-string 1 char)))
+    (backward-char 1)))
+#+end_src
+
+Next is my =boon-command-map=:
+- Because I'm using the Colemak DH mod instead of regular Colemak, my "D" key is where "V" is in [[https://github.com/jyp/boon/blob/master/colemak.pdf][the original layout]], and my "V" is in a very awkward position. Not ideal for a very common operation. I swap the two keys.
+- Avy commands on "H" work great, I'm just not yet 100% sure which ones. Still experimenting.
+- Love the =goto-map= on =g=, but I map it to [[id:81219cda-4249-480d-959f-2d44edf1a589][something a little more flexible]] ([[#goto-transient][web]]). The trouble with using a map is that it's a lot more work to adjust it to specific modes. It can still be done, but using a transient makes it a lot easier to adjust to various modes.
+- The original layout uses =j= for =xref-find-definitions= and =J= for =xref-find-references=. Which okay, but I include them in my =+goto-transient=, so I can use the "J" key for something else. I put line joining functions on it, because that's what it does in vim/evil, and I actually use those quite a lot! Lowercase =j= joins the following line to the end of the current one like in vim, and uppercase =J= joins the current line to the end of the preceding one.
+- The =occur= binding on =p= doesn't make much sense to me, and I have other functions for searching, such as =consult-line=. On the other hand, copying on a shifted key is not ideal. Put copying on =s= instead (mnemonic: save), and moved pasting to =p= (mnemonic: duh!).
+- I use [[id:53828884-e258-4f2b-b8e0-46c5cf9926ea][undo-fu]] for linear undo, and bind both undo and redo here.
+- The original layout uses =/= for =qsearch-at-point=, but that's already bound in =boon-forward-search-map=, so instead I bind it to my preferred line search using [[https://github.com/minad/consult][consult]].
+- I bind Enter to =nil= (instead of the default =undefined=) so that it can fall through to other modes' bindings. E.g., I bind Enter in org-mode, so it needs to be =nil= in boon in order for my org binding to work.
+
+#+begin_src emacs-lisp
+(use-package boon
   :bind
   (:map boon-command-map
+        ("d" . #'boon-set-insert-like-state)
+        ("D" . #'boon-open-next-line-and-insert)
+        ("C-d" . #'boon-open-line-and-insert)
+        ;; ("f") forward search transient
         ("g" . #'+goto-transient)
         ("h" . #'avy-goto-word-1)
         ("H" . #'avy-goto-char-timer)
         ("j" . #'crux-top-join-line)
         ("J" . #'join-line)
+        ("p" . #'boon-splice)
+        ("s" . #'boon-treasure-region)
+        ("v" . #'boon-replace-by-character)
+        ;; ("w") backward search transient
         (";" . nil)
         ("/" . #'consult-line)
         ("-" . #'undo-fu-only-undo)
         ("_" . #'undo-fu-only-redo)
         ("<return>" . nil) ; fall through
-   :map boon-moves-map
-        ("e" . #'next-line)
-        ("E" . #'forward-paragraph)
-        ("l" . #'boon-smarter-backward)
-        ("L" . #'backward-sentence)
-        ("m" . #'beginning-of-line)
-        ("M" . #'beginning-of-visual-line)
-        ("n" . #'backward-char)
-        ("N" . #'boon-smarter-upward)
-        ("o" . #'end-of-line)
-        ("O" . #'end-of-visual-line)
-        ("y" . #'boon-smarter-forward)
-        ("Y" . #'forward-sentence)
-   :map boon-insert-map
+))
+#+end_src
+
+** Boon insert state
+
+I only change a couple of things in insert mode:
+- When I'm in insert mode and a [[id:2ca8bb84-790f-4e68-8d3d-4893ef154e43][completion]] overlay or a template input is active, I want ESC to quit completion or templating *while keeping me in insert mode*. In my evil config, I used a wrapper function, which I replicated with boon.
+- I prefer to have =C-w= as a kill word binding. By default it runs =kill-region=, which can delete swathes of text.
+
+#+begin_src emacs-lisp
+(use-package boon
+  :bind
+  (:map boon-insert-map
         ("<escape>" . #'+boon-command-state-maybe)
         ("C-t" . #'ignore)
         ("C-n" . #'ignore)
         ("C-e" . #'ignore)
-   :map boon-special-map
-        ("<escape>" . #'ignore)
-   :map boon-x-map
+        ("C-w" . #'backward-kill-word))
+  :config
+  (defun +boon-command-state-maybe ()
+    (interactive)
+    (cond
+     ((and corfu-mode completion-in-region-mode) (corfu-quit))
+     ((bound-and-true-p tempel--active) (tempel-done))
+     (t (boon-set-command-state)))))
+#+end_src
+
+** Boon special state
+
+Special map is essentially when boon isn't active. Modes like magit, org agenda, or dired use this state by default, and I add a few more here. However, I *do not* want boon to switch to command mode on Escape, because I press it habitually.
+
+#+begin_src emacs-lisp
+(use-package boon
+  :bind
+  (:map boon-special-map
+        ("<escape>" . #'ignore))
+  :config
+  (dolist (mode '(ebib-index-mode ebib-entry-mode Info-mode))
+    (add-to-list 'boon-special-mode-list mode)))
+#+end_src
+
+** Boon x map
+
+#+begin_src emacs-lisp
+(use-package boon
+  :bind
+  (:map boon-x-map
         ("a" . #'org-agenda-list)
         ("f" . #'+file-transient)
         ("h" . #'+helpful-transient)
@@ -532,31 +652,8 @@ While I'm still getting used to boon, here are reminders for things that I used 
         ("s" . #'save-buffer)
         (";" . #'comment-line)
         ("." . #'find-file)
-        ("," . #'consult-buffer))
-  :config
-  (remove-hook 'minibuffer-setup-hook #'boon-minibuf-hook)
-  (remove-hook 'window-selection-change-functions #'boon-reset-state-for-switchw)
-
-  (setq boon-default-cursor-type 'box)
-  (blink-cursor-mode -1)
-
-  (dolist (mode '(ebib-index-mode ebib-entry-mode Info-mode))
-    (add-to-list 'boon-special-mode-list mode))
-
-  (defun +boon-command-state-maybe ()
-  (interactive)
-  (cond
-   ((and corfu-mode completion-in-region-mode) (corfu-quit))
-   ((bound-and-true-p tempel--active) (tempel-done))
-   (t (boon-set-command-state)))))
+        ("," . #'consult-buffer)))
 #+end_src
-
-I do not have Tab bindings collected in any single specific place, but this bears stating somewhere. Here is as good a place as any. I have the following functionality on my Tab key:
-- expand a snippet if one is available, but *only* in insert state,
-- act as org-cycle in org mode, in both normal and insert states,
-- act as indent key in programming modes in both normal and insert states.
-
-When I'm in insert mode and a [[id:2ca8bb84-790f-4e68-8d3d-4893ef154e43][completion]] overlay is active, I want ESC to quit completion or templating *while keeping me in insert mode*. In my evil config, I used a wrapper function, which I replicated with boon.
 
 * Minibuffer keybindings
 
@@ -613,6 +710,9 @@ Transients are an amazing feature of Emacs, and really handy for people who like
 Right now, all my transient menus live here. Since many of my packages are deferred, it's simpler to define the transients outside their =use-package= calls. The packages then get loaded when I call their respective transients.
 
 ** Goto transient
+:PROPERTIES:
+:ID:       81219cda-4249-480d-959f-2d44edf1a589
+:END:
 
 #+begin_src emacs-lisp
 (transient-define-prefix +goto-transient ()
@@ -622,7 +722,8 @@ Right now, all my transient menus live here. Since many of my packages are defer
     ("h" "find heading" +consult-goto-org-heading)
     ("u" "prev heading" +org-up-heading)]
    [:if-derived prog-mode
-    ("d" "definition" xref-find-definitions)]
+    ("d" "definition" xref-find-definitions)
+    ("r" "references" xref-find-references)]
    [("q" "quit" transient-quit-all)
     ("<escape>" "quit" transient-quit-all)]])
 #+end_src
@@ -810,10 +911,10 @@ makes sense to me to combine into a single keybinding."
 ;; add link-hint on u?
 (transient-define-prefix +org-movement-transient ()
   ["Moving around in org"
-   [("h" "up level" +org-up-level-and-show :transient t)
-    ("c" "up (same level)" +org-up-heading :transient t)
-    ("t" "down (same level)" +org-down-same-level :transient t)
-    ("n" "down level" +org-down-and-show :transient t)]
+   [("n" "up level" +org-up-level-and-show :transient t)
+    ("u" "up (same level)" +org-up-heading :transient t)
+    ("e" "down (same level)" +org-down-same-level :transient t)
+    ("i" "down level" +org-down-and-show :transient t)]
    [("<tab>" "cycle" org-cycle :transient t)
     ("<backtab>" "cycle all" org-shifttab :transient t)
     ("<SPC>" "scroll down" scroll-up :transient t)]
@@ -913,7 +1014,7 @@ and I feel the convenience outweighs it.
         ("<return>" . +org-return)
         ("C-<return>" . +org-insert-item)
         ("C-c c" . ebib-insert-citation)
-        ("C-c l" . +org-link-dwim)
+        ("C-c l" . #'+link-transient)
         ("C-c r" . +ref-transient)
         ;; org movement
         ("M-n" . org-metaleft)
@@ -1694,13 +1795,12 @@ Largely mode and  input method agnostic keybindings for ebib.
 Smartparens is THE package for lisp code editing.
 #+begin_src emacs-lisp :noweb yes
 (use-package smartparens
-  :hook (prog-mode) ;; should probably narrow it down to lisps
+  :hook (org-mode prog-mode)
   :config
   ;; load default config
   (require 'smartparens-config)
   :bind
-  (:map emacs-lisp-mode-map
-        ("C-c C-e" . +elisp-eval-transient)
+  (:map smartparens-mode-map
         ("C-(" . sp-backward-slurp-sexp)
         ("C-)" . sp-forward-slurp-sexp)
         ("C-," . sp-backward-barf-sexp)
@@ -1718,7 +1818,10 @@ Examples can be found in the [[https://github.com/Fuco1/smartparens/wiki][wiki]]
 
 #+begin_src emacs-lisp
 (use-package elisp-mode
-  :ensure nil)
+  :ensure nil
+  :bind
+  (:map emacs-lisp-mode-map
+        ("C-c C-e" . +elisp-eval-transient)))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -1968,7 +2071,7 @@ and then it's indispensable.
   :defer 2
   :config (global-hl-todo-mode 1)
   (transient-define-prefix +hl-todo-transient ()
-    ["Change margins..."
+    ["Browsing todo keywords..."
      ("n" "next" hl-todo-next :transient t)
      ("p" "previous" hl-todo-previous :transient t)
      ("q" "quit" transient-quit-all)]))
@@ -2033,6 +2136,9 @@ https://github.com/Wilfred/helpful
 #+end_src
 
 ** TODO Undo
+:PROPERTIES:
+:ID:       53828884-e258-4f2b-b8e0-46c5cf9926ea
+:END:
 See also Hints and undo-fu-session [[https://codeberg.org/ideasman42/emacs-undo-fu][here]].
 Can also try [[https://github.com/casouri/vundo][vundo]], although my undo needs aren't that sophisticated.
 
