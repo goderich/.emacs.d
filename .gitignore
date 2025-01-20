@@ -3,7 +3,9 @@ custom.el
 *~
 eln-cache/
 elpa/
+elpaca/
 transient/
+tree-sitter/
 tmp/
 .local/
 .org-id-locations

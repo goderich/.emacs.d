@@ -10,11 +10,11 @@
   - [[#theming][Theming]]
   - [[#fonts][Fonts]]
   - [[#dashboard][Dashboard]]
+  - [[#modeline][Modeline]]
 - [[#boon][Boon]]
   - [[#boon-command-state][Boon command state]]
   - [[#boon-insert-state][Boon insert state]]
   - [[#boon-special-state][Boon special state]]
-  - [[#boon-x-map][Boon x map]]
 - [[#minibuffer-keybindings][Minibuffer keybindings]]
 - [[#transient-commands][Transient commands]]
   - [[#goto-transient][Goto transient]]
@@ -37,9 +37,10 @@
   - [[#pandoc-integration][Pandoc integration]]
   - [[#links][Links]]
   - [[#cross-referencing][Cross-referencing]]
-  - [[#org-cite][Org cite]]
+  - [[#org-cite-disabled][Org cite (disabled)]]
   - [[#org-functions][Org functions]]
   - [[#toc-org][Toc-org]]
+- [[#typst][Typst]]
 - [[#bibliography-and-citations][Bibliography and citations]]
   - [[#ebib][Ebib]]
 - [[#programming-languages][Programming languages]]
@@ -49,7 +50,6 @@
 - [[#utils][Utils]]
   - [[#magit][Magit]]
   - [[#tempel-snippets][Tempel snippets]]
-  - [[#modeline][Modeline]]
   - [[#crux][Crux]]
   - [[#avy][Avy]]
   - [[#link-hinting][Link hinting]]
@@ -61,7 +61,7 @@
   - [[#help][Help]]
   - [[#tldr][Tldr]]
   - [[#undo][Undo]]
-  - [[#evil-numbers][Evil-numbers]]
+  - [[#evil-numbers-disabled][Evil-numbers (disabled)]]
 - [[#finalize][Finalize]]
 
 * Introduction
@@ -189,15 +189,8 @@ Some of these settings were taken from the [[https://github.com/hrs/sensible-def
 #+end_src
 
 ** Package management
-Instead of putting =:ensure t= everywhere, I can just set it here once.
-(This is not recommended by some.)
 
-#+begin_src elisp
-(require 'use-package-ensure)
-(setq use-package-always-ensure t)
-#+end_src
-
-I also turn on the profiler, so that I can see which packages
+I turn on the profiler, so that I can see which packages
 take the longest amount of time to load
 (with the =use-package-report= command)
 and see if their loading can be deferred.
@@ -205,11 +198,17 @@ and see if their loading can be deferred.
 #+begin_src emacs-lisp
 (setq use-package-compute-statistics t)
 #+end_src
-
 See also =use-package-defaults= for other settings.
 
-#+begin_src elisp
+Because I am using Elpaca, this is no longer needed:
+#+begin_src elisp :tangle no
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+#+end_src
+
+Load =f= early to make sure it's available to other packages (required with Elpaca's async).
+#+begin_src emacs-lisp
+(use-package f
+  :ensure (:wait t))
 #+end_src
 
 ** In-built packages
@@ -331,6 +330,7 @@ Having said that, I found myself missing a few of the colours in Doom's version 
 
 #+begin_src emacs-lisp
 (use-package solarized-theme
+  :ensure (:wait t)
   :init
   (setq solarized-scale-org-headlines nil)
   (load-theme 'solarized-light t)
@@ -369,17 +369,17 @@ Having said that, I found myself missing a few of the colours in Doom's version 
                       :extend t)))
   ;; org cite
   (face-spec-set 'org-cite
-                 '((t :foreground nil
+                 '((t :foreground unspecified
                       :inherit link)))
   ;; org checkbox
   (face-spec-set 'org-checkbox
                  '((t :box unspecified)))
   ;; org agenda
   (face-spec-set 'org-agenda-date
-                 '((t :foreground nil
+                 '((t :foreground unspecified
                       :weight bold)))
   (face-spec-set 'org-scheduled-previously
-                 '((t :foreground nil)))
+                 '((t :foreground unspecified)))
   (face-spec-set 'org-agenda-done
                  '((t :slant normal)))
   (face-spec-set 'link
@@ -387,8 +387,8 @@ Having said that, I found myself missing a few of the colours in Doom's version 
                       :weight bold
                       :underline t)))
   (face-spec-set 'org-agenda-date-weekend
-                 '((t :foreground nil
-                      :underline nil)))
+                 '((t :foreground unspecified
+                      :underline unspecified)))
   ;; info
   (face-spec-set 'Info-quoted
                  '((t :inherit font-lock-keyword-face)))
@@ -423,6 +423,7 @@ Since I spend so much time in org-mode, and a lot of it writing prose, it makes 
 
 #+begin_src emacs-lisp
 (use-package mixed-pitch
+  :ensure t
   :hook ((text-mode . mixed-pitch-mode)
          (Info-mode . mixed-pitch-mode))
   :config
@@ -468,6 +469,7 @@ The default Emacs startup screen isn't particularly useful. It's rendered even l
 
 #+begin_src emacs-lisp
 (use-package dashboard
+  :ensure t
   :bind
   (:map dashboard-mode-map
         ("u" . 'dashboard-previous-line)
@@ -479,6 +481,53 @@ The default Emacs startup screen isn't particularly useful. It's rendered even l
   (setq dashboard-items '((recents . 5))))
 #+end_src
 
+** Modeline
+
+ Currently using [[https://gitlab.com/jessieh/mood-line][mood-line]] (see [[https://www.reddit.com/r/emacs/comments/c5mel4/what_mode_line_do_you_use_and_why/][here]] for more great packages.)
+
+#+begin_src emacs-lisp
+(use-package mood-line
+  :ensure t
+  :config
+  ;; can't use unicode glyphs with my current font
+  (setq mood-line-glyph-alist mood-line-glyphs-fira-code)
+  (mood-line-mode)
+
+  (setq mood-line-format
+        (mood-line-defformat
+         :left
+         (((+boon-state-string) . " ")
+          ((or (mood-line-segment-buffer-status) " ") . " ")
+          ((mood-line-segment-buffer-name) . " ")
+          ((mood-line-segment-anzu) . " ")
+          ((mood-line-segment-cursor-position) . " ")
+          ((+count-selected-lines) . " ")
+          ((mood-line-segment-scroll) . " "))
+         :right
+         (((mood-line-segment-vc) . "  ")
+          ((mood-line-segment-major-mode) . "  ")
+          ((mood-line-segment-misc-info) . "  ")
+          ((mood-line-segment-checker) . "  ")
+          ((mood-line-segment-process) . "  "))))
+
+  (defun +count-selected-lines ()
+    (when (region-active-p)
+      (let ((numlines
+             (1+
+              (- (line-number-at-pos (region-end))
+                 (line-number-at-pos (region-beginning))))))
+        (format #("-%d-" 0 4 (face mood-line-status-error))
+                numlines))))
+
+  (defun +boon-state-string ()
+    "Return a string describing the current state."
+    (cond
+     (boon-command-state "<C>")
+     (boon-insert-state  (propertize "<I>" 'face '(:foreground "indian red")))
+     (boon-special-state (propertize "<S>" 'face '(:foreground "dodger blue")))
+     (t "???"))))
+#+end_src
+
 * Boon
 
 [[https://github.com/jyp/boon][Boon]] is a fantastic modal editing package for Emacs. It's tiny, but packs a ton of functiotality.
@@ -486,25 +535,107 @@ The default Emacs startup screen isn't particularly useful. It's rendered even l
 I like boon's idea of ergonomics before mnemonics---basically, for the most common commands, it doesn't matter what's on the keycap, what matters is where it is on the keyboard. I feel this deeply, having used Dvorak for a number of years before switching to Colemak.
 
 While I'm still getting used to boon, here are reminders for things that I used with evil but no longer have access to, and what I should replace them with.
-- [[https://github.com/juliapath/evil-numbers][evil-numbers]] for incrementing/decrementing (does not require evil)
 - Look into [[https://www.emacswiki.org/emacs/KeyboardMacros][Emacs macros]] to replace vim =q=
 - Look into [[info:emacs#Replace][replacement commands]] instead of vim =:=
 - [[info:emacs#Mark Ring][Marks]] (pop/unpop) and [[info:emacs#Position Registers][registers]] for movements similar to =gi=
 - Smartparens instead of evil-surround
 
-TODO: explain settings
+Specific changes to keybindings are explained further below.
 
 #+begin_src emacs-lisp
 (use-package boon
+  :ensure t
   :init
   (require 'boon-colemak)
   (boon-mode)
+  :bind
+  (:map boon-moves-map
+        ("e" . #'next-line)
+        ("E" . #'forward-paragraph)
+        ("l" . #'boon-smarter-backward)
+        ("L" . #'backward-sentence)
+        ("m" . #'crux-move-beginning-of-line)
+        ("M" . #'beginning-of-visual-line)
+        ("n" . #'backward-char)
+        ("N" . #'boon-smarter-upward)
+        ("o" . #'end-of-line)
+        ("O" . #'end-of-visual-line)
+        ("y" . #'boon-smarter-forward)
+        ("Y" . #'forward-sentence)
+        ("(" . #'+boon-find-char-backward)
+        (")" . #'+boon-find-char-forward)
+        ("^" . #'beginning-of-line)
+   :map boon-command-map
+        ("d" . #'boon-set-insert-like-state)
+        ("D" . #'boon-open-next-line-and-insert)
+        ("C-d" . #'boon-open-line-and-insert)
+        ;; ("f") forward search transient
+        ("g" . #'+goto-transient)
+        ("h" . #'avy-goto-word-1)
+        ("H" . #'avy-goto-char-timer)
+        ("j" . #'crux-top-join-line)
+        ("J" . #'join-line)
+        ("p" . #'boon-splice)
+        ("s" . #'boon-treasure-region)
+        ("v" . #'boon-replace-by-character)
+        ;; ("w") backward search transient
+        (";" . nil)
+        ("/" . #'consult-line)
+        ("-" . #'undo-fu-only-undo)
+        ("_" . #'undo-fu-only-redo)
+        ("<return>" . nil) ; fall through
+   :map boon-insert-map
+        ("<escape>" . #'+boon-command-state-maybe)
+        ("C-t" . #'ignore)
+        ("C-n" . #'ignore)
+        ("C-e" . #'ignore)
+        ("C-w" . #'backward-kill-word)
+   :map boon-special-map
+        ("<escape>" . #'ignore)
+   :map boon-x-map
+        ("a" . #'org-agenda-list)
+        ("f" . #'+file-transient)
+        ("h" . #'+helpful-transient)
+        ("k" . #'kill-this-buffer)
+        ("l" . #'link-hint-open-link)
+        ("m" . #'magit)
+        ("n" . #'+narrow-dwim)
+        ("p" . #'pandoc-transient)
+        ("s" . #'save-buffer)
+        (";" . #'comment-line)
+        ("." . #'find-file)
+        ("," . #'consult-buffer))
   :config
   (remove-hook 'minibuffer-setup-hook #'boon-minibuf-hook)
   (remove-hook 'window-selection-change-functions #'boon-reset-state-for-switchw)
 
   (setq boon-default-cursor-type 'box)
-  (blink-cursor-mode -1))
+  (blink-cursor-mode -1)
+
+  (defun +boon-find-char-backward (char)
+    "Find the previous occurrence of CHAR, not including the char at point."
+    (interactive "cType the character to find")
+    (backward-char 1)
+    (let ((case-fold-search nil))
+      (search-backward (make-string 1 char))))
+
+  (defun +boon-find-char-forward (char)
+    "Find the next occurrence of CHAR, not including the char at point."
+    (interactive "cType the character to find")
+    (forward-char 1)
+    (let ((case-fold-search nil))
+      (search-forward (make-string 1 char)))
+    (backward-char 1))
+
+  (defun +boon-command-state-maybe ()
+    (interactive)
+    (cond
+     ((and corfu-mode completion-in-region-mode) (corfu-quit))
+     ((bound-and-true-p tempel--active) (tempel-done))
+     (t (boon-set-command-state))))
+
+  (dolist (mode '(ebib-index-mode ebib-entry-mode Info-mode))
+    (add-to-list 'boon-special-mode-list mode)))
 #+end_src
 
 I do not have Tab bindings collected in any single specific place, but this bears stating somewhere. Here is as good a place as any. I have the following functionality on my Tab key:
@@ -525,77 +656,15 @@ Instead of trying to keep my fingers on the home row as much as possible, I use 
 - Because Colemak DH Matrix mod swaps the "M" and "H" keys, I can still keep avy searches on "H", which is right below my "N" (= left) key. These are set in =boon-command-map=.
 - I like the idea of using =(= and =)= for single character searches. With my [[https://docs.qmk.fm/features/space_cadet][Space Cadet Shift]], they are very conveniently positioned. My only gripe with boon's functions is that if you search for X (for any given value of X) and your point is already on X, boon will just say, "Hey, look, there's one right where I'm standing!" and not move the point. Thanks boon, but I was looking for the *next* occurrence. Also, I want these searches to always be case sensitive. I modified these functions accordingly.
 
-#+begin_src emacs-lisp
-(use-package boon
-  :bind
-  (:map boon-moves-map
-   ("e" . #'next-line)
-   ("E" . #'forward-paragraph)
-   ("l" . #'boon-smarter-backward)
-   ("L" . #'backward-sentence)
-   ("m" . #'crux-move-beginning-of-line)
-   ("M" . #'beginning-of-visual-line)
-   ("n" . #'backward-char)
-   ("N" . #'boon-smarter-upward)
-   ("o" . #'end-of-line)
-   ("O" . #'end-of-visual-line)
-   ("y" . #'boon-smarter-forward)
-   ("Y" . #'forward-sentence)
-   ("(" . #'+boon-find-char-backward)
-   (")" . #'+boon-find-char-forward)
-   ("^" . #'beginning-of-line))
-
-  :config
-  (defun +boon-find-char-backward (char)
-    "Find the previous occurrence of CHAR, not including the char at point."
-    (interactive "cType the character to find")
-    (backward-char 1)
-    (let ((case-fold-search nil))
-      (search-backward (make-string 1 char))))
-
-  (defun +boon-find-char-forward (char)
-    "Find the next occurrence of CHAR, not including the char at point."
-    (interactive "cType the character to find")
-    (forward-char 1)
-    (let ((case-fold-search nil))
-      (search-forward (make-string 1 char)))
-    (backward-char 1)))
-#+end_src
-
 Next is my =boon-command-map=:
 - Because I'm using the Colemak DH mod instead of regular Colemak, my "D" key is where "V" is in [[https://github.com/jyp/boon/blob/master/colemak.pdf][the original layout]], and my "V" is in a very awkward position. Not ideal for a very common operation. I swap the two keys.
 - Avy commands on "H" work great, I'm just not yet 100% sure which ones. Still experimenting.
-- Love the =goto-map= on =g=, but I map it to [[id:81219cda-4249-480d-959f-2d44edf1a589][something a little more flexible]] ([[#goto-transient][web]]). The trouble with using a map is that it's a lot more work to adjust it to specific modes. It can still be done, but using a transient makes it a lot easier to adjust to various modes.
+- Love the =goto-map= on =g=, but I map it to [[id:81219cda-4249-480d-959f-2d44edf1a589][something a little more flexible]] ([[#goto-transient][link]]). The trouble with using a map is that it's a lot more work to adjust it to specific modes. It can still be done, but using a transient makes it a lot easier to adjust to various modes.
 - The original layout uses =j= for =xref-find-definitions= and =J= for =xref-find-references=. Which okay, but I include them in my =+goto-transient=, so I can use the "J" key for something else. I put line joining functions on it, because that's what it does in vim/evil, and I actually use those quite a lot! Lowercase =j= joins the following line to the end of the current one like in vim, and uppercase =J= joins the current line to the end of the preceding one.
 - The =occur= binding on =p= doesn't make much sense to me, and I have other functions for searching, such as =consult-line=. On the other hand, copying on a shifted key is not ideal. Put copying on =s= instead (mnemonic: save), and moved pasting to =p= (mnemonic: duh!).
 - I use [[id:53828884-e258-4f2b-b8e0-46c5cf9926ea][undo-fu]] for linear undo, and bind both undo and redo here.
 - The original layout uses =/= for =qsearch-at-point=, but that's already bound in =boon-forward-search-map=, so instead I bind it to my preferred line search using [[https://github.com/minad/consult][consult]].
 - I bind Enter to =nil= (instead of the default =undefined=) so that it can fall through to other modes' bindings. E.g., I bind Enter in org-mode, so it needs to be =nil= in boon in order for my org binding to work.
-
-#+begin_src emacs-lisp
-(use-package boon
-  :bind
-  (:map boon-command-map
-        ("d" . #'boon-set-insert-like-state)
-        ("D" . #'boon-open-next-line-and-insert)
-        ("C-d" . #'boon-open-line-and-insert)
-        ;; ("f") forward search transient
-        ("g" . #'+goto-transient)
-        ("h" . #'avy-goto-word-1)
-        ("H" . #'avy-goto-char-timer)
-        ("j" . #'crux-top-join-line)
-        ("J" . #'join-line)
-        ("p" . #'boon-splice)
-        ("s" . #'boon-treasure-region)
-        ("v" . #'boon-replace-by-character)
-        ;; ("w") backward search transient
-        (";" . nil)
-        ("/" . #'consult-line)
-        ("-" . #'undo-fu-only-undo)
-        ("_" . #'undo-fu-only-redo)
-        ("<return>" . nil) ; fall through
-))
-#+end_src
 
 ** Boon insert state
 
@@ -603,57 +672,9 @@ I only change a couple of things in insert mode:
 - When I'm in insert mode and a [[id:2ca8bb84-790f-4e68-8d3d-4893ef154e43][completion]] overlay or a template input is active, I want ESC to quit completion or templating *while keeping me in insert mode*. In my evil config, I used a wrapper function, which I replicated with boon.
 - I prefer to have =C-w= as a kill word binding. By default it runs =kill-region=, which can delete swathes of text.
 
-#+begin_src emacs-lisp
-(use-package boon
-  :bind
-  (:map boon-insert-map
-        ("<escape>" . #'+boon-command-state-maybe)
-        ("C-t" . #'ignore)
-        ("C-n" . #'ignore)
-        ("C-e" . #'ignore)
-        ("C-w" . #'backward-kill-word))
-  :config
-  (defun +boon-command-state-maybe ()
-    (interactive)
-    (cond
-     ((and corfu-mode completion-in-region-mode) (corfu-quit))
-     ((bound-and-true-p tempel--active) (tempel-done))
-     (t (boon-set-command-state)))))
-#+end_src
-
 ** Boon special state
 
 Special map is essentially when boon isn't active. Modes like magit, org agenda, or dired use this state by default, and I add a few more here. However, I *do not* want boon to switch to command mode on Escape, because I press it habitually.
-
-#+begin_src emacs-lisp
-(use-package boon
-  :bind
-  (:map boon-special-map
-        ("<escape>" . #'ignore))
-  :config
-  (dolist (mode '(ebib-index-mode ebib-entry-mode Info-mode))
-    (add-to-list 'boon-special-mode-list mode)))
-#+end_src
-
-** Boon x map
-
-#+begin_src emacs-lisp
-(use-package boon
-  :bind
-  (:map boon-x-map
-        ("a" . #'org-agenda-list)
-        ("f" . #'+file-transient)
-        ("h" . #'+helpful-transient)
-        ("k" . #'kill-this-buffer)
-        ("l" . #'link-hint-open-link)
-        ("m" . #'magit)
-        ("n" . #'+narrow-dwim)
-        ("p" . #'pandoc-transient)
-        ("s" . #'save-buffer)
-        (";" . #'comment-line)
-        ("." . #'find-file)
-        ("," . #'consult-buffer)))
-#+end_src
 
 * Minibuffer keybindings
 
@@ -706,6 +727,11 @@ and I'm still in the process of refining it.
 :END:
 
 Transients are an amazing feature of Emacs, and really handy for people who like to over-personalize their configs. They don't immediately run a command, but instead pop up a menu where you can choose further actions, or enter a transitory state so that you can mash one key to, e.g. increase the font size or text width. I prefer using transients to mapping every function individually, because transients are a lot easier to remap, and their functionality is strictly more powerful. Since Emacs 28, the transient package has been included in Emacs itself.
+
+#+begin_src emacs-lisp
+(use-package transient
+  :ensure (:wait t))
+#+end_src
 
 Right now, all my transient menus live here. Since many of my packages are deferred, it's simpler to define the transients outside their =use-package= calls. The packages then get loaded when I call their respective transients.
 
@@ -932,9 +958,11 @@ Here I mean incremental narrowing of searches in the minibuffer, and not the kin
 TODO: There is a lot of functionality here, I should explore it.
 https://github.com/minad/consult
 #+begin_src emacs-lisp
-(use-package consult)
+(use-package consult
+  :ensure (:wait t))
 
 (use-package vertico
+  :ensure t
   ;; :custom
   ;; (vertico-scroll-margin 0) ;; Different scroll margin
   ;; (vertico-count 20) ;; Show more candidates
@@ -943,6 +971,7 @@ https://github.com/minad/consult
   :init (vertico-mode))
 
 (use-package orderless
+  :ensure t
   :custom
   (completion-styles '(orderless basic))
   (completion-category-defaults nil)
@@ -950,6 +979,7 @@ https://github.com/minad/consult
 
 ;; Documentation in M-x and minibuffers
 (use-package marginalia
+  :ensure t
   ;; Bind `marginalia-cycle' locally in the minibuffer.  To make the binding
   ;; available in the *Completions* buffer, add it to the
   ;; `completion-list-mode-map'.
@@ -960,6 +990,7 @@ https://github.com/minad/consult
 
 ;; Do not delay which-key (delay has to be above zero)
 (use-package which-key
+  :ensure t
   :init (which-key-mode)
   :config
   (setq which-key-idle-delay 1)
@@ -982,6 +1013,7 @@ I'm using SPC as separator: pressing space does not exit completion, but instead
 
 #+begin_src emacs-lisp
 (use-package corfu
+  :ensure t
   :hook ((prog-mode . corfu-mode))
   :custom
   (corfu-auto t)
@@ -1003,7 +1035,6 @@ and I feel the convenience outweighs it.
 
 #+begin_src emacs-lisp :noweb yes
 (use-package org
-  :ensure nil
   :init <<org-init>>
   :hook <<org-hooks>>
   :bind
@@ -1182,7 +1213,6 @@ I then add the function to the hook run before =org-cycle=.
 
 #+begin_src emacs-lisp
 (use-package org-agenda
-  :ensure nil
   :after org
   :bind
   (:map org-agenda-mode-map
@@ -1242,6 +1272,7 @@ With org-lists, I use "-" everywhere, because it can be typed without holding do
 
 #+begin_src emacs-lisp
 (use-package org-modern
+  :ensure t
   :hook org-mode
   :config
   (setq org-modern-todo nil
@@ -1255,6 +1286,7 @@ Valign works much better with tables containing CJK and symbols than other simil
 
 #+begin_src emacs-lisp
 (use-package valign
+  :ensure t
   :commands (valign-mode))
 #+end_src
 
@@ -1292,6 +1324,7 @@ Hiding emphasis markers in org-mode makes it look quite nice, however it also ma
 
 #+begin_src emacs-lisp
 (use-package org-appear
+  :ensure t
   :commands (org-appear-mode))
 #+end_src
 
@@ -1368,13 +1401,12 @@ Again, a transient. Since I'm using transients instead of regular evil keybindin
     ("<escape>" "quit" transient-quit-all)]])
 #+end_src
 
-** Org cite
+** Org cite (disabled)
 
 It's pretty awesome that org-mode now has in-built citation capabilities. I write my papers in org-mode, and having a stable citation API gives me confidence that my config won't need constant package and workflow changes (even though I started writing academic papers in org-mode even before org-cite).
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package org-cite
-  :ensure nil
   :after org)
 #+end_src
 
@@ -1619,8 +1651,20 @@ The sole purpose of this package is to make it easier to read this config online
 
 #+begin_src emacs-lisp
 (use-package toc-org
+  :ensure t
   :after org
   :hook (org-mode . toc-org-mode))
+#+end_src
+
+* Typst
+
+#+begin_src emacs-lisp :tangle no
+(use-package typst-ts-mode
+  :ensure (:type git :host sourcehut :repo "meow_king/typst-ts-mode" :files (:defaults "*.el"))
+  ;; :custom
+  ;; don't add "--open" if you'd like `watch` to be an error detector
+  ;; (typst-ts-mode-watch-options "--open")
+  )
 #+end_src
 
 * Bibliography and citations
@@ -1633,6 +1677,7 @@ Sure, it doesn't have the bells and whistles of [[https://www.zotero.org/][other
 
 #+begin_src emacs-lisp :noweb yes
 (use-package ebib
+  :ensure t
   :commands (ebib ebib-insert-citation)
   :bind
   <<ebib-keybindings>>
@@ -1795,6 +1840,7 @@ Largely mode and  input method agnostic keybindings for ebib.
 Smartparens is THE package for lisp code editing.
 #+begin_src emacs-lisp :noweb yes
 (use-package smartparens
+  :ensure t
   :hook (org-mode prog-mode)
   :config
   ;; load default config
@@ -1809,6 +1855,7 @@ Smartparens is THE package for lisp code editing.
 
 #+begin_src emacs-lisp
 (use-package eros
+  :ensure t
   :hook emacs-lisp-mode)
 #+end_src
 
@@ -1818,7 +1865,6 @@ Examples can be found in the [[https://github.com/Fuco1/smartparens/wiki][wiki]]
 
 #+begin_src emacs-lisp
 (use-package elisp-mode
-  :ensure nil
   :bind
   (:map emacs-lisp-mode-map
         ("C-c C-e" . +elisp-eval-transient)))
@@ -1832,6 +1878,7 @@ Examples can be found in the [[https://github.com/Fuco1/smartparens/wiki][wiki]]
 
 #+begin_src emacs-lisp
 (use-package elisp-demos
+  :ensure t
   :after helpful
   :config
   (advice-add 'helpful-update :after #'elisp-demos-advice-helpful-update))
@@ -1857,6 +1904,7 @@ See also the following:
 
 #+begin_src emacs-lisp
 (use-package clojure-mode
+  :ensure t
   :defer t
   :bind (:map clojure-mode-map
           ("C-x '" . 'cider-jack-in)))
@@ -1864,6 +1912,7 @@ See also the following:
 
 #+begin_src emacs-lisp
 (use-package cider
+  :ensure t
   :commands (cider-jack-in cider-jack-in-clj cider-jack-in-cljs
              cider-connect-clj cider-connect-cljs)
   :config
@@ -1879,6 +1928,7 @@ Consider also [[https://github.com/alphapapa/magit-todos][magit-todos]].
 
 #+begin_src emacs-lisp
 (use-package magit
+  :ensure t
   :commands (magit)
   :bind (:map magit-mode-map
          ("p" . magit-push)
@@ -1892,24 +1942,19 @@ Consider also [[https://github.com/alphapapa/magit-todos][magit-todos]].
 *** Git diff highlighting
 
 Changed the settings using [[https://www.reddit.com/r/emacs/comments/582yms/question_changing_the_colour_of_diffhl_indicators/][this discussion]] as a reference.
-#+begin_src emacs-lisp :noweb yes
-(use-package diff-hl
-  :defer 2
-  :config
-  <<diff-hl-colors>>
-  (diff-hl-flydiff-mode)
-  (global-diff-hl-mode)
-  ;; <<diff-hl-keybindings>>
-  )
-#+end_src
-
 I stole the insert and delete shades from Doom, because they look really good.
 
-#+begin_src emacs-lisp :tangle no :noweb-ref diff-hl-colors
-(custom-set-faces
- '(diff-hl-change ((t (:background "orange2" :foreground "orange2")))) ; #cb4b16
- '(diff-hl-insert ((t (:background "#859900" :foreground "#859900"))))
- '(diff-hl-delete ((t (:background "#dc322f" :foreground "#dc322f")))))
+#+begin_src emacs-lisp
+(use-package diff-hl
+  :ensure t
+  :defer 2
+  :config
+  (custom-set-faces
+   '(diff-hl-change ((t (:background "orange2" :foreground "orange2")))) ; #cb4b16
+   '(diff-hl-insert ((t (:background "#859900" :foreground "#859900"))))
+   '(diff-hl-delete ((t (:background "#dc322f" :foreground "#dc322f")))))
+  (diff-hl-flydiff-mode)
+  (global-diff-hl-mode))
 #+end_src
 
 ** Tempel snippets
@@ -1922,6 +1967,7 @@ Once I'm inside a snippet, I want to be able to use Tab to jump to next placehol
 
 #+begin_src elisp :noweb yes
 (use-package tempel
+  :ensure t
   :commands (tempel-expand)
   :bind (:map tempel-map
           ("TAB" . tempel-next)
@@ -1929,56 +1975,11 @@ Once I'm inside a snippet, I want to be able to use Tab to jump to next placehol
           ("<escape>" . tempel-done)))
 #+end_src
 
-** Modeline
-
- Currently using [[https://gitlab.com/jessieh/mood-line][mood-line]] (see [[https://www.reddit.com/r/emacs/comments/c5mel4/what_mode_line_do_you_use_and_why/][here]] for more great packages.)
-
-#+begin_src emacs-lisp
-(use-package mood-line
-  :config
-  ;; can't use unicode glyphs with my current font
-  (setq mood-line-glyph-alist mood-line-glyphs-fira-code)
-  (mood-line-mode)
-
-  (setq mood-line-format
-        (mood-line-defformat
-         :left
-         (((+boon-state-string) . " ")
-          ((or (mood-line-segment-buffer-status) " ") . " ")
-          ((mood-line-segment-buffer-name) . " ")
-          ((mood-line-segment-anzu) . " ")
-          ((mood-line-segment-cursor-position) . " ")
-          ((+count-selected-lines) . " ")
-          ((mood-line-segment-scroll) . " "))
-         :right
-         (((mood-line-segment-vc) . "  ")
-          ((mood-line-segment-major-mode) . "  ")
-          ((mood-line-segment-misc-info) . "  ")
-          ((mood-line-segment-checker) . "  ")
-          ((mood-line-segment-process) . "  "))))
-
-  (defun +count-selected-lines ()
-    (when (region-active-p)
-      (let ((numlines
-             (1+
-              (- (line-number-at-pos (region-end))
-                 (line-number-at-pos (region-beginning))))))
-        (format #("-%d-" 0 4 (face mood-line-status-error))
-                numlines))))
-
-  (defun +boon-state-string ()
-    "Return a string describing the current state."
-    (cond
-     (boon-command-state "<C>")
-     (boon-insert-state  (propertize "<I>" 'face '(:foreground "indian red")))
-     (boon-special-state (propertize "<S>" 'face '(:foreground "dodger blue")))
-     (t "???"))))
-#+end_src
-
 ** Crux
 
 #+begin_src emacs-lisp
 (use-package crux
+  :ensure t
   :commands (crux-delete-file-and-buffer
              crux-rename-file-and-buffer
              crux-sudo-edit
@@ -1993,8 +1994,9 @@ Avy is an amazing package for all kinds of on-screen navigation. I use it to jum
 
 #+begin_src emacs-lisp
 (use-package avy
+  :ensure t
   :config
-  ;; use Colemak (DH matrix) home row hints
+  ;; use Colemak (DH) home row hints
   (setq avy-keys '(?n ?t ?e ?s ?i ?r ?h ?d)))
 #+end_src
 
@@ -2005,6 +2007,7 @@ Avy is an amazing package for all kinds of on-screen navigation. I use it to jum
 
 #+begin_src elisp :noweb yes
 (use-package link-hint
+  :ensure t
   :commands (link-hint-open-link link-hint-open-link-at-point)
   :config
   <<link-hint-org-cite>>)
@@ -2044,6 +2047,7 @@ Only search the range between just after the point and BOUND."
 
 #+begin_src emacs-lisp
 (use-package dumb-jump
+  :ensure t
   :init
   (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
   :bind
@@ -2061,6 +2065,7 @@ and then it's indispensable.
 
 #+begin_src emacs-lisp
 (use-package anzu
+  :ensure t
   :init (global-anzu-mode 1))
 #+end_src
 
@@ -2068,6 +2073,7 @@ and then it's indispensable.
 
 #+begin_src emacs-lisp
 (use-package hl-todo
+  :ensure t
   :defer 2
   :config (global-hl-todo-mode 1)
   (transient-define-prefix +hl-todo-transient ()
@@ -2083,6 +2089,7 @@ Olivetti is a great mode for prose writing and reading. All it does is increase 
 
 #+begin_src emacs-lisp
 (use-package olivetti
+  :ensure t
   :commands (olivetti-mode)
   :hook ((Info-mode . +olivetti-info-setup))
   :config
@@ -2098,6 +2105,7 @@ One more package I learned of from Doom's config.
 
 #+begin_src emacs-lisp
 (use-package ws-butler
+  :ensure t
   :init (ws-butler-global-mode 1))
 #+end_src
 
@@ -2107,6 +2115,7 @@ https://github.com/Wilfred/helpful
 
 #+begin_src emacs-lisp
 (use-package helpful
+  :ensure t
   :commands (+helpful-transient))
 #+end_src
 
@@ -2116,23 +2125,24 @@ https://github.com/Wilfred/helpful
 
 #+begin_src emacs-lisp
 (use-package tldr
+  :ensure t
   :custom-face
   (tldr-title
-   ((t :foreground nil)))
+   ((t :foreground unspecified)))
   (tldr-introduction
-   ((t :foreground nil
-       :italic nil)))
+   ((t :foreground unspecified
+       :italic unspecified)))
   (tldr-description
-   ((t :foreground nil)))
+   ((t :foreground unspecified)))
   (tldr-command-itself
-   ((t :foreground nil
-       :background nil)))
+   ((t :foreground unspecified
+       :background unspecified)))
   (tldr-command-argument
-   ((t :foreground nil
-       :background nil)))
+   ((t :foreground unspecified
+       :background unspecified)))
   (tldr-code-block
-   ((t :foreground nil
-       :background nil))))
+   ((t :foreground unspecified
+       :background unspecified))))
 #+end_src
 
 ** TODO Undo
@@ -2143,16 +2153,18 @@ See also Hints and undo-fu-session [[https://codeberg.org/ideasman42/emacs-undo-
 Can also try [[https://github.com/casouri/vundo][vundo]], although my undo needs aren't that sophisticated.
 
 #+begin_src emacs-lisp
-(use-package undo-fu)
+(use-package undo-fu
+  :ensure t)
 #+end_src
 
-** Evil-numbers
+** Evil-numbers (disabled)
 
 Another small package, this time to manipulate numbers.
 I occasionally find myself needing to add/subtract a sum
 from numbers on a bunch of lines, so this is handy for those situations.
+NOTE: Appears to require evil
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package evil-numbers
   :commands (evil-numbers/inc-at-pt
              evil-numbers/dec-at-pt
