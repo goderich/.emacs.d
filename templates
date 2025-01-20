@@ -22,7 +22,6 @@ org-mode
 ;; org blocks
 (caption "#+caption: ")
 (name "#+name: ")
-(drawer ":" p ":" n r ":end:")
 (begin "#+begin_" (s name) n> r> n "#+end_" name)
 (quote "#+begin_quote" n> r> n "#+end_quote")
 (example "#+begin_example" n> r> n "#+end_example")
@@ -30,28 +29,23 @@ org-mode
 (html "#+begin_export html" n> r> n "#+end_export")
 (latex "#+begin_export latex" n> r> n "#+end_export")
 (comment "#+begin_comment" n> r> n "#+end_comment")
-(src "#+begin_src " q n r n "#+end_src")
-;; (gnuplot "#+begin_src gnuplot :var data=" (p "table") " :file " (p "plot.png") n r n "#+end_src" :post (org-edit-src-code))
+(src "#+begin_src " n r q n "#+end_src")
 (elisp
- "#+begin_src emacs-lisp" n r n "#+end_src"
+ "#+begin_src emacs-lisp" n q n "#+end_src"
  :post (org-edit-src-code))
 (elnt
  "#+begin_src emacs-lisp :tangle no :noweb-ref " p n r n "#+end_src"
  :post (org-edit-src-code))
 (tbl
 "#+caption: " p n
-"#+label: tbl:" p n
-"| " p q)
-(inlsrc "src_" p "{" q "}")
+"#+label: tbl:" p n q)
 
 ;; academic snippets
 (/ "\\text{/" p "/}" q)
 (// "\\textit{/" p "/}" q)
-(video
-"#+begin_html
-<video controls src=\"./media/" p "\"></video>
-#+end_html
-" q)
+(video "#+begin_html" n
+       "<video controls src=\"./media/" p "\"></video>" n
+       "#+end_html" n q)
 
 ;; Local Variables:
 ;; mode: lisp-data
