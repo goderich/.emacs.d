@@ -47,6 +47,9 @@
   - [[#lisps][Lisps]]
   - [[#emacs-lisp][Emacs Lisp]]
   - [[#clojure][Clojure]]
+  - [[#hare][Hare]]
+- [[#markup-languages][Markup languages]]
+  - [[#yaml][YAML]]
 - [[#utils][Utils]]
   - [[#magit][Magit]]
   - [[#tempel-snippets][Tempel snippets]]
@@ -181,6 +184,8 @@ Some of these settings were taken from the [[https://github.com/hrs/sensible-def
   (setq warning-minimum-level :emergency)
   ;; don't beep or flash, display a message instead
   (setq ring-bell-function (lambda () (message "Oops!")))
+  ;; do not make me type out 'yes' in full every time
+  (fset 'yes-or-no-p 'y-or-n-p)
   ;; do not use tabs for indentation
   (setq-default indent-tabs-mode nil)
   ;; scrolling settings
@@ -371,6 +376,9 @@ Having said that, I found myself missing a few of the colours in Doom's version 
   (face-spec-set 'org-cite
                  '((t :foreground unspecified
                       :inherit link)))
+  (face-spec-set 'org-macro
+                 `((t :inherit fixed-pitch
+                      :height ,+fontsize)))
   ;; org checkbox
   (face-spec-set 'org-checkbox
                  '((t :box unspecified)))
@@ -1663,13 +1671,9 @@ The sole purpose of this package is to make it easier to read this config online
 
 * Typst
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (use-package typst-ts-mode
-  :ensure (:type git :host sourcehut :repo "meow_king/typst-ts-mode" :files (:defaults "*.el"))
-  ;; :custom
-  ;; don't add "--open" if you'd like `watch` to be an error detector
-  ;; (typst-ts-mode-watch-options "--open")
-  )
+  :ensure (:type git :host sourcehut :repo "meow_king/typst-ts-mode" :files (:defaults "*.el")))
 #+end_src
 
 * Bibliography and citations
@@ -1846,7 +1850,7 @@ Smartparens is THE package for lisp code editing.
 #+begin_src emacs-lisp :noweb yes
 (use-package smartparens
   :ensure t
-  :hook (org-mode prog-mode)
+  :hook (prog-mode)
   :config
   ;; load default config
   (require 'smartparens-config)
@@ -1924,6 +1928,23 @@ See also the following:
   (setq cider-allow-jack-in-without-project t
         cider-jack-in-default 'babashka
         cider-repl-pop-to-buffer-on-connect nil))
+#+end_src
+
+** Hare
+
+#+begin_src emacs-lisp
+(use-package hare-mode
+  :ensure (:host sourcehut :repo "bbuccianti/hare-mode")
+  :mode "\\.ha\\'")
+#+end_src
+
+* Markup languages
+
+** YAML
+
+#+begin_src emacs-lisp
+(use-package yaml-ts-mode
+  :mode ("\\.yml\\'" "\\.yaml\\'"))
 #+end_src
 
 * Utils
