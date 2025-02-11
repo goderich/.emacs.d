@@ -5,6 +5,7 @@
 (require 'ol)
 (require 'consult)
 (require 'dash)
+(require 'f)
 
 (defun +insert-link (address &optional name)
   "Insert an Org link to ADDRESS.
@@ -19,7 +20,7 @@ in normal mode."
          (prompt (concat "Link name (default \"" default "\"): "))
          (link-name (read-string prompt "" nil default))
          (link-string (org-link-make-string address link-name)))
-    (if (and (eolp) (= (char-after) 32))
+    (if (and (eolp) (not (eobp)) (= (char-after) 32))
         (insert " " link-string)
       (insert link-string))))
 
@@ -60,15 +61,22 @@ Creates the ID if one isn't already present."
   (let ((link (pop org-stored-links)))
     (+insert-link (car link) (cadr link))))
 
-(defun +org-insert-file-path ()
+(defun +org-insert-file-path (&optional absolute?)
   "Insert file path at point as an org-link, with autocompletion."
   ;; see `org-link-complete-file'
   (interactive)
-  (let ((result (find-file-read-args "Copy file path: "
-                                     (confirm-nonexistent-file-or-buffer))))
+  (let* ((result (find-file-read-args "Copy file path: "
+                                     (confirm-nonexistent-file-or-buffer)))
+         (link (if absolute?
+                   (-first-item result)
+                 (f-relative (-first-item result)))))
     (if (-second-item result)
-        (+insert-link (-first-item result))
+        (+insert-link (concat "file:" link))
       (message "Error retrieving file path."))))
+
+(defun +org-insert-absolute-file-path ()
+  (interactive)
+  (+org-insert-file-path t))
 
 (defun +org-link-dwim ()
   "Do-what-I-mean for linking.

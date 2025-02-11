@@ -473,7 +473,10 @@ The default Emacs startup screen isn't particularly useful. It's rendered even l
   :bind
   (:map dashboard-mode-map
         ("u" . 'dashboard-previous-line)
-        ("e" . 'dashboard-next-line))
+        ("e" . 'dashboard-next-line)
+        ("o" . '+open-org-dir)
+        ("c" . '+open-config)
+        ("a" . 'org-agenda-list))
   :config
   (dashboard-setup-startup-hook)
   (setq dashboard-startup-banner (file-name-concat user-emacs-directory "img/emacs-e.svg"))
@@ -1058,6 +1061,7 @@ and I feel the convenience outweighs it.
         ("M-I" . org-shiftmetaright)
         ;; god mode bindings
         ("C-c C-l" . #'+link-transient)
+        ("C-c C-p" . #'org-set-property)
         ("C-c C-S-q" . +org-remove-tags)
    :map org-src-mode-map
         ("C-c C-c" . #'org-edit-src-exit))
@@ -1372,7 +1376,8 @@ As with other commands, I like having it all in one big transient menu.
    ["insert link..."
     ("l" "do-what-i-mean" +org-link-dwim)
     ("c" "from clipboard" +org-insert-link-from-clipboard)
-    ("f" "to file" +org-insert-file-path)]
+    ("f" "to file" +org-insert-file-path)
+    ("F" "to file (absolute)" +org-insert-absolute-file-path)]
    ["link to org heading..."
     ("h" "with heading text" +org-insert-link)
     ("u" "with a unique ID" +org-insert-link-with-id)]
@@ -1907,7 +1912,7 @@ See also the following:
   :ensure t
   :defer t
   :bind (:map clojure-mode-map
-          ("C-x '" . 'cider-jack-in)))
+          ("C-c '" . 'cider-jack-in)))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -1985,7 +1990,8 @@ Once I'm inside a snippet, I want to be able to use Tab to jump to next placehol
              crux-sudo-edit
              crux-move-beginning-of-line
              crux-top-join-line
-             crux-eval-and-replace))
+             crux-eval-and-replace)
+  :bind ("C-k" . #'crux-smart-kill-line))
 #+end_src
 
 ** Avy
