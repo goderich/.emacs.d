@@ -166,21 +166,21 @@ Some of these settings were taken from the [[https://github.com/hrs/sensible-def
 #+begin_src emacs-lisp
 ;; -*- lexical-binding: t -*-
 (use-package emacs
-  :custom
+  :config
   ;; reduce the frequency of garbage collection by making it happen on
   ;; each 50MB of allocated data (the default is on every 0.76MB)
-  (gc-cons-threshold (* 50 1000 1000))
+  (setq gc-cons-threshold (* 50 1000 1000))
   ;; warn when opening files bigger than 50MB
-  (large-file-warning-threshold (* 50 1000 1000))
+  (setq large-file-warning-threshold (* 50 1000 1000))
   ;; do not create backups
-  (make-backup-files nil)
+  (setq make-backup-files nil)
   ;; use regular spacing with sentences.
   ;; this is important because it directly impacts sentence motions.
-  (sentence-end-double-space nil)
+  (setq sentence-end-double-space nil)
   ;; do not pollute this file with custom variables
-  (custom-file "~/.emacs.d/custom.el")
-  :config
+  (setq custom-file "~/.emacs.d/custom.el")
   (load custom-file)
+  ;; disable unnecessary warnings
   (setq warning-minimum-level :emergency)
   ;; don't beep or flash, display a message instead
   (setq ring-bell-function (lambda () (message "Oops!")))
