@@ -489,8 +489,12 @@ The default Emacs startup screen isn't particularly useful. It's rendered even l
   (dashboard-setup-startup-hook)
   (setq dashboard-startup-banner (file-name-concat user-emacs-directory "img/emacs-e.svg"))
   (setq dashboard-center-content t)
-  (setq dashboard-items '((recents . 5))))
+  (setq dashboard-items '((recents . 5)))
+  (setq dashboard-recentf-show-base 'align)
+  (setq dashboard-recentf-item-format "%s %.45s"))
 #+end_src
+
+I prefer to just have recently opened files there for now. Because some of my file paths are too deeply nested, I prefer to show the base name first, followed by 45 chars of the full path. This way I don't get wonky formatting due to overflowing lines.
 
 ** Modeline
 
