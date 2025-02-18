@@ -1120,6 +1120,11 @@ By default, I want org to show me the ancestry of a node when I'm dropping to it
 (map-put! org-fold-show-context-detail 'default 'tree)
 #+end_src
 
+Using the newer org-fold API does not work with consult. It should have been [[https://github.com/oantolin/consult/commit/68c1c07a9bdea0b806b2762c5b17296de7b2eeb8][fixed in 2022]], but the problem persists on my machines. This is a workaround.
+#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
+(setq org-fold-core-style 'overlays)
+#+end_src
+
 Here I set the org file associations, i.e. how org opens file links. I don't like reading PDFs inside Emacs. Dedicated readers are a lot faster and have better commands (although I do use Emacs to comment PDFs). With zathura, and probably other PDF readers too, it's possible to open a file on a particular page. Emacs will do this when the file link ends in, e.g. ".pdf::123", as defined in the regex below.
 #+begin_src emacs-lisp :tangle no :noweb-ref org-settings
 (setq org-file-apps
