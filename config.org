@@ -36,6 +36,7 @@
   - [[#org-bling][Org bling]]
   - [[#pandoc-integration][Pandoc integration]]
   - [[#links][Links]]
+  - [[#yt-dlp][Yt-dlp]]
   - [[#cross-referencing][Cross-referencing]]
   - [[#org-cite-disabled][Org cite (disabled)]]
   - [[#org-functions][Org functions]]
@@ -617,6 +618,7 @@ Specific changes to keybindings are explained further below.
         ("n" . #'+narrow-dwim)
         ("p" . #'pandoc-transient)
         ("s" . #'save-buffer)
+        ("y" . #'+yt-dlp-link)
         (";" . #'comment-line)
         ("." . #'find-file)
         ("," . #'consult-buffer))
@@ -1400,6 +1402,14 @@ As with other commands, I like having it all in one big transient menu.
     ("u" "with a unique ID" +org-insert-link-with-id)]
    [("q" "quit" transient-quit-all)
     ("<escape>" "quit" transient-quit-all)]])
+#+end_src
+
+** Yt-dlp
+
+Not just an org module, but I'm putting it here for now.
+
+#+begin_src emacs-lisp
+(load-file (concat user-emacs-directory "yt-dlp.el"))
 #+end_src
 
 ** Cross-referencing
