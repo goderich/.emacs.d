@@ -611,7 +611,7 @@ Specific changes to keybindings are explained further below.
         ("a" . #'org-agenda-list)
         ("f" . #'+file-transient)
         ("h" . #'+helpful-transient)
-        ("k" . #'kill-this-buffer)
+        ("k" . #'kill-current-buffer)
         ("l" . #'link-hint-open-link)
         ("m" . #'magit)
         ("n" . #'+narrow-dwim)
@@ -846,8 +846,8 @@ Right now, all my transient menus live here. Since many of my packages are defer
    [("b" "open" consult-buffer)
     ("s" "save" save-buffer)
     ("u" "sudo edit" crux-sudo-edit)]
-   [("d" "quit" kill-this-buffer)
-    ("q" "quit" kill-this-buffer)]
+   [("d" "quit" kill-current-buffer)
+    ("q" "quit" kill-current-buffer)]
    [("<escape>" "quit" transient-quit-all)]])
 #+end_src
 
@@ -1682,7 +1682,8 @@ The sole purpose of this package is to make it easier to read this config online
 
 #+begin_src emacs-lisp
 (use-package typst-ts-mode
-  :ensure (:type git :host sourcehut :repo "meow_king/typst-ts-mode" :files (:defaults "*.el")))
+  :ensure (:type git :host sourcehut :repo "meow_king/typst-ts-mode" :files (:defaults "*.el"))
+  :mode "\\.typ\\'")
 #+end_src
 
 * Bibliography and citations
