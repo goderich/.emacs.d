@@ -88,11 +88,13 @@ Crucially, =use-package= also supports lazy loading (i.e. delayed evaluation), w
 
 One more thing I'm doing with my literate config is splitting the source blocks with [[https://orgmode.org/manual/Noweb-Reference-Syntax.html][noweb]]. It goes like this: all the configuration and customization associated with a single package goes into one =use-package= block. That's simple and it makes sense. However, sometimes there is too much configuration, and the blocks get too long. I could add comments directly inside the source code (and I do that in a few places), but that seems to run counter to the core tenets of literate programming. Noweb allows me to separate blocks in the literate file to structure my text around them as I please, but still string them together when [[https://orgmode.org/manual/Extracting-Source-Code.html][tangling]] the resulting Elisp source file.
 
-I am currently using the =boon= package for modal editing. However, although I started with the recommended Colemak keybindings, I modified them quite a bit (especially the movement keys). I try to keep my bindings ergonomic and mnemonic: the most common commands should be easy to type, and the less common ones easy to remember. What's ergonomic for me may not be ergonomic for you; adjust to your own setup.
+I am currently using the =boon= package for modal editing. However, although I started with the recommended Colemak keybindings, I modified them quite a bit (especially the movement keys). I try to keep my bindings ergonomic first and mnemonic second: the most common commands should be easy to type, and the less common ones easy to remember. What's ergonomic for me may not be ergonomic for you; adjust to your own setup.
 
 For reasons of both ergonomics and mnemonics, I tend to eschew commands that require modifiers (Ctrl and Alt, or =C= and =M= in Emacs parlance), and instead opt for key combinations. That's the whole premise of a modal editing system like the one I'm using, of course. But I take this further by using (and sometimes abusing) transient commands to build my own mini-menus for all kinds of tasks from window management to export via pandoc.
 
 I use quite a lot of my own functions in this config. As seems to be a convention with many users, I add a =+= to the beginning of my own functions to serve as a kind of namespace.
+
+Although this began as a one-file literate config, I don't think including whole modules in it is a good idea. I have written a number of almost-packages for my personal use (maybe some of them will be published in future), and I keep them in their own files.
 
 This config is still very much a work in progress, but it has reached a state where I can publish it for others to see.
 
@@ -139,7 +141,7 @@ So in short, I went through the following stages:
 2. Spacemacs
 3. Doom Emacs
 4. evil (custom config)
-5. meow
+5. (very briefly) meow
 6. boon
 
 This is where I am right now. Ten years of vim/evil, most of them spent using Doom. Suddenly, I'm in territory that's at once familiar and not. I've learned a lot about Emacs using Doom, and I've learned a lot more about Emacs after leaving Doom for my own config. I'm really grateful for Spacemacs, Doom, and evil, because without these projects I likely would not have started using Emacs. Now though, I'm ready for something new.
@@ -448,9 +450,9 @@ Next are the fonts themselves. [[https://github.com/be5invis/Iosevka][Iosevka]] 
 - [[https://pcaro.es/hermit/][Hermit]] (a little of an old-school 8-bit quality to it, but modernized)
 - [[https://www.dafont.com/lotion.font][Lotion]] (funky and slightly cartoonish)
 
-With variable width fonts, it's not always just a matter of liking a typeface, but also it being compatible with the things I type. E.g. I like the [[https://edwardtufte.github.io/et-book/][ET Book]] quite a lot, but unfortunately it has minimal support for non-ASCII characters, which is less than ideal, because I type those a lot. A few other variable width fonts I like are (also see [[https://wiki.archlinux.org/title/Fonts][here]]):
+With variable width fonts, it's not always just a matter of liking a typeface, but also it being compatible with the things I type. E.g. I like [[https://edwardtufte.github.io/et-book/][ET Book]] quite a lot, but unfortunately it has minimal support for non-ASCII characters, which is less than ideal, because I type those a bunch. A few other variable width fonts I like are (also see [[https://wiki.archlinux.org/title/Fonts][here]]):
 - Crimson Pro
-- Gentium family (has all of the IPA, but the line spacing is too big)
+- Gentium family (has all of the IPA, but the line spacing is too big in Emacs)
 - Libertinus
 
 #+begin_src emacs-lisp
@@ -546,7 +548,7 @@ I prefer to just have recently opened files there for now. Because some of my fi
 
 * Boon
 
-[[https://github.com/jyp/boon][Boon]] is a fantastic modal editing package for Emacs. It's tiny, but packs a ton of functiotality.
+[[https://github.com/jyp/boon][Boon]] is a fantastic modal editing package for Emacs. It's tiny, but packs a ton of functionality.
 
 I like boon's idea of ergonomics before mnemonics---basically, for the most common commands, it doesn't matter what's on the keycap, what matters is where it is on the keyboard. I feel this deeply, having used Dvorak for a number of years before switching to Colemak.
 
@@ -668,7 +670,7 @@ Instead of trying to keep my fingers on the home row as much as possible, I use 
 - I prefer having a WASD-like pyramid for up, left, down, and right, respectively, but it's on my right hand instead (UNEI on Colemak).
 - I put the =boon-smarter-backward= and =boon-smarter-forward= commands next to the "up" key on the top row (=l= and =y=). In prose, these function like word movements. In code, they move by sexps. So far I'm happy with how they work. I use these more than line movements, so I like them to be more reachable.
 - Because the above keys are undefined in uppercase, I bind =L= and =Y= to sentence movements, which in prose are very useful.
-- The line movements go to the left of "left" and to the right of "right". On Colemak DH Matrix, that's =m= and =o=. I also bind visual line movements on =M= and =O=, for prose.
+- The line movements go to the left of "left" and to the right of "right". On Colemak DH Matrix, that's =m= and =o=. I also bind visual line movements on =M= and =O=, mostly for prose.
 - If I'm on a heavily indented line and want to move to the point to the first char, boon doesn't seem to have a convenient function out of the box for this eventuality. Usually that's where I want to go though. So my =m= key is actually bound to =crux-move-beginning-of-line=. If I need to go to the first column, I just press it again. In case I ever need to move directly to the first column (say, when recording a macro), I bound it to =^=: this time a mnemonic of sorts, for the regex symbol.
 - Because Colemak DH Matrix mod swaps the "M" and "H" keys, I can still keep avy searches on "H", which is right below my "N" (= left) key. These are set in =boon-command-map=.
 - I like the idea of using =(= and =)= for single character searches. With my [[https://docs.qmk.fm/features/space_cadet][Space Cadet Shift]], they are very conveniently positioned. My only gripe with boon's functions is that if you search for X (for any given value of X) and your point is already on X, boon will just say, "Hey, look, there's one right where I'm standing!" and not move the point. Thanks boon, but I was looking for the *next* occurrence. Also, I want these searches to always be case sensitive. I modified these functions accordingly.
@@ -676,7 +678,7 @@ Instead of trying to keep my fingers on the home row as much as possible, I use 
 Next is my =boon-command-map=:
 - Because I'm using the Colemak DH mod instead of regular Colemak, my "D" key is where "V" is in [[https://github.com/jyp/boon/blob/master/colemak.pdf][the original layout]], and my "V" is in a very awkward position. Not ideal for a very common operation. I swap the two keys.
 - Avy commands on "H" work great, I'm just not yet 100% sure which ones. Still experimenting.
-- Love the =goto-map= on =g=, but I map it to [[id:81219cda-4249-480d-959f-2d44edf1a589][something a little more flexible]] ([[#goto-transient][link]]). The trouble with using a map is that it's a lot more work to adjust it to specific modes. It can still be done, but using a transient makes it a lot easier to adjust to various modes.
+- Love the =goto-map= on =g=, but I map it to [[id:81219cda-4249-480d-959f-2d44edf1a589][something a little more flexible]] ([[#goto-transient][browser link]]). The trouble with using a map is that it's a lot more work to adjust it to specific modes. It can still be done, but using a transient makes it a lot easier to adjust to various modes.
 - The original layout uses =j= for =xref-find-definitions= and =J= for =xref-find-references=. Which okay, but I include them in my =+goto-transient=, so I can use the "J" key for something else. I put line joining functions on it, because that's what it does in vim/evil, and I actually use those quite a lot! Lowercase =j= joins the following line to the end of the current one like in vim, and uppercase =J= joins the current line to the end of the preceding one.
 - The =occur= binding on =p= doesn't make much sense to me, and I have other functions for searching, such as =consult-line=. On the other hand, copying on a shifted key is not ideal. Put copying on =s= instead (mnemonic: save), and moved pasting to =p= (mnemonic: duh!).
 - I use [[id:53828884-e258-4f2b-b8e0-46c5cf9926ea][undo-fu]] for linear undo, and bind both undo and redo here.
@@ -696,7 +698,7 @@ Special map is essentially when boon isn't active. Modes like magit, org agenda,
 * Minibuffer keybindings
 
 Keybindings in the minibuffer have to be set differently.
-I am not using evil in the minibuffer, and the bindings
+Boon is not active in the minibuffer, and the bindings
 have to be set up using a hook each time.
 
 I went through this trouble to replicate Doom's behaviour
@@ -706,8 +708,8 @@ but if you keep deleting, the parent directories will be deleted
 with a single press of backspace.
 This is pretty convenient when jumping upwards many levels.
 
-Right now my implementation is still relatively naive,
-and I'm still in the process of refining it.
+Right now my implementation is relatively naive,
+but it does the job well enough.
 
 #+begin_src emacs-lisp
 (defun +delete-char-or-directory ()
@@ -757,6 +759,10 @@ Right now, all my transient menus live here. Since many of my packages are defer
 :ID:       81219cda-4249-480d-959f-2d44edf1a589
 :END:
 
+Transient for various movement commands, from jumping to a line visible on the screen, all the way to searches within the buffer and even outside. I bind it to the =g= key in boon.
+
+This transient's behaviour changes depending on the mode it's in, with special functions for org and programming modes.
+
 #+begin_src emacs-lisp
 (transient-define-prefix +goto-transient ()
   ["Go to..."
@@ -772,6 +778,8 @@ Right now, all my transient menus live here. Since many of my packages are defer
 #+end_src
 
 ** Narrowing transient
+
+Narrowing here is in the Emacs sense of only keeping part of the buffer visible. If I have a selection, the =+narrow-dwim= function narrows to it straight away, otherwise the transient is called. Widening is also available in the transient.
 
 #+begin_src emacs-lisp
 (defun +narrow-dwim ()
@@ -852,7 +860,6 @@ Right now, all my transient menus live here. Since many of my packages are defer
     ("q" "quit" kill-current-buffer)]
    [("<escape>" "quit" transient-quit-all)]])
 #+end_src
-
 
 ** Helpful transient
 
@@ -1042,7 +1049,7 @@ I'm using SPC as separator: pressing space does not exit completion, but instead
 
 * Org-mode
 
-- Sacha Chua also has an [[https://sachachua.com/blog/2024/01/using-consult-and-org-ql-to-search-my-org-mode-agenda-files-and-sort-the-results-to-prioritize-heading-matches/][interesting use]] of org-ql.
+(NB. Sacha Chua also has an [[https://sachachua.com/blog/2024/01/using-consult-and-org-ql-to-search-my-org-mode-agenda-files-and-sort-the-results-to-prioritize-heading-matches/][interesting use]] of org-ql.)
 
 Note that since I am using a literate config
 and loading it with org-babel from my =init.el=,
