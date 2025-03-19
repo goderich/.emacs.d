@@ -38,6 +38,7 @@
   - [[#links][Links]]
   - [[#yt-dlp][Yt-dlp]]
   - [[#cross-referencing][Cross-referencing]]
+  - [[#org-books][Org-books]]
   - [[#org-cite-disabled][Org cite (disabled)]]
   - [[#org-functions][Org functions]]
   - [[#toc-org][Toc-org]]
@@ -1438,6 +1439,43 @@ Again, a transient. Since I'm using transients instead of regular evil keybindin
     ("f" "to figure" +ref-insert-ref-figure)]
    [("q" "quit" transient-quit-all)
     ("<escape>" "quit" transient-quit-all)]])
+#+end_src
+
+** Org-books
+
+#+begin_src emacs-lisp
+(use-package org-books
+  :ensure (:host github :repo "goderich/org-books" :files (:defaults "*.el"))
+  :init
+  (setq org-books-file (f-join org-directory "books.org"))
+
+  ;; Derive a separate mode for org-books-specific keybinds
+  (define-derived-mode org-books-mode org-mode "Org books mode"
+    "Major mode for managing prose using org.")
+
+  ;; Autostart this mode when opening the org-books file
+  (add-to-list 'auto-mode-alist `(,org-books-file . org-books-mode))
+
+  (defun +org-books-setup ()
+    (make-local-variable 'org-cycle-hook)
+    (remove-hook 'org-cycle-hook #'org-cycle-hide-drawers 'local))
+
+  (add-hook 'org-books-mode-hook #'+org-books-setup)
+  ;; (add-hook 'org-books-after-insert-hook #'gd/org-books-tag-short)
+
+  :bind (:map org-books-mode-map
+              ("C-c C-j" . #'org-books-jump-to-reading)
+              ("C-c C-f" . #'org-books-rate-book)
+              ("C-c C-r" . #'org-books-start-reading)
+              ("C-c C-d" . #'org-books-dnf)
+              ("C-c C-u" . #'org-books-add-url)
+              ("C-c C-l" . #'org-books-cliplink))
+
+  :config
+  ;; Add new books at the bottom of the chosen subtree
+  (setq org-books-add-to-top nil)
+  ;; Allow adding books under level 3 headings
+  (setq org-books-file-depth 3))
 #+end_src
 
 ** Org cite (disabled)
