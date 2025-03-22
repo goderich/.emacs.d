@@ -78,6 +78,17 @@ Creates the ID if one isn't already present."
   (interactive)
   (+org-insert-file-path t))
 
+(defun +org-insert-image-path (&optional absolute?)
+  (interactive)
+  (let* ((result (find-file-read-args "Copy file path: "
+                                     (confirm-nonexistent-file-or-buffer)))
+         (link (if absolute?
+                   (-first-item result)
+                 (f-relative (-first-item result)))))
+    (if (-second-item result)
+        (insert (concat "[[./" link "]]"))
+      (message "Error retrieving file path."))))
+
 (defun +org-link-dwim ()
   "Do-what-I-mean for linking.
 If on a heading, link it. If on a link, edit it.

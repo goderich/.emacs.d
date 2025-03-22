@@ -1404,7 +1404,8 @@ As with other commands, I like having it all in one big transient menu.
     ("l" "do-what-i-mean" +org-link-dwim)
     ("c" "from clipboard" +org-insert-link-from-clipboard)
     ("f" "to file" +org-insert-file-path)
-    ("F" "to file (absolute)" +org-insert-absolute-file-path)]
+    ("F" "to file (absolute)" +org-insert-absolute-file-path)
+    ("i" "to image" +org-insert-image-path)]
    ["link to org heading..."
     ("h" "with heading text" +org-insert-link)
     ("u" "with a unique ID" +org-insert-link-with-id)]
