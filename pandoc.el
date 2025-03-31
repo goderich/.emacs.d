@@ -45,6 +45,9 @@ The format and the defaults file need to be supplied by the caller."
          (csl (pandoc--find-csl dir)))
     `("pandoc" ,input ,defaults
       ,@(when (f-exists? metadata) `("--metadata-file" ,metadata))
+      ;; Temporary bugfix for https://github.com/jgm/pandoc/issues/6431
+      ,@(when (string= extension "html")
+          '("-V" "revealjs-url=https://unpkg.com/reveal.js@^4"))
       ,@(when (and (string= extension "html") style?)
           '("--css" "./style.css"))
       ,@(when (string= extension "html")
