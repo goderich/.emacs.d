@@ -1444,6 +1444,11 @@ Again, a transient. Since I'm using transients instead of regular evil keybindin
 
 ** Org-books
 
+The =ht= package is a dependency of =org-books=.
+#+begin_src emacs-lisp
+(use-package ht)
+#+end_src
+
 #+begin_src emacs-lisp
 (use-package org-books
   :ensure (:host github :repo "goderich/org-books" :files (:defaults "*.el"))
