@@ -1446,7 +1446,8 @@ Again, a transient. Since I'm using transients instead of regular evil keybindin
 
 The =ht= package is a dependency of =org-books=.
 #+begin_src emacs-lisp
-(use-package ht)
+(use-package ht
+  :ensure t)
 #+end_src
 
 #+begin_src emacs-lisp
