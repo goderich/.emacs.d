@@ -77,14 +77,21 @@ The format and the defaults file need to be supplied by the caller."
 (defvar pandoc-org->pdf-hook nil
   "Hook to run before converting from org-mode to PDF.")
 
-(defun pandoc-org->pdf-latex ()
-  "Convert the current file to pdf using pandoc.
-Works only on org files using my pdf template."
+(defun pandoc--convert-org->pdf-latex ()
+  "Convert org file to PDF via LaTeX with chosen settings."
   (interactive)
   (run-hooks 'pandoc-org->pdf-hook)
-  (let ((num? (transient-arg-value "number-sections" (transient-args 'pandoc-transient)))
-        (empty? (transient-arg-value "empty" (transient-args 'pandoc-transient))))
+  (let ((num? (transient-arg-value "number-sections" (transient-args 'pandoc-org->pdf-latex)))
+        (empty? (transient-arg-value "empty" (transient-args 'pandoc-org->pdf-latex))))
     (pandoc-org--convert :format "latex" :numbered num? :empty empty?)))
+
+(transient-define-prefix pandoc-org->pdf-latex ()
+  ["Convert to PDF via LaTeX..."
+   [("c" "convert" pandoc--convert-org->pdf-latex)
+    ("q" "quit" transient-quit-all)]]
+  ["Options"
+   [(pandoc--number-sections?)
+    (pandoc--empty?)]])
 
 (defun pandoc-org->pdf-typst ()
   "Convert the current file to pdf using pandoc.
@@ -152,11 +159,12 @@ Works only on org files using my docx template."
     ("r" "to revealjs" pandoc-org->revealjs)
     ("d" "to docx" pandoc-org->docx)]
    [("q" "quit" transient-quit-all)]]
-  ["Options"
-   [(pandoc--self-contained?)
-    (pandoc--number-sections?)
-    (pandoc--handout?)
-    (pandoc--empty?)]])
+  ;; ["Options"
+  ;;  [(pandoc--self-contained?)
+  ;;   (pandoc--number-sections?)
+  ;;   (pandoc--handout?)
+  ;;   (pandoc--empty?)]]
+  )
 
 (defun pandoc-process-sentinel (process event)
   "Sentinel for use by this module.
