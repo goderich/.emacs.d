@@ -80,20 +80,20 @@ The format and the defaults file need to be supplied by the caller."
           `("--csl" ,csl))
       "-o" ,output)))
 
-(defvar pandoc-org->pdf-hook nil
+(defvar pandoc--org->pdf-hook nil
   "Hook to run before converting from org-mode to PDF.")
 
-(defun pandoc--convert-org->pdf-latex ()
+(defun pandoc--org->pdf-latex ()
   "Convert org file to PDF via LaTeX with chosen settings."
   (interactive)
-  (run-hooks 'pandoc-org->pdf-hook)
+  (run-hooks 'pandoc--org->pdf-hook)
   (let ((num? (transient-arg-value "number-sections" (transient-args 'pandoc-org->pdf-latex)))
         (empty? (transient-arg-value "empty" (transient-args 'pandoc-org->pdf-latex))))
     (pandoc-org--convert :format "latex" :numbered num? :empty empty?)))
 
-(transient-define-prefix pandoc-org->pdf-latex ()
+(transient-define-prefix pandoc--pdf-latex-transient ()
   ["Convert to PDF via LaTeX..."
-   [("c" "convert" pandoc--convert-org->pdf-latex)
+   [("c" "convert" pandoc--org->pdf-latex)
     ("q" "quit" transient-quit-all)]]
   ["Options"
    [(pandoc--number-sections?)
@@ -160,7 +160,7 @@ Works only on org files using my docx template."
 ;; available with which formats.
 (transient-define-prefix pandoc-transient ()
   ["Convert this file with pandoc..."
-   [("p" "to pdf (LaTeX)" pandoc-org->pdf-latex)
+   [("p" "to pdf (LaTeX)" pandoc--pdf-latex-transient)
     ("t" "to pdf (typst)" pandoc-org->pdf-typst)
     ("r" "to revealjs" pandoc-org->revealjs)
     ("d" "to docx" pandoc-org->docx)]
