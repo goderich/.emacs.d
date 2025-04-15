@@ -80,13 +80,13 @@ The format and the defaults file need to be supplied by the caller."
           `("--csl" ,csl))
       "-o" ,output)))
 
-(defvar pandoc--org->pdf-hook nil
+(defvar pandoc--org->pdf-pre-hook nil
   "Hook to run before converting from org-mode to PDF.")
 
 (defun pandoc--org->pdf-latex ()
   "Convert org file to PDF via LaTeX with chosen settings."
   (interactive)
-  (run-hooks 'pandoc--org->pdf-hook)
+  (run-hooks 'pandoc--org->pdf-pre-hook)
   (let ((num? (transient-arg-value "number-sections" (transient-args 'pandoc-org->pdf-latex)))
         (empty? (transient-arg-value "empty" (transient-args 'pandoc-org->pdf-latex))))
     (pandoc-org--convert :format "latex" :numbered num? :empty empty?)))
@@ -99,7 +99,7 @@ The format and the defaults file need to be supplied by the caller."
    [(pandoc--number-sections?)
     (pandoc--empty?)]])
 
-(defun pandoc-org->pdf-typst ()
+(defun pandoc--org->pdf-typst ()
   "Convert the current file to pdf using pandoc.
 Works only on org files using my pdf template."
   (interactive)
@@ -108,7 +108,15 @@ Works only on org files using my pdf template."
         (empty? (transient-arg-value "empty" (transient-args 'pandoc-transient))))
     (pandoc-org--convert :format "typst" :numbered num? :empty empty?)))
 
-(defun pandoc-org->revealjs ()
+(transient-define-prefix pandoc--pdf-typst-transient ()
+  ["Convert to PDF via LaTeX..."
+   [("c" "convert" pandoc--org->pdf-typst)
+    ("q" "quit" transient-quit-all)]]
+  ["Options"
+   [(pandoc--number-sections?)
+    (pandoc--empty?)]])
+
+(defun pandoc--org->revealjs ()
   "Convert the current file to revealjs using pandoc.
 Works only on org files using my revealjs template."
   (interactive)
@@ -116,17 +124,32 @@ Works only on org files using my revealjs template."
         (self-con? (transient-arg-value "self-contained" (transient-args 'pandoc-transient))))
     (pandoc-org--convert :format "revealjs" :handout handout? :self-contained self-con?)))
 
+(transient-define-prefix pandoc--revealjs-transient ()
+  ["Convert to PDF via LaTeX..."
+   [("c" "convert" pandoc--org->revealjs)]
+   [("q" "quit" transient-quit-all)]]
+  ["Options"
+   [(pandoc--handout?)
+    (pandoc--self-contained?)]])
+
 (defun pandoc-org->docx ()
   "Convert the current file to pdf using pandoc.
 Works only on org files using my docx template."
   (interactive)
   (pandoc-org--convert :format "docx"))
 
+(transient-define-prefix pandoc--docx-transient ()
+  ["Convert to PDF via LaTeX..."
+   [("c" "convert" pandoc--org->pdf-latex)
+    ("q" "quit" transient-quit-all)]]
+  ["Options"
+   [(pandoc--number-sections?)]])
+
 (transient-define-infix pandoc--handout? ()
   :argument "handout"
   :shortarg "h"
   :class 'transient-switch
-  :description "Toggle handout mode (reveal.js only)."
+  :description "Toggle handout mode."
   :init-value (lambda (obj)
                 (oset obj value nil)))
 
@@ -134,7 +157,7 @@ Works only on org files using my docx template."
   :argument "number-sections"
   :shortarg "n"
   :class 'transient-switch
-  :description "Toggle section numbering (pdf/doc)."
+  :description "Toggle section numbering."
   :init-value (lambda (obj)
                 (oset obj value "number-sections")))
 
@@ -142,7 +165,7 @@ Works only on org files using my docx template."
   :argument "self-contained"
   :shortarg "s"
   :class 'transient-switch
-  :description "Toggle self-contained file (reveal.js only)."
+  :description "Toggle self-contained file."
   :init-value (lambda (obj)
                 (oset obj value nil)))
 
@@ -150,27 +173,17 @@ Works only on org files using my docx template."
   :argument "empty"
   :shortarg "e"
   :class 'transient-switch
-  :description "Toggle empty style (no page numbers, pdf only)."
+  :description "Toggle empty style."
   :init-value (lambda (obj)
                 (oset obj value nil)))
 
-;; TODO: rearrange command order,
-;; so that format is chosen first, then options.
-;; This way I can control which options are
-;; available with which formats.
 (transient-define-prefix pandoc-transient ()
   ["Convert this file with pandoc..."
    [("p" "to pdf (LaTeX)" pandoc--pdf-latex-transient)
-    ("t" "to pdf (typst)" pandoc-org->pdf-typst)
-    ("r" "to revealjs" pandoc-org->revealjs)
-    ("d" "to docx" pandoc-org->docx)]
-   [("q" "quit" transient-quit-all)]]
-  ;; ["Options"
-  ;;  [(pandoc--self-contained?)
-  ;;   (pandoc--number-sections?)
-  ;;   (pandoc--handout?)
-  ;;   (pandoc--empty?)]]
-  )
+    ("t" "to pdf (typst)" pandoc--pdf-typst-transient)
+    ("r" "to revealjs" pandoc--revealjs-transient)
+    ("d" "to docx" pandoc--docx-transient)]
+   [("q" "quit" transient-quit-all)]])
 
 (defun pandoc-process-sentinel (process event)
   "Sentinel for use by this module.
@@ -179,7 +192,7 @@ successful or otherwise."
   (when (eq (process-status process) 'exit)
     (if (string-match "finished" event)
         (progn
-          (shell-command "notify-send 'Pandoc' 'Finished successfully.' --icon=dialog-information --expire-time=10000")
+          (shell-command "notify-send 'Pandoc' 'Finished successfully.' --icon=dialog-information --expire-time=5000")
           (message "Process pandoc finished successfully!"))
-      (shell-command "notify-send 'Pandoc' 'Error, could not compile.' --icon=dialog-information --expire-time=10000")
+      (shell-command "notify-send 'Pandoc' 'Error, could not compile.' --icon=dialog-information --expire-time=5000")
       (message "Error: pandoc could not compile!"))))
