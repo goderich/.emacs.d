@@ -36,11 +36,17 @@
   "Convert the current file using pandoc.
 The format and the defaults file need to be supplied by the caller."
   (save-buffer)
-  (let* ((args (pandoc-org--get-args format self-contained numbered handout empty)))
+  (let* ((args (pandoc-org--get-args format self-contained numbered handout empty))
+         (process (make-process :name "pandoc"
+                                :buffer "*pandoc*"
+                                :command args
+                                :sentinel #'pandoc-process-sentinel)))
     (message "Calling: %s" args)
-    (set-process-sentinel
-     (apply #'start-process "pandoc" "*pandoc*" args)
-     #'pandoc-process-sentinel)))
+    ;; This blocks Emacs until the process is done,
+    ;; but allows me to run post-process hooks.
+    (while (accept-process-output process))
+    ;; post-hook goes here
+    ))
 
 (defun pandoc-org--get-args (format self-contained numbered handout empty)
   "Helper function to construct the correct pandoc call."
