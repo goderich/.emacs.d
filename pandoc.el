@@ -120,8 +120,8 @@ Works only on org files using my pdf template."
   "Convert the current file to revealjs using pandoc.
 Works only on org files using my revealjs template."
   (interactive)
-  (let ((handout? (transient-arg-value "handout" (transient-args 'pandoc-transient)))
-        (self-con? (transient-arg-value "self-contained" (transient-args 'pandoc-transient))))
+  (let ((handout? (transient-arg-value "handout" (transient-args 'pandoc--revealjs-transient)))
+        (self-con? (transient-arg-value "self-contained" (transient-args 'pandoc--revealjs-transient))))
     (pandoc-org--convert :format "revealjs" :handout handout? :self-contained self-con?)))
 
 (transient-define-prefix pandoc--revealjs-transient ()
