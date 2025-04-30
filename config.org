@@ -1745,7 +1745,9 @@ The sole purpose of this package is to make it easier to read this config online
 #+begin_src emacs-lisp
 (use-package typst-ts-mode
   :ensure (:type git :host sourcehut :repo "meow_king/typst-ts-mode" :files (:defaults "*.el"))
-  :mode "\\.typ\\'")
+  :mode "\\.typ\\'"
+  :bind (:map typst-ts-mode-map
+              ("C-c C-c" . #'typst-ts-compile)))
 #+end_src
 
 * Bibliography and citations
