@@ -39,6 +39,9 @@ org-mode
 (tbl
 "#+caption: " p n
 "#+label: tbl:" p n q)
+(fig
+"#+caption: " p n
+"#+label: fig:" p n q)
 
 ;; academic snippets
 (/ "\\text{/" p "/}" q)
