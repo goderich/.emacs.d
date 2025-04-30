@@ -65,7 +65,7 @@ created."
        (shell-command-to-string)
        (s-trim-right)
        (s-split "\n")
-       (-map #'+ref--extract-latex-label)))
+       (--map-when (not (s-blank? it)) #'+ref--extract-latex-label)))
 
 (defun +ref--get-labels-org (type)
   "Get a list of all org labels in this file beginning with the string TYPE."
