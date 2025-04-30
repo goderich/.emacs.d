@@ -87,8 +87,8 @@ The format and the defaults file need to be supplied by the caller."
   "Convert org file to PDF via LaTeX with chosen settings."
   (interactive)
   (run-hooks 'pandoc--org->pdf-pre-hook)
-  (let ((num? (transient-arg-value "number-sections" (transient-args 'pandoc-org->pdf-latex)))
-        (empty? (transient-arg-value "empty" (transient-args 'pandoc-org->pdf-latex))))
+  (let ((num? (transient-arg-value "number-sections" (transient-args 'pandoc--pdf-latex-transient)))
+        (empty? (transient-arg-value "empty" (transient-args 'pandoc--pdf-latex-transient))))
     (pandoc-org--convert :format "latex" :numbered num? :empty empty?)))
 
 (transient-define-prefix pandoc--pdf-latex-transient ()
