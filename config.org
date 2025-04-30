@@ -571,6 +571,7 @@ Specific changes to keybindings are explained further below.
   (:map boon-moves-map
         ("e" . #'next-line)
         ("E" . #'forward-paragraph)
+        ("h" . #'avy-goto-char-2)
         ("l" . #'boon-smarter-backward)
         ("L" . #'backward-sentence)
         ("m" . #'crux-move-beginning-of-line)
@@ -590,7 +591,6 @@ Specific changes to keybindings are explained further below.
         ("C-d" . #'boon-open-line-and-insert)
         ;; ("f") forward search transient
         ("g" . #'+goto-transient)
-        ("h" . #'avy-goto-word-1)
         ("H" . #'avy-goto-char-timer)
         ("j" . #'crux-top-join-line)
         ("J" . #'join-line)
