@@ -3,6 +3,10 @@
 ;; Elisp functions to call Pandoc from Emacs
 (require 'f)
 
+(defvar pandoc--process-output-file nil
+  "Name of file being written to.")
+(make-variable-buffer-local 'pandoc--process-output-file)
+
 (defun pandoc--extension (format)
   (pcase format
     ("latex" "pdf")
@@ -41,7 +45,7 @@ The format and the defaults file need to be supplied by the caller."
     (make-process :name "pandoc"
                   :buffer "*pandoc*"
                   :command args
-                  :sentinel #'pandoc-process-sentinel)))
+                  :sentinel (pandoc-process-sentinel handout))))
 
 (defun pandoc-org--get-args (format self-contained numbered handout empty)
   "Helper function to construct the correct pandoc call."
@@ -53,6 +57,7 @@ The format and the defaults file need to be supplied by the caller."
          (metadata (f-join dir "metadata.yaml"))
          (style? (f-exists? (f-join dir "style.css")))
          (csl (pandoc--find-csl dir)))
+    (setq pandoc--process-output-file output)
     `("pandoc" ,input ,defaults
       ,@(when (f-exists? metadata) `("--metadata-file" ,metadata))
       ;; Temporary bugfix for https://github.com/jgm/pandoc/issues/6431
@@ -184,28 +189,21 @@ Works only on org files using my docx template."
     ("d" "to docx" pandoc--docx-transient)]
    [("q" "quit" transient-quit-all)]])
 
-(defun pandoc-process-sentinel (process event)
+(defun pandoc-process-sentinel (handout?)
   "Sentinel for use by this module.
+
 Sends a notification in Emacs and the system upon completion,
-successful or otherwise."
-  (when (eq (process-status process) 'exit)
-    (if (string-match "finished" event)
-        (progn
-          (shell-command "notify-send 'Pandoc' 'Finished successfully.' --icon=dialog-information --expire-time=5000")
-          (message "Process pandoc finished successfully!")
-          ;; TODO: add condition flag, think about how to pass vars.
-          ;; 1. The flag itself, i.e. `handout?'
-          ;; 2. The filename, because I could change buffers while pandoc is running.
-          ;; Probably both will have to be global, which is unfortunate.
-          (run-hooks 'pandoc--org->revealjs-handout-post-hook))
-      (shell-command "notify-send 'Pandoc' 'Error, could not compile.' --icon=dialog-information --expire-time=5000")
-      (message "Error: pandoc could not compile!"))))
+successful or otherwise.
 
-(defvar +revealjs-handout-delete-html? t
-  "Delete the temporary 'xxx-handout.html' file after converting to PDF?")
-
-(defun +revealjs-handout ()
-  (interactive)
-  (let ((filename (pandoc--output-name (f-this-file) "html" t))
-        (program "~/bin/scripts/browser-print/src/print.clj"))
-    (start-process "handout-compile" "*handout*" program filename)))
+The current iteration is a closure over the HANDOUT? flag,
+so that it can be passed as an additional argument."
+  (lambda (process event)
+    (when (eq (process-status process) 'exit)
+      (if (string-match "finished" event)
+          (progn
+            (shell-command "notify-send 'Pandoc' 'Finished successfully.' --icon=dialog-information --expire-time=5000")
+            (message "Process pandoc finished successfully!")
+            (when handout?
+              (run-hooks 'pandoc--org->revealjs-handout-post-hook)))
+        (shell-command "notify-send 'Pandoc' 'Error, could not compile.' --icon=dialog-information --expire-time=5000")
+        (message "Error: pandoc could not compile!")))))
