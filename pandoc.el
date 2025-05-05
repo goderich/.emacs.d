@@ -103,9 +103,9 @@ The format and the defaults file need to be supplied by the caller."
   "Convert the current file to pdf using pandoc.
 Works only on org files using my pdf template."
   (interactive)
-  (run-hooks 'pandoc-org->pdf-hook)
-  (let ((num? (transient-arg-value "number-sections" (transient-args 'pandoc-transient)))
-        (empty? (transient-arg-value "empty" (transient-args 'pandoc-transient))))
+  (run-hooks 'pandoc-org->pdf-pre-hook)
+  (let ((num? (transient-arg-value "number-sections" (transient-args 'pandoc--pdf-typst-transient)))
+        (empty? (transient-arg-value "empty" (transient-args 'pandoc--pdf-typst-transient))))
     (pandoc-org--convert :format "typst" :numbered num? :empty empty?)))
 
 (transient-define-prefix pandoc--pdf-typst-transient ()
@@ -136,7 +136,8 @@ Works only on org files using my revealjs template."
   "Convert the current file to pdf using pandoc.
 Works only on org files using my docx template."
   (interactive)
-  (pandoc-org--convert :format "docx"))
+  (let ((num? (transient-arg-value "number-sections" (transient-args 'pandoc--docx-transient))))
+    (pandoc-org--convert :format "docx" :numbered num?)))
 
 (transient-define-prefix pandoc--docx-transient ()
   ["Convert to PDF via LaTeX..."
