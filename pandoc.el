@@ -36,18 +36,12 @@
   "Convert the current file using pandoc.
 The format and the defaults file need to be supplied by the caller."
   (save-buffer)
-  (let* ((args (pandoc-org--get-args format self-contained numbered handout empty))
-         (process (make-process :name "pandoc"
-                                :buffer "*pandoc*"
-                                :command args
-                                :sentinel #'pandoc-process-sentinel)))
+  (let* ((args (pandoc-org--get-args format self-contained numbered handout empty)))
     (message "Calling: %s" args)
-    ;; This blocks Emacs until the process is done,
-    ;; but allows me to run post-process hooks.
-    (while (accept-process-output process))
-    ;; post-hook
-    (when handout
-      (run-hooks 'pandoc--org->revealjs-handout-post-hook))))
+    (make-process :name "pandoc"
+                  :buffer "*pandoc*"
+                  :command args
+                  :sentinel #'pandoc-process-sentinel)))
 
 (defun pandoc-org--get-args (format self-contained numbered handout empty)
   "Helper function to construct the correct pandoc call."
@@ -198,6 +192,20 @@ successful or otherwise."
     (if (string-match "finished" event)
         (progn
           (shell-command "notify-send 'Pandoc' 'Finished successfully.' --icon=dialog-information --expire-time=5000")
-          (message "Process pandoc finished successfully!"))
+          (message "Process pandoc finished successfully!")
+          ;; TODO: add condition flag, think about how to pass vars.
+          ;; 1. The flag itself, i.e. `handout?'
+          ;; 2. The filename, because I could change buffers while pandoc is running.
+          ;; Probably both will have to be global, which is unfortunate.
+          (run-hooks 'pandoc--org->revealjs-handout-post-hook))
       (shell-command "notify-send 'Pandoc' 'Error, could not compile.' --icon=dialog-information --expire-time=5000")
       (message "Error: pandoc could not compile!"))))
+
+(defvar +revealjs-handout-delete-html? t
+  "Delete the temporary 'xxx-handout.html' file after converting to PDF?")
+
+(defun +revealjs-handout ()
+  (interactive)
+  (let ((filename (pandoc--output-name (f-this-file) "html" t))
+        (program "~/bin/scripts/browser-print/src/print.clj"))
+    (start-process "handout-compile" "*handout*" program filename)))
