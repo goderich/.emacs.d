@@ -45,8 +45,9 @@ The format and the defaults file need to be supplied by the caller."
     ;; This blocks Emacs until the process is done,
     ;; but allows me to run post-process hooks.
     (while (accept-process-output process))
-    ;; post-hook goes here
-    ))
+    ;; post-hook
+    (when handout
+      (run-hooks 'pandoc--org->revealjs-handout-post-hook))))
 
 (defun pandoc-org--get-args (format self-contained numbered handout empty)
   "Helper function to construct the correct pandoc call."
@@ -82,6 +83,9 @@ The format and the defaults file need to be supplied by the caller."
 
 (defvar pandoc--org->pdf-pre-hook nil
   "Hook to run before converting from org-mode to PDF.")
+
+(defvar pandoc--org->revealjs-handout-post-hook nil
+  "Hook to run after converting from org-mode to revealjs with the handout flag enabled.")
 
 (defun pandoc--org->pdf-latex ()
   "Convert org file to PDF via LaTeX with chosen settings."
