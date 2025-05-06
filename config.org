@@ -1387,10 +1387,10 @@ The only keybinding required is for the transient entry point, which I set toget
 I personalize the module behaviour here with a hook that runs a Clojure script if a =handout= flag is set.
 
 #+begin_src emacs-lisp :tangle no :noweb-ref org-modules
-(defun +revealjs-handout ()
+(defun +revealjs-handout (filename)
   (interactive)
   (let ((program "~/bin/scripts/browser-print/src/print.clj"))
-    (start-process "handout-compile" "*handout*" program pandoc--process-output-file)))
+    (start-process "pandoc-handout" "*pandoc-handout*" program filename)))
 
 (add-hook 'pandoc--org->revealjs-handout-post-hook #'+revealjs-handout)
 #+end_src

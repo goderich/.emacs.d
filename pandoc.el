@@ -3,10 +3,6 @@
 ;; Elisp functions to call Pandoc from Emacs
 (require 'f)
 
-(defvar pandoc--process-output-file nil
-  "Name of file being written to.")
-(make-variable-buffer-local 'pandoc--process-output-file)
-
 (defun pandoc--extension (format)
   (pcase format
     ("latex" "pdf")
@@ -40,45 +36,41 @@
   "Convert the current file using pandoc.
 The format and the defaults file need to be supplied by the caller."
   (save-buffer)
-  (let* ((args (pandoc-org--get-args format self-contained numbered handout empty)))
-    (message "Calling: %s" args)
-    (make-process :name "pandoc"
-                  :buffer "*pandoc*"
-                  :command args
-                  :sentinel (pandoc-process-sentinel handout))))
-
-(defun pandoc-org--get-args (format self-contained numbered handout empty)
-  "Helper function to construct the correct pandoc call."
   (let* ((input (f-this-file))
          (dir (f-dirname input))
          (extension (pandoc--extension format))
-         (output (pandoc--output-name input extension handout))
+         (outfile (pandoc--output-name input extension handout))
          (defaults (pandoc--defaults-option format))
          (metadata (f-join dir "metadata.yaml"))
          (style? (f-exists? (f-join dir "style.css")))
-         (csl (pandoc--find-csl dir)))
-    (setq pandoc--process-output-file output)
-    `("pandoc" ,input ,defaults
-      ,@(when (f-exists? metadata) `("--metadata-file" ,metadata))
-      ;; Temporary bugfix for https://github.com/jgm/pandoc/issues/6431
-      ,@(when (string= format "revealjs")
-          '("-V" "revealjs-url=https://unpkg.com/reveal.js@^4"))
-      ,@(when (and (string= format "revealjs") style?)
-          '("--css" "./style.css"))
-      ,@(when (string= format "revealjs")
-          (if handout
-              '("--metadata=handout" "--incremental=false")
-            '("--incremental=true")))
-      ,@(when (and (string= format "revealjs") self-contained)
-          '("--embed-resources=true" "--standalone"))
-      ,@(when (and (member extension '("pdf" "docx")) numbered)
-          '("--number-sections"))
-      ,@(when (and (string= format "latex") empty)
-          '("--variable=pagestyle:empty"))
-      ;; Temporarily disable CSL styles in typst due to bug
-      ,@(unless (string= format "typst")
-          `("--csl" ,csl))
-      "-o" ,output)))
+         (csl (pandoc--find-csl dir))
+         (command
+          `("pandoc" ,input ,defaults
+            ,@(when (f-exists? metadata) `("--metadata-file" ,metadata))
+            ;; Temporary bugfix for https://github.com/jgm/pandoc/issues/6431
+            ,@(when (string= format "revealjs")
+                '("-V" "revealjs-url=https://unpkg.com/reveal.js@^4"))
+            ,@(when (and (string= format "revealjs") style?)
+                '("--css" "./style.css"))
+            ,@(when (string= format "revealjs")
+                (if handout
+                    '("--metadata=handout" "--incremental=false")
+                  '("--incremental=true")))
+            ,@(when (and (string= format "revealjs") self-contained)
+                '("--embed-resources=true" "--standalone"))
+            ,@(when (and (member extension '("pdf" "docx")) numbered)
+                '("--number-sections"))
+            ,@(when (and (string= format "latex") empty)
+                '("--variable=pagestyle:empty"))
+            ;; Temporarily disable CSL styles in typst due to bug
+            ,@(unless (string= format "typst")
+                `("--csl" ,csl))
+            "-o" ,outfile)))
+    (message "Calling: %s" command)
+    (make-process :name "pandoc"
+                  :buffer "*pandoc*"
+                  :command command
+                  :sentinel (pandoc-process-sentinel outfile handout))))
 
 (defvar pandoc--org->pdf-pre-hook nil
   "Hook to run before converting from org-mode to PDF.")
@@ -189,7 +181,7 @@ Works only on org files using my docx template."
     ("d" "to docx" pandoc--docx-transient)]
    [("q" "quit" transient-quit-all)]])
 
-(defun pandoc-process-sentinel (handout?)
+(defun pandoc-process-sentinel (outfile handout?)
   "Sentinel for use by this module.
 
 Sends a notification in Emacs and the system upon completion,
@@ -204,6 +196,6 @@ so that it can be passed as an additional argument."
             (shell-command "notify-send 'Pandoc' 'Finished successfully.' --icon=dialog-information --expire-time=5000")
             (message "Process pandoc finished successfully!")
             (when handout?
-              (run-hooks 'pandoc--org->revealjs-handout-post-hook)))
+              (run-hook-with-args 'pandoc--org->revealjs-handout-post-hook outfile)))
         (shell-command "notify-send 'Pandoc' 'Error, could not compile.' --icon=dialog-information --expire-time=5000")
         (message "Error: pandoc could not compile!")))))
