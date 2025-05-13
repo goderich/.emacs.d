@@ -50,6 +50,7 @@
   - [[#emacs-lisp][Emacs Lisp]]
   - [[#clojure][Clojure]]
   - [[#hare][Hare]]
+  - [[#odin][Odin]]
 - [[#markup-languages][Markup languages]]
   - [[#yaml][YAML]]
 - [[#utils][Utils]]
@@ -2021,6 +2022,17 @@ See also the following:
 (use-package hare-mode
   :ensure (:host sourcehut :repo "bbuccianti/hare-mode")
   :mode "\\.ha\\'")
+#+end_src
+
+** Odin
+
+There is also [[https://github.com/Sampie159/odin-ts-mode][odin-ts-mode]], but that's still a WIP.
+
+#+begin_src emacs-lisp
+(use-package odin-mode
+  :ensure (:host github :repo "mattt-b/odin-mode")
+  :mode "\\.odin\\'"
+  :hook (odin-mode . eglot-ensure))
 #+end_src
 
 * Markup languages
