@@ -21,10 +21,10 @@
   "Find a single CSL file in DIR or supply a default."
   (let ((fs (f-glob "*.csl" dir))
         (default (f-full "~/dotfiles/pandoc/.local/share/pandoc/defaults/linguistics.csl")))
-    (when (length> fs 1)
-      ;; TODO: allow user to select CSL file?
-      (error "Error: more than one CSL file in current directory!"))
-    (or (-first-item fs) default)))
+    (pcase (length fs)
+      (0 default)
+      (1 (-first-item fs))
+      (_ (completing-read "Choose CSL file: " fs)))))
 
 (defun pandoc--output-name (input extension handout?)
   "Generate output file name from the INPUT."
