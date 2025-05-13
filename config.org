@@ -1352,18 +1352,12 @@ Using a hook appears to be more reliable than just a bare =font-lock-add-keyword
 
 *** Org-appear
 
-Hiding emphasis markers in org-mode makes it look quite nice, however it also makes editing more difficult. The [[https://github.com/awth13/org-appear][org-appear]] package shows hidden emphasis markers when the cursor is on an emphasized word, solving that problem.
+Hiding emphasis markers in org-mode makes it look quite nice, however it also makes editing more difficult. The [[https://github.com/awth13/org-appear][org-appear]] package shows hidden emphasis markers when the cursor is on an emphasized word, solving that problem. I hook the package to open together with org.
 
 #+begin_src emacs-lisp
 (use-package org-appear
   :ensure t
-  :commands (org-appear-mode))
-#+end_src
-
-I hook the package to open together with org.
-
-#+begin_src emacs-lisp :tangle no :noweb-ref org-hooks
-(org-mode . org-appear-mode)
+  :hook org-mode)
 #+end_src
 
 Now the emphasis markers may safely be hidden.
