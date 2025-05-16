@@ -68,7 +68,6 @@
   - [[#tldr][Tldr]]
   - [[#undo][Undo]]
   - [[#evil-numbers-disabled][Evil-numbers (disabled)]]
-- [[#finalize][Finalize]]
 
 * Introduction
 
@@ -173,8 +172,10 @@ Some of these settings were taken from the [[https://github.com/hrs/sensible-def
 (use-package emacs
   :config
   ;; reduce the frequency of garbage collection by making it happen on
-  ;; each 50MB of allocated data (the default is on every 0.76MB)
-  (setq gc-cons-threshold (* 50 1000 1000))
+  ;; each 100MB of allocated data (the default is on every 0.76MB)
+  (setq gc-cons-threshold (* 100 1000 1000))
+  ;; garbage collect when idling so it's not noticeable
+  (run-with-idle-timer 2 t #'garbage-collect)
   ;; warn when opening files bigger than 50MB
   (setq large-file-warning-threshold (* 50 1000 1000))
   ;; do not create backups
@@ -2288,19 +2289,6 @@ NOTE: Appears to require evil
              evil-numbers/dec-at-pt
              evil-numbers/inc-at-pt-incremental
              evil-numbers/dec-at-pt-incremental))
-#+end_src
-
-* Finalize
-
-Trick from [[https://blog.d46.us/advanced-emacs-startup/][here]]:
-I increase the garbage collection threshold
-during startup to speed up Emacs' load time,
-but then decrease it once my config loads
-so that GC pauses aren't so noticeable
-when I'm actually using Emacs.
-
-#+begin_src emacs-lisp
-(setq gc-cons-threshold (* 2 1000 1000))
 #+end_src
 
 * More packages :noexport:
