@@ -127,7 +127,7 @@ Works only on org files using my revealjs template."
    [(pandoc--handout?)
     (pandoc--self-contained?)]])
 
-(defun pandoc-org->docx ()
+(defun pandoc--org->docx ()
   "Convert the current file to pdf using pandoc.
 Works only on org files using my docx template."
   (interactive)
@@ -136,7 +136,7 @@ Works only on org files using my docx template."
 
 (transient-define-prefix pandoc--docx-transient ()
   ["Convert to PDF via LaTeX..."
-   [("c" "convert" pandoc--org->pdf-latex)
+   [("c" "convert" pandoc--org->docx)
     ("q" "quit" transient-quit-all)]]
   ["Options"
    [(pandoc--number-sections?)]])
