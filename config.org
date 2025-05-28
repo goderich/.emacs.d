@@ -11,6 +11,7 @@
   - [[#fonts][Fonts]]
   - [[#dashboard][Dashboard]]
   - [[#modeline][Modeline]]
+  - [[#tooltips][Tooltips]]
 - [[#boon][Boon]]
   - [[#boon-command-state][Boon command state]]
   - [[#boon-insert-state][Boon insert state]]
@@ -547,6 +548,22 @@ I prefer to just have recently opened files there for now. Because some of my fi
      (boon-insert-state  (propertize "<I>" 'face '(:foreground "indian red")))
      (boon-special-state (propertize "<S>" 'face '(:foreground "dodger blue")))
      (t "???"))))
+#+end_src
+
+** Tooltips
+
+Show tooltips. I am using this for displaying org link paths when the pointer is on a link. This may not be the best use of this functionality, and I do have an alternative implementation.
+#+begin_src emacs-lisp
+(setq help-at-pt-display-when-idle t
+      help-at-pt-timer-delay 0.1)
+(help-at-pt-set-timer)
+#+end_src
+
+Do not show tooltips in calendar mode, because they interfere with the layout.
+#+begin_src emacs-lisp
+(add-hook 'calendar-mode-hook
+          (lambda ()
+            (setq-local help-at-pt-display-when-idle nil)))
 #+end_src
 
 * Boon
@@ -1150,13 +1167,6 @@ The URL opener has to be set separately (although it works everywhere, not just 
 #+begin_src emacs-lisp :tangle no :noweb-ref org-settings
 (setq browse-url-browser-function 'browse-url-generic
       browse-url-generic-program "qutebrowser")
-#+end_src
-
-Show tooltips. I am using this for displaying org link paths when the pointer is on a link. This may not be the best use of this functionality, and I do have an alternative implementation.
-#+begin_src emacs-lisp :tangle no :noweb-ref org-settings
-(setq help-at-pt-display-when-idle t
-      help-at-pt-timer-delay 0.1)
-(help-at-pt-set-timer)
 #+end_src
 
 I use several additional TODO keywords of my own choosing. I got the idea from Doom, but changed the keywords themselves.
